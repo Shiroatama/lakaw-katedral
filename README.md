@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lakaw Katedral
 
-## Getting Started
+Mobile web app for a QR-guided walk through Naga Metropolitan Cathedral.
 
-First, run the development server:
+See [docs/SPEC.md](docs/SPEC.md) for the MVP product and technical spec, and [docs/DESIGN.md](docs/DESIGN.md) for color, UX flow, and screen inventory.
+
+## Stack
+
+- Next.js (App Router) + TypeScript + Tailwind CSS
+- Zustand (persisted journey progress)
+- Serwist (PWA / offline via Turbopack)
+
+## Develop
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Test on your phone (same Wi‑Fi)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev:lan
+ipconfig getifaddr en0   # your Mac's LAN IP, e.g. 192.168.1.67
+```
 
-## Learn More
+On the phone open `http://<that-ip>:3000/s/entrance`.
 
-To learn more about Next.js, take a look at the following resources:
+`next.config.ts` allows private LAN origins in development (`allowedDevOrigins`). Without that, Next returns 403 for `/_next` JS/CSS from the phone, React never starts, and you only see the hero image.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If the phone still shows a half-broken page after a config change:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Chrome Android: tap the lock/tune icon in the address bar → **Permissions** / site settings → **Clear & reset**, or Chrome menu → **Delete browsing data** → cached images and files (for that site).
+2. Or open the URL in a **Chrome Incognito** tab (no service worker / old cache).
+3. Confirm the IP again; DHCP can change it.
 
-## Deploy on Vercel
+Stop URLs (readable on purpose, so they can be typed by hand):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Stop | URL |
+|------|-----|
+| Entrance | `/s/entrance` |
+| Murals | `/s/murals` |
+| Statue | `/s/statue` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### QR codes
+
+- Print sheet: [http://localhost:3000/print/qr](http://localhost:3000/print/qr) (set `NEXT_PUBLIC_SITE_URL` to the public or LAN origin before printing).
+- In-app scanner: `/scan` (also from the map sheet: **Scan with this phone**). Needs camera permission. On a phone, prefer HTTPS or `localhost`; plain `http://192.168…` may block the camera.
+- Phone camera app still works: each printed code is a normal `/s/<slug>` link.
+
+Visitor-facing copy uses plain words around real names (say "place", not "stop", but keep names like Naga Metropolitan Cathedral; see SPEC section 3.1). Until QR codes are printed, the map sheet has a "Skip the scan" button. Turn it off with `NEXT_PUBLIC_ALLOW_SKIP=false`.
+
+Offline mode only works in a production build: `npm run build && npm run start`, then test in airplane mode. `next dev` does not register the service worker.
+
+## Scripts
+
+- `npm run dev` — development server
+- `npm run build` — production build
+- `npm run start` — serve production build
+- `npm run lint` — ESLint

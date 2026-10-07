@@ -1,0 +1,154 @@
+import Link from "next/link";
+
+type ProgressBarProps = {
+  total: number;
+  completed: number;
+  currentOrder?: number;
+};
+
+export function ProgressBar({
+  total,
+  completed,
+  currentOrder,
+}: ProgressBarProps) {
+  const clamped = Math.min(Math.max(completed, 0), total);
+  const pct = total === 0 ? 0 : (clamped / total) * 100;
+  const label =
+    currentOrder !== undefined
+      ? `Place ${currentOrder} of ${total}`
+      : `${clamped} of ${total} places`;
+
+  return (
+    <div role="status" aria-label={`Progress ${clamped} of ${total}`}>
+      <div className="mb-2 flex items-center justify-between text-xs font-medium text-[var(--muted-fg)]">
+        <span>{label}</span>
+        <span>
+          {clamped}/{total}
+        </span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-[var(--stone-light)]">
+        <div
+          className="bar-fill h-full rounded-full bg-[var(--accent)] transition-[width] duration-700 ease-[var(--ease-out)]"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** @deprecated Prefer progress on the map bubble */
+export function ProgressDots(props: ProgressBarProps) {
+  return <ProgressBar {...props} />;
+}
+
+/**
+ * Fixed bottom dock: optional map bubble on the left, primary action on the right.
+ * Messenger-style: map is a circular launcher; progress lives on that circle.
+ *
+ * The slide-up runs on the inner row, never on the fixed wrapper, so
+ * `position: fixed` keeps working and the map sheet (portaled to <body>) is
+ * not trapped inside a transformed ancestor.
+ */
+export function StickyActionBar({
+  map,
+  children,
+}: {
+  map?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  const hasActions = Boolean(children);
+
+  return (
+    <>
+      <div
+        className="shrink-0"
+        style={{ height: "var(--action-bar-space, 5.5rem)" }}
+        aria-hidden
+      />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30">
+        <div className="rise-in pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+          {map}
+          {hasActions ? (
+            <div className="flex min-w-0 flex-1 flex-col gap-3">{children}</div>
+          ) : null}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** Which way a link moves the page transition. Forward goes deeper into the walk. */
+type Direction = "forward" | "back";
+
+const transitionFor = (direction: Direction) => [`nav-${direction}`];
+
+const buttonMotion =
+  "transition-[transform,filter,box-shadow,background-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-px active:translate-y-0 active:scale-[0.97]";
+
+export function PrimaryButton({
+  children,
+  href,
+  onClick,
+  type = "button",
+  className = "",
+  direction = "forward",
+}: {
+  children: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  type?: "button" | "submit";
+  className?: string;
+  direction?: Direction;
+}) {
+  const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] hover:shadow-[0_8px_22px_rgba(184,92,56,0.4)] hover:brightness-95 active:brightness-90 ${buttonMotion}`;
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        transitionTypes={transitionFor(direction)}
+        className={`${base} ${className}`.trim()}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <button type={type} onClick={onClick} className={`${base} ${className}`.trim()}>
+      {children}
+    </button>
+  );
+}
+
+export function SecondaryButton({
+  children,
+  href,
+  onClick,
+  direction = "forward",
+}: {
+  children: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  direction?: Direction;
+}) {
+  const className = `inline-flex min-h-12 w-full items-center justify-center rounded-md border border-[var(--border)] bg-transparent px-5 text-base font-medium text-[var(--foreground)] hover:bg-[var(--surface)] ${buttonMotion}`;
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        transitionTypes={transitionFor(direction)}
+        className={className}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {children}
+    </button>
+  );
+}

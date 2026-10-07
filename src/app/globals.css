@@ -1,26 +1,417 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4eee4;
+  --foreground: #2a211c;
+  --surface: #faf6ef;
+  --border: #e0d4c4;
+  --muted: #9a8b7c;
+  --muted-fg: #6b5e54;
+  --accent: #b85c38;
+  --accent-fg: #fffaf5;
+  --stone: #6b4a35;
+  --stone-light: #e8d8c8;
+  --ceremonial: #c4a35a;
+  --success: #4f6b4a;
+  --danger: #b33b2e;
+  /* Space for map bubble + Next dock */
+  --action-bar-space: 5.5rem;
+
+  /* Motion tokens */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* fast start, soft landing */
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1); /* iOS-style sheet */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* small overshoot */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* ==========================================================================
+   Motion
+   Rules: ease-out for things arriving, ease-in for things leaving, short
+   (150-500ms) except one slow hero/ceremonial moment. Transform and opacity
+   only where possible. Everything is switched off for reduced-motion users at
+   the bottom of this file.
+   ========================================================================== */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-settle {
+  from {
+    transform: scale(1.07);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes rule-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes bar-fill {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-circ);
+  }
+}
+
+@keyframes count-pop {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes marker-ping {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.75;
+  }
+  80%,
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* Start over lands on Home already settled, so the start screen is not
+   invisible for the entrance fade (about half a second). */
+.instant-arrival .fade-up,
+.instant-arrival .fade-in,
+.instant-arrival .rise-in,
+.instant-arrival .hero-settle,
+.instant-arrival .pop-in {
+  animation: none;
+}
+
+/*
+  Content arriving: rises and fades. Set --delay inline to stagger.
+
+  Resting opacity/transform are set on the element, and fill-mode is
+  `backwards` (not `both`/`forwards`). After the animation ends the element
+  keeps its real styles. `both` + opacity:0 has left text and buttons stuck
+  invisible on some mobile WebKit builds after the animation finishes.
+*/
+.fade-up {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fade-up 600ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+.fade-in {
+  opacity: 1;
+  animation: fade-in 500ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Bottom dock slides up into place. */
+.rise-in {
+  opacity: 1;
+  transform: translateY(0);
+  animation: rise-in 560ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+.pop-in {
+  opacity: 1;
+  transform: scale(1);
+  animation: pop-in 420ms var(--ease-spring) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Photo eases from slightly zoomed to rest (clipped by its frame). */
+.hero-settle {
+  animation: hero-settle 1100ms var(--ease-out) both;
+}
+
+.gold-rule {
+  transform-origin: center;
+  animation: rule-grow 900ms var(--ease-out) both;
+}
+
+.bar-fill {
+  animation: bar-fill 1000ms var(--ease-out) both;
+}
+
+.ring-fill {
+  animation: ring-fill 900ms var(--ease-out) 150ms both;
+}
+
+.count-pop {
+  display: inline-block;
+  animation: count-pop 420ms var(--ease-spring) 500ms both;
+}
+
+/* Map: "next" marker sends out a soft ring. */
+.marker-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+
+/* Only runs while the sheet is open (restarts each time it opens). */
+.sheet-root[data-open="true"] .marker-ping {
+  animation: marker-ping 2s var(--ease-out) 700ms infinite;
+}
+
+.map-marker {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* --------------------------------------------------------------------------
+   Map / wayfinding sheet. Always mounted (portaled to <body>) so it can
+   animate both ways; data-open drives everything.
+   -------------------------------------------------------------------------- */
+
+.sheet-root {
+  visibility: hidden;
+  /* Hold visibility until the close animation has finished. */
+  transition: visibility 0s linear 320ms;
+}
+
+.sheet-root[data-open="true"] {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.sheet-backdrop {
+  opacity: 0;
+  transition: opacity 280ms var(--ease-in);
+}
+
+.sheet-root[data-open="true"] .sheet-backdrop {
+  opacity: 1;
+  transition: opacity 380ms var(--ease-out);
+}
+
+.sheet-panel {
+  transform: translateY(100%);
+  transition: transform 300ms var(--ease-in);
+  will-change: transform;
+}
+
+.sheet-root[data-open="true"] .sheet-panel {
+  transform: translateY(0);
+  transition: transform 480ms var(--ease-sheet);
+}
+
+/* Sheet contents reveal one after another each time it opens. */
+.sheet-root[data-open="true"] .sheet-item {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fade-up 520ms var(--ease-out) backwards;
+  animation-delay: calc(160ms + var(--i, 0) * 90ms);
+}
+
+.sheet-root[data-open="true"] .map-marker {
+  opacity: 1;
+  transform: scale(1);
+  animation: pop-in 480ms var(--ease-spring) backwards;
+  animation-delay: calc(420ms + var(--i, 0) * 110ms);
+}
+
+.sheet-root[data-open="true"] .map-label {
+  opacity: 1;
+  animation: fade-in 400ms var(--ease-out) backwards;
+  animation-delay: calc(560ms + var(--i, 0) * 110ms);
+}
+
+/* --------------------------------------------------------------------------
+   Page transitions (React <ViewTransition> + Link/router transitionTypes).
+   Forward = new page rises from below; back = new page drops in from above.
+   -------------------------------------------------------------------------- */
+
+::view-transition {
+  /* Let taps through while a transition runs. */
+  pointer-events: none;
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: -40px;
+  animation:
+    160ms var(--ease-in) both vt-fade reverse,
+    420ms var(--ease-sheet) both vt-slide-y reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 40px;
+  animation:
+    260ms var(--ease-out) 120ms both vt-fade,
+    480ms var(--ease-sheet) both vt-slide-y;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 40px;
+  animation:
+    160ms var(--ease-in) both vt-fade reverse,
+    420ms var(--ease-sheet) both vt-slide-y reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -40px;
+  animation:
+    260ms var(--ease-out) 120ms both vt-fade,
+    480ms var(--ease-sheet) both vt-slide-y;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes vt-slide-y {
+  from {
+    translate: 0 var(--slide-offset);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Print QR sheet (/print/qr)
+   -------------------------------------------------------------------------- */
+
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print-qr {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print-card {
+    break-inside: avoid;
+    border-color: #ccc !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: no movement, no waiting. Content simply appears.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Never leave reveal content at the keyframe "from" state. */
+  .fade-up,
+  .fade-in,
+  .rise-in,
+  .pop-in,
+  .hero-settle,
+  .sheet-root[data-open="true"] .sheet-item,
+  .sheet-root[data-open="true"] .map-marker,
+  .sheet-root[data-open="true"] .map-label {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .marker-ping {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }
