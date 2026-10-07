@@ -12,6 +12,7 @@ import {
   useJourneyStore,
 } from "@/lib/tour";
 import { CathedralMap } from "@/components/cathedral-map";
+import { ArrowRightIcon, QrCodeIcon } from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
 
 type MapBubbleProps = {
@@ -132,7 +133,7 @@ export function MapBubble({
         <div className="sheet-item mb-3 flex items-start justify-between gap-3">
           <h2
             id={titleId}
-            className="font-[family-name:var(--font-display)] text-2xl text-[var(--foreground)]"
+            className="font-display text-2xl text-[var(--foreground)]"
           >
             Where to go
           </h2>
@@ -172,7 +173,7 @@ export function MapBubble({
                   {started ? "Next place" : "Start here"} · {next.order} of{" "}
                   {total}
                 </p>
-                <h3 className="font-[family-name:var(--font-display)] text-2xl leading-tight text-[var(--foreground)]">
+                <h3 className="font-display text-2xl leading-tight text-[var(--foreground)]">
                   {next.title}
                 </h3>
               </header>
@@ -185,7 +186,7 @@ export function MapBubble({
               </div>
 
               <section
-                className="sheet-item space-y-2"
+                className="sheet-item space-y-2 rounded-md bg-white p-4 ring-1 ring-[var(--border)]"
                 style={{ "--i": 3 } as React.CSSProperties}
                 aria-label="Directions"
               >
@@ -196,10 +197,8 @@ export function MapBubble({
                   {landmarkSteps(next.landmark).map((step) => (
                     <li key={step}>{step}</li>
                   ))}
+                  <li>Scan the QR code there to read the story.</li>
                 </ol>
-                <p className="text-sm text-[var(--muted-fg)]">
-                  Scan the QR code there to read the story.
-                </p>
               </section>
             </>
           )}
@@ -216,8 +215,9 @@ export function MapBubble({
                 setOpen(false);
                 router.push("/scan", { transitionTypes: ["nav-forward"] });
               }}
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
             >
+              <QrCodeIcon className="h-[1.1em] w-[1.1em]" />
               Scan with this phone
             </button>
             {ALLOW_SKIP && started && next ? (
@@ -230,9 +230,10 @@ export function MapBubble({
                       transitionTypes: ["nav-forward"],
                     });
                   }}
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-dashed border-[var(--stone)] bg-transparent px-5 text-base font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--surface)] active:scale-[0.98]"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-dashed border-[var(--stone)] bg-transparent px-5 text-base font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--surface)] active:scale-[0.98]"
                 >
                   Skip the scan: open place {next.order}
+                  <ArrowRightIcon className="h-[1.1em] w-[1.1em]" />
                 </button>
                 <p className="text-center text-xs text-[var(--muted-fg)]">
                   For testing only. This button will go away.
@@ -288,17 +289,22 @@ export function MapBubble({
             style={{ "--ring-circ": circumference } as React.CSSProperties}
           />
         </svg>
-        <span className="relative z-10 flex flex-col items-center leading-none">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-fg)]">
-            Map
-          </span>
-          <span className="mt-0.5 text-sm font-bold text-[var(--foreground)]">
-            <span key={done} className="count-pop">
-              {done}
-            </span>
-            /{total}
-          </span>
-        </span>
+        <svg
+          width={22}
+          height={22}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="relative z-10 text-[var(--foreground)]"
+          aria-hidden
+        >
+          <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />
+          <path d="M9 4v14" />
+          <path d="M15 6v14" />
+        </svg>
       </button>
 
       {hydrated ? createPortal(sheet, document.body) : null}

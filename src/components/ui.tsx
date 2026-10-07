@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 
 type ProgressBarProps = {
   total: number;
@@ -85,6 +86,25 @@ const transitionFor = (direction: Direction) => [`nav-${direction}`];
 const buttonMotion =
   "transition-[transform,filter,box-shadow,background-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-px active:translate-y-0 active:scale-[0.97]";
 
+type ButtonIcon = "next" | "back" | "none";
+
+function ButtonLabel({
+  children,
+  icon,
+}: {
+  children: React.ReactNode;
+  icon: ButtonIcon;
+}) {
+  if (icon === "none") return children;
+  return (
+    <span className="inline-flex items-center justify-center gap-2">
+      {icon === "back" ? <ArrowLeftIcon className="h-[1.1em] w-[1.1em]" /> : null}
+      <span>{children}</span>
+      {icon === "next" ? <ArrowRightIcon className="h-[1.1em] w-[1.1em]" /> : null}
+    </span>
+  );
+}
+
 export function PrimaryButton({
   children,
   href,
@@ -92,6 +112,7 @@ export function PrimaryButton({
   type = "button",
   className = "",
   direction = "forward",
+  icon,
 }: {
   children: React.ReactNode;
   href?: string;
@@ -99,8 +120,13 @@ export function PrimaryButton({
   type?: "button" | "submit";
   className?: string;
   direction?: Direction;
+  /** Arrow for page moves. Defaults to next/back from direction; submit stays plain. */
+  icon?: ButtonIcon;
 }) {
+  const resolvedIcon: ButtonIcon =
+    icon ?? (type === "submit" ? "none" : direction === "back" ? "back" : "next");
   const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] hover:shadow-[0_8px_22px_rgba(184,92,56,0.4)] hover:brightness-95 active:brightness-90 ${buttonMotion}`;
+  const label = <ButtonLabel icon={resolvedIcon}>{children}</ButtonLabel>;
 
   if (href) {
     return (
@@ -109,14 +135,14 @@ export function PrimaryButton({
         transitionTypes={transitionFor(direction)}
         className={`${base} ${className}`.trim()}
       >
-        {children}
+        {label}
       </Link>
     );
   }
 
   return (
     <button type={type} onClick={onClick} className={`${base} ${className}`.trim()}>
-      {children}
+      {label}
     </button>
   );
 }
@@ -126,13 +152,18 @@ export function SecondaryButton({
   href,
   onClick,
   direction = "forward",
+  icon,
 }: {
   children: React.ReactNode;
   href?: string;
   onClick?: () => void;
   direction?: Direction;
+  icon?: ButtonIcon;
 }) {
+  const resolvedIcon: ButtonIcon =
+    icon ?? (direction === "back" ? "back" : "none");
   const className = `inline-flex min-h-12 w-full items-center justify-center rounded-md border border-[var(--border)] bg-transparent px-5 text-base font-medium text-[var(--foreground)] hover:bg-[var(--surface)] ${buttonMotion}`;
+  const label = <ButtonLabel icon={resolvedIcon}>{children}</ButtonLabel>;
 
   if (href) {
     return (
@@ -141,14 +172,14 @@ export function SecondaryButton({
         transitionTypes={transitionFor(direction)}
         className={className}
       >
-        {children}
+        {label}
       </Link>
     );
   }
 
   return (
     <button type="button" onClick={onClick} className={className}>
-      {children}
+      {label}
     </button>
   );
 }

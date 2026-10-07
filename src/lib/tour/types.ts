@@ -11,7 +11,7 @@ export type Poi = {
   landmark: string;
   /** Short overview of what the visitor is looking at. */
   about: string;
-  /** Optional callout shown between About and History. */
+  /** Optional callout below the overview. */
   fact?: string;
   /** Longer story of how this place came to be. */
   history: string;

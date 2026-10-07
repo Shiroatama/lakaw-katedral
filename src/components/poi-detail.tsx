@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { ExpandableText } from "@/components/expandable-text";
 import type { Poi } from "@/lib/tour";
 
 type PoiDetailProps = {
@@ -30,18 +29,20 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
           />
         </div>
         {banner}
-        <header className="fade-up" style={delay(120)}>
-          <h1 className="font-[family-name:var(--font-display)] text-3xl leading-tight text-[var(--foreground)]">
-            {poi.title}
-          </h1>
-        </header>
+        <div className="flex flex-col gap-2">
+          <header className="fade-up" style={delay(120)}>
+            <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
+              {poi.title}
+            </h1>
+          </header>
 
-        <section className="fade-up flex flex-col gap-2" style={delay(220)}>
-          <h2 className="text-lg font-bold text-[var(--foreground)]">About</h2>
-          <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+          <p
+            className="fade-up text-base leading-relaxed text-[var(--foreground)]/90"
+            style={delay(220)}
+          >
             {poi.about}
           </p>
-        </section>
+        </div>
 
         {poi.fact ? (
           <aside
@@ -57,7 +58,9 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
 
         <section className="fade-up flex flex-col gap-2" style={delay(420)}>
           <h2 className="text-lg font-bold text-[var(--foreground)]">History</h2>
-          <ExpandableText text={poi.history} />
+          <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+            {poi.history}
+          </p>
         </section>
       </div>
       {dock}

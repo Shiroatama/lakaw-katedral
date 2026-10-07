@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useJourneyStore } from "@/lib/tour";
 import { stubPaymentProvider } from "@/lib/payments/provider";
 import { PrimaryButton } from "@/components/ui";
@@ -11,19 +11,21 @@ type ParishGiftProps = {
   footer?: React.ReactNode;
 };
 
+const AMOUNT_TEMPLATES = [20, 50, 100] as const;
+
 export function ParishGift({ footer }: ParishGiftProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const markDonated = useJourneyStore((s) => s.markDonated);
   const [amount, setAmount] = useState("");
-  const [offline, setOffline] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const selectedTemplate = AMOUNT_TEMPLATES.find(
+    (value) => amount === String(value),
+  );
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      setOffline(true);
-      return;
-    }
     setSubmitting(true);
     try {
       const value = Number(amount);
@@ -32,7 +34,10 @@ export function ParishGift({ footer }: ParishGiftProps) {
         currency: "PHP",
       });
       markDonated();
-      router.push(redirectUrl, { transitionTypes: ["nav-forward"] });
+      // Stay on /finish when already there; ThankYouModal opens from donated.
+      if (pathname !== redirectUrl) {
+        router.replace(redirectUrl);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -43,23 +48,53 @@ export function ParishGift({ footer }: ParishGiftProps) {
       onSubmit={onSubmit}
       className="w-full space-y-5 text-left"
       aria-labelledby="parish-gift-heading"
+      aria-describedby="parish-gift-description"
     >
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <h2
           id="parish-gift-heading"
-          className="font-[family-name:var(--font-display)] text-xl text-[var(--foreground)]"
+          className="font-display text-xl text-[var(--foreground)]"
         >
           Help the parish
         </h2>
-        <p className="text-sm leading-relaxed text-[var(--muted-fg)]">
-          Your gift helps care for the Cathedral and welcome the next visitors.
-          Every peso stays with the parish.
+        <p
+          id="parish-gift-description"
+          className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]"
+        >
+          Your gift helps care for this church and the people who come here
+          each day.
         </p>
       </div>
 
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium text-[var(--foreground)]">
+          Choose an amount
+        </legend>
+        <div className="flex flex-nowrap gap-2">
+          {AMOUNT_TEMPLATES.map((value) => {
+            const selected = selectedTemplate === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setAmount(String(value))}
+                className={`inline-flex min-h-12 min-w-0 flex-1 items-center justify-center rounded-md border px-2 text-sm font-semibold transition-[transform,background-color,border-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
+                  selected
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
+                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--accent)]/50"
+                }`}
+              >
+                ₱{value}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
       <label className="block space-y-2">
         <span className="text-sm font-medium text-[var(--foreground)]">
-          How much? (PHP)
+          Or type another amount (PHP)
         </span>
         <div className="flex min-h-12 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.15)]">
           <span className="text-base text-[var(--muted-fg)]">PHP</span>
@@ -68,28 +103,16 @@ export function ParishGift({ footer }: ParishGiftProps) {
             inputMode="decimal"
             pattern="[0-9]+([.][0-9]{1,2})?"
             value={amount}
-            onChange={(e) => {
-              setAmount(e.target.value);
-              setOffline(false);
-            }}
+            onChange={(e) => setAmount(e.target.value)}
             className="w-full bg-transparent text-lg outline-none"
             placeholder="0.00"
           />
         </div>
       </label>
 
-      {offline ? (
-        <p
-          className="fade-up rounded-md border border-[var(--danger)]/35 bg-[var(--surface)] px-4 py-3 text-sm text-[var(--danger)]"
-          role="alert"
-        >
-          You need internet to give. Try again when you have signal.
-        </p>
-      ) : null}
-
       <div className="flex flex-col gap-3 pt-1">
         <PrimaryButton type="submit">
-          {submitting ? "Please wait…" : "Give (coming soon)"}
+          {submitting ? "Please wait…" : "Donate (coming soon)"}
         </PrimaryButton>
         {footer}
       </div>

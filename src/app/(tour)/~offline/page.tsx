@@ -5,7 +5,7 @@ const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as React.CSSProperties;
 export default function OfflinePage() {
   return (
     <main className="flex flex-1 flex-col justify-center gap-6 py-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center">
-      <h1 className="fade-up font-[family-name:var(--font-display)] text-3xl text-[var(--foreground)]">
+      <h1 className="fade-up font-display text-3xl text-[var(--foreground)]">
         No internet
       </h1>
       <p

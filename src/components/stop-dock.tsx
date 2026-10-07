@@ -24,7 +24,7 @@ type StopDockProps = {
 /**
  * Bottom dock shared by every journey screen. One consistent action:
  *
- * - walk not begun: Start the walk (opens the first story)
+ * - walk not begun: Start the walk (opens the first story). No map yet.
  * - stops left:     Find place N (opens wayfinding: landmark + map)
  * - all visited:    Finish
  *
@@ -44,7 +44,13 @@ export function StopDock({
   const entrance = getEntrancePoi(nagaTour);
 
   return (
-    <StickyActionBar map={<MapBubble open={open} onOpenChange={setOpen} />}>
+    <StickyActionBar
+      map={
+        started ? (
+          <MapBubble open={open} onOpenChange={setOpen} />
+        ) : undefined
+      }
+    >
       {complete || !next ? (
         <PrimaryButton href="/finish">{finishLabel}</PrimaryButton>
       ) : !started ? (

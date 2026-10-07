@@ -133,7 +133,7 @@ export function QrScanner() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-fg)]/90">
             Lakaw Katedral
           </p>
-          <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-[var(--accent-fg)]">
+          <h1 className="mt-1 font-display text-2xl text-[var(--accent-fg)]">
             Scan a place
           </h1>
         </div>

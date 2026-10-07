@@ -31,6 +31,11 @@
   --font-display: var(--font-display);
 }
 
+@utility font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 400;
+}
+
 html {
   background: var(--background);
 }
@@ -289,6 +294,50 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Confirm dialog (Start over). Same always-mounted / data-open pattern as the
+   map sheet, but a centered surface card instead of a bottom sheet.
+   -------------------------------------------------------------------------- */
+
+.confirm-root {
+  visibility: hidden;
+  transition: visibility 0s linear 220ms;
+  pointer-events: none;
+}
+
+.confirm-root[data-open="true"] {
+  visibility: visible;
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+
+.confirm-backdrop {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-in);
+}
+
+.confirm-root[data-open="true"] .confirm-backdrop {
+  opacity: 1;
+  transition: opacity 280ms var(--ease-out);
+}
+
+.confirm-panel {
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+  transition:
+    opacity 180ms var(--ease-in),
+    transform 180ms var(--ease-in);
+  will-change: transform, opacity;
+}
+
+.confirm-root[data-open="true"] .confirm-panel {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition:
+    opacity 320ms var(--ease-out),
+    transform 320ms var(--ease-out);
+}
+
+/* --------------------------------------------------------------------------
    Page transitions (React <ViewTransition> + Link/router transitionTypes).
    Forward = new page rises from below; back = new page drops in from above.
    -------------------------------------------------------------------------- */
@@ -397,7 +446,8 @@ body {
   .hero-settle,
   .sheet-root[data-open="true"] .sheet-item,
   .sheet-root[data-open="true"] .map-marker,
-  .sheet-root[data-open="true"] .map-label {
+  .sheet-root[data-open="true"] .map-label,
+  .confirm-root[data-open="true"] .confirm-panel {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

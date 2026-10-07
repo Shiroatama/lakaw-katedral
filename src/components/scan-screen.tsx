@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import type { Poi, ScanOutcome } from "@/lib/tour";
 import { useJourneyStore } from "@/lib/tour";
 import { PoiDetail } from "@/components/poi-detail";
@@ -18,24 +17,6 @@ function Banner({ outcome }: { outcome: ScanOutcome }) {
       >
         Place {suggested.order} is next on the path. But you can see the
         places in any order. Enjoy this one!
-      </div>
-    );
-  }
-
-  if (outcome.kind === "completed") {
-    return (
-      <div
-        className="fade-up flex items-center justify-between gap-3 rounded-md border border-[var(--ceremonial)]/60 bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)]"
-        role="status"
-      >
-        <span>You finished the walk.</span>
-        <Link
-          href="/finish"
-          transitionTypes={["nav-forward"]}
-          className="font-semibold text-[var(--accent)] underline underline-offset-2"
-        >
-          See the end
-        </Link>
       </div>
     );
   }
@@ -67,7 +48,7 @@ export function ScanScreen({ poi }: { poi: Poi }) {
     <PoiDetail
       poi={poi}
       banner={outcome ? <Banner outcome={outcome} /> : null}
-      dock={<StopDock />}
+      dock={<StopDock finishLabel="You finished the walk" />}
     />
   );
 }

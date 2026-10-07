@@ -11,6 +11,6 @@ export type PaymentProvider = {
 /** MVP stub. Swap for a real gateway later (SPEC §9). */
 export const stubPaymentProvider: PaymentProvider = {
   async createPayment() {
-    return { redirectUrl: "/thank-you" };
+    return { redirectUrl: "/finish" };
   },
 };

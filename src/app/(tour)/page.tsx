@@ -58,14 +58,14 @@ function HomeHero({
 
         <div className="relative z-10 flex flex-1 flex-col justify-end px-7 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))] text-center">
           <h1
-            className="fade-up font-[family-name:var(--font-display)] text-[2.35rem] leading-[1.1] tracking-tight text-white sm:text-5xl"
+            className="fade-up font-display text-[2.35rem] leading-[1.1] tracking-tight text-white sm:text-5xl"
             style={delay(200)}
           >
             Lakaw Katedral
           </h1>
           {headline ? (
             <p
-              className="fade-up mt-3 font-[family-name:var(--font-display)] text-xl leading-snug text-white/90 sm:text-2xl"
+              className="fade-up mt-3 font-display text-xl leading-snug text-white/90 sm:text-2xl"
               style={delay(280)}
             >
               {headline}

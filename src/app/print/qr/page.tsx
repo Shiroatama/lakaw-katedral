@@ -24,7 +24,7 @@ export default async function PrintQrPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted-fg)]">
           Lakaw Katedral
         </p>
-        <h1 className="font-[family-name:var(--font-display)] text-3xl text-[var(--foreground)]">
+        <h1 className="font-display text-3xl text-[var(--foreground)]">
           Print QR codes
         </h1>
         <p className="max-w-xl text-base leading-relaxed text-[var(--muted-fg)]">
@@ -54,7 +54,7 @@ export default async function PrintQrPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-fg)]">
               Place {poi.order}
             </p>
-            <h2 className="font-[family-name:var(--font-display)] text-xl leading-tight text-[var(--foreground)]">
+            <h2 className="font-display text-xl leading-tight text-[var(--foreground)]">
               {poi.shortTitle}
             </h2>
             <div

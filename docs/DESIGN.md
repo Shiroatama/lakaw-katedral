@@ -79,7 +79,7 @@ Aim for WCAG AA on text and CTAs. Prefer mid-brick terracotta over muted clay so
 |------|--------|
 | Tab bar | None |
 | Persistent chrome | Progress ring on the map button in the bottom dock (`2/3`). Finish shows a full progress bar. |
-| Map access | Anytime, including before start |
+| Map access | After the walk has begun |
 | Home role | Resume hub (see screens) |
 | Back | In-screen secondary actions only. No universal back chevron required for MVP. |
 

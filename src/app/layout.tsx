@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Source_Sans_3 } from "next/font/google";
+import { Ruwudu, Source_Sans_3 } from "next/font/google";
 import { JourneyHydrator } from "@/components/journey-hydrator";
 import { PwaProvider } from "@/components/pwa-provider";
 import "./globals.css";
 
-const display = Fraunces({
+const display = Ruwudu({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
