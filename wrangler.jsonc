@@ -17,4 +17,7 @@
   "observability": {
     "enabled": true,
   },
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://lakaw-katedral.gabrielbreuyan.workers.dev",
+  },
 }

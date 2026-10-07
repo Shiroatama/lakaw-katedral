@@ -75,9 +75,9 @@ This app deploys with [`@opennextjs/cloudflare`](https://opennext.js.org/cloudfl
 | Deploy command | `npx wrangler deploy` |
 | Root directory | `/` (repo root) |
 
-Also set the Worker variable / env:
+Live site: [https://lakaw-katedral.gabrielbreuyan.workers.dev](https://lakaw-katedral.gabrielbreuyan.workers.dev)
 
-- `NEXT_PUBLIC_SITE_URL` = `https://<your-worker>.workers.dev` (or your custom domain)
+`NEXT_PUBLIC_SITE_URL` is set in `.env.production` (and `wrangler.jsonc`) so printable QR codes point at that origin. Change both when you move to a custom domain.
 
 For a plain Node server locally, use `npm run build:next && npm start`.
 
