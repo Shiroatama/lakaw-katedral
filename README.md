@@ -57,6 +57,32 @@ Offline mode only works in a production build: `npm run build && npm run start`,
 ## Scripts
 
 - `npm run dev` — development server
-- `npm run build` — production build
-- `npm run start` — serve production build
+- `npm run build` — Next.js production build
+- `npm run start` — serve Next.js production build
 - `npm run lint` — ESLint
+- `npm run preview` — OpenNext build + local Workers preview
+- `npm run deploy` — OpenNext build + deploy to Cloudflare Workers
+
+## Cloudflare Workers
+
+This app deploys with [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare/get-started).
+
+In the Cloudflare dashboard (Workers → your project → Settings → Build):
+
+| Setting | Value |
+|---------|--------|
+| Build command | `npx opennextjs-cloudflare build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` (repo root) |
+
+Also set the Worker variable / env:
+
+- `NEXT_PUBLIC_SITE_URL` = `https://<your-worker>.workers.dev` (or your custom domain)
+
+Do **not** use plain `npm run build` + bare `npx wrangler deploy` without OpenNext: Wrangler will try to auto-migrate mid-deploy and can fail.
+
+Local check before pushing:
+
+```bash
+npx opennextjs-cloudflare build
+```

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useJourneyStore } from "@/lib/tour";
 
 /** Quiet destructive action: clears progress after a confirm, then returns home. */
-export function StartOver() {
+export function StartOver({ className = "" }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const reset = useJourneyStore((s) => s.reset);
@@ -33,7 +33,7 @@ export function StartOver() {
           }
         }
       }}
-      className="mx-auto block min-h-12 px-4 text-sm text-[var(--danger)] underline underline-offset-2 transition-opacity duration-200 hover:opacity-70 active:opacity-50"
+      className={`mx-auto block min-h-12 px-4 text-sm text-[var(--danger)] underline underline-offset-2 transition-opacity duration-200 hover:opacity-70 active:opacity-50 ${className}`.trim()}
     >
       Start over
     </button>

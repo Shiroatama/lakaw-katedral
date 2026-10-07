@@ -1,10 +1,16 @@
-import { spawnSync } from "node:child_process";
 import { createSerwistRoute } from "@serwist/turbopack";
 import { nagaTour } from "@/lib/tour/content";
 
+/**
+ * Cache-busting revision for precached pages. Prefer CI commit SHAs so we
+ * never shell out to `git` (Workers cannot run child_process).
+ */
 const revision =
-  spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf-8" }).stdout?.trim() ||
-  crypto.randomUUID();
+  process.env.WORKERS_CI_COMMIT_SHA ||
+  process.env.CF_PAGES_COMMIT_SHA ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.GITHUB_SHA ||
+  Date.now().toString(36);
 
 /**
  * Pages saved on the visitor's phone the first time the service worker

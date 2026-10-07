@@ -1,0 +1,3 @@
+# Copy to `.dev.vars` for local Cloudflare preview (`npm run preview`).
+# Do not set NEXTJS_ENV=development while running `npm run build`:
+# OpenNext injects `.dev.vars` into the build and that can break prerender.

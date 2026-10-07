@@ -8,7 +8,7 @@ import { nagaTour } from "@/lib/tour";
  * worker's precache for every stop page. Shows nothing when the service worker
  * is unavailable (for example in `next dev`).
  */
-export function OfflineStatus() {
+export function OfflineStatus({ className = "" }: { className?: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function OfflineStatus() {
 
   return (
     <p
-      className="fade-in flex items-center justify-center gap-2 text-sm text-[var(--success)]"
+      className={`fade-in flex items-center justify-center gap-2 text-sm ${className || "text-[var(--success)]"}`.trim()}
       role="status"
     >
       <span aria-hidden className="pop-in" style={{ "--delay": "150ms" } as React.CSSProperties}>

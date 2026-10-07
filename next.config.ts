@@ -8,3 +8,11 @@ const nextConfig: NextConfig = {
 };
 
 export default withSerwist(nextConfig);
+
+// Cloudflare bindings during `next dev` only.
+// @see https://opennext.js.org/cloudflare/get-started
+if (process.env.NODE_ENV === "development") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { initOpenNextCloudflareForDev } = require("@opennextjs/cloudflare");
+  initOpenNextCloudflareForDev();
+}

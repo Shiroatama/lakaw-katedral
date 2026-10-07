@@ -21,20 +21,25 @@ function HomeHero({
   src,
   alt,
   instant = false,
+  headline,
+  finishLabel,
   children,
 }: {
   src: string;
   alt: string;
   /** Skip the entrance fade. Used when Start over has already reset the walk. */
   instant?: boolean;
+  /** Optional line under the brand (site name, or a resume headline). */
+  headline?: string;
+  finishLabel?: string;
   children?: React.ReactNode;
 }) {
   return (
     <PageTransition>
       <main
-        className={`flex flex-1 flex-col gap-6${instant ? " instant-arrival" : ""}`}
+        className={`relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] flex min-h-dvh flex-1 flex-col bg-black${instant ? " instant-arrival" : ""}`}
       >
-        <div className="relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] aspect-[4/3] overflow-hidden bg-[var(--stone-light)]">
+        <div className="absolute inset-0 overflow-hidden">
           <Image
             src={src}
             alt={alt}
@@ -44,23 +49,34 @@ function HomeHero({
             className="hero-settle object-cover"
             sizes="100vw"
           />
+          {/* Soft mid fade, then solid black so bottom copy stays readable. */}
           <div
-            className="absolute inset-0 bg-gradient-to-t from-[var(--foreground)]/55 via-transparent to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-black from-[12%] via-black/75 via-[42%] to-transparent to-[72%]"
             aria-hidden
           />
-          <div
-            className="fade-up absolute inset-x-0 bottom-0 p-5 text-left"
-            style={delay(250)}
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-fg)]/90">
-              Lakaw Katedral
-            </p>
-            <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl leading-tight text-[var(--accent-fg)]">
-              {nagaTour.siteName}
-            </h1>
-          </div>
         </div>
-        {children}
+
+        <div className="relative z-10 flex flex-1 flex-col justify-end px-7 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))] text-center">
+          <h1
+            className="fade-up font-[family-name:var(--font-display)] text-[2.35rem] leading-[1.1] tracking-tight text-white sm:text-5xl"
+            style={delay(200)}
+          >
+            Lakaw Katedral
+          </h1>
+          {headline ? (
+            <p
+              className="fade-up mt-3 font-[family-name:var(--font-display)] text-xl leading-snug text-white/90 sm:text-2xl"
+              style={delay(280)}
+            >
+              {headline}
+            </p>
+          ) : null}
+          {children}
+        </div>
+
+        <div className="relative z-10">
+          <StopDock finishLabel={finishLabel} />
+        </div>
       </main>
     </PageTransition>
   );
@@ -79,14 +95,14 @@ export default function HomePage() {
         src="/img/home-facade.jpg"
         alt={nagaTour.siteName}
         instant={showHomeAtOnce}
+        headline={nagaTour.siteName}
       >
         <p
-          className="fade-up text-center text-base leading-relaxed text-[var(--muted-fg)]"
+          className="fade-up mx-auto mt-4 max-w-sm text-base leading-relaxed text-white/80"
           style={delay(350)}
         >
           {nagaTour.intro} Scan the QR code at the door, or tap Start.
         </p>
-        <StopDock />
       </HomeHero>
     );
   }
@@ -98,41 +114,46 @@ export default function HomePage() {
 
   if (journeyComplete) {
     return (
-      <HomeHero src="/img/home-facade.jpg" alt={nagaTour.siteName}>
-        <div className="fade-up space-y-3 text-center" style={delay(350)}>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl">
-            You finished the walk!
-          </h2>
-          <p className="mx-auto max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
-            Thank you for walking with us. You can help the parish if you like.
-          </p>
-        </div>
-        <div className="fade-up" style={delay(450)}>
+      <HomeHero
+        src="/img/home-facade.jpg"
+        alt={nagaTour.siteName}
+        headline="You finished the walk"
+        finishLabel="Help the parish"
+      >
+        <p
+          className="fade-up mx-auto mt-4 max-w-sm text-base leading-relaxed text-white/80"
+          style={delay(350)}
+        >
+          Thank you for walking with us. You can help the parish if you like.
+        </p>
+        <div className="fade-up mt-5" style={delay(450)}>
           <StartOver />
         </div>
-        <StopDock finishLabel="Help the parish" />
       </HomeHero>
     );
   }
 
   if (inProgress) {
     return (
-      <HomeHero src="/img/dome.jpg" alt="Cathedral dome">
-        <div className="fade-up space-y-3 text-center" style={delay(350)}>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl">
-            Keep walking
-          </h2>
-          <p className="mx-auto max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
-            {next
-              ? `Your next place is ${next.title}. Tap Find place ${next.order} to see how to get there.`
-              : "Tap the map to see where to go."}
-          </p>
+      <HomeHero
+        src="/img/dome.jpg"
+        alt="Cathedral dome"
+        headline="Keep walking"
+      >
+        <p
+          className="fade-up mx-auto mt-4 max-w-sm text-base leading-relaxed text-white/80"
+          style={delay(350)}
+        >
+          {next
+            ? `Your next place is ${next.title}. Tap Find place ${next.order} to see how to get there.`
+            : "Tap the map to see where to go."}
+        </p>
+        <div className="fade-up mt-4" style={delay(400)}>
+          <OfflineStatus className="text-white/75" />
         </div>
-        <OfflineStatus />
-        <div className="fade-up" style={delay(450)}>
+        <div className="fade-up mt-3" style={delay(450)}>
           <StartOver />
         </div>
-        <StopDock />
       </HomeHero>
     );
   }
@@ -142,15 +163,17 @@ export default function HomePage() {
       src="/img/home-facade.jpg"
       alt={nagaTour.siteName}
       instant={showHomeAtOnce}
+      headline={nagaTour.siteName}
     >
       <p
-        className="fade-up text-center text-base leading-relaxed text-[var(--muted-fg)]"
+        className="fade-up mx-auto mt-4 max-w-sm text-base leading-relaxed text-white/80"
         style={delay(350)}
       >
         {nagaTour.intro} Scan the QR code at the door, or tap Start.
       </p>
-      <OfflineStatus />
-      <StopDock />
+      <div className="fade-up mt-4" style={delay(400)}>
+        <OfflineStatus className="text-white/75" />
+      </div>
     </HomeHero>
   );
 }
