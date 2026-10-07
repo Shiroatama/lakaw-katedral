@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ExpandableText } from "@/components/expandable-text";
 import type { Poi } from "@/lib/tour";
 
 type PoiDetailProps = {
@@ -34,23 +35,30 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
             {poi.title}
           </h1>
         </header>
-        <p
-          className="fade-up text-base leading-relaxed text-[var(--foreground)]/90"
-          style={delay(220)}
-        >
-          {poi.body}
-        </p>
+
+        <section className="fade-up flex flex-col gap-2" style={delay(220)}>
+          <h2 className="text-lg font-bold text-[var(--foreground)]">About</h2>
+          <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+            {poi.about}
+          </p>
+        </section>
+
         {poi.fact ? (
           <aside
-            className="fade-up rounded-md border-l-4 border-[var(--accent)] bg-[var(--surface)] px-4 py-3"
+            className="fade-up rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]"
             style={delay(320)}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-fg)]">
-              Did you know?
+            <h2 className="text-base font-bold">Interesting fact</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--accent-fg)]/90">
+              {poi.fact}
             </p>
-            <p className="mt-1 text-sm leading-relaxed">{poi.fact}</p>
           </aside>
         ) : null}
+
+        <section className="fade-up flex flex-col gap-2" style={delay(420)}>
+          <h2 className="text-lg font-bold text-[var(--foreground)]">History</h2>
+          <ExpandableText text={poi.history} />
+        </section>
       </div>
       {dock}
     </article>

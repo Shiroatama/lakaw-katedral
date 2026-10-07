@@ -9,8 +9,12 @@ export type Poi = {
   heroImage: string;
   /** Plain-words directions to this place's sign / QR code. */
   landmark: string;
-  body: string;
+  /** Short overview of what the visitor is looking at. */
+  about: string;
+  /** Optional callout shown between About and History. */
   fact?: string;
+  /** Longer story of how this place came to be. */
+  history: string;
   map: { x: number; y: number };
 };
 

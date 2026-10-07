@@ -114,7 +114,7 @@ export default function FinishPage() {
             <div className="relative aspect-[5/2] bg-[var(--stone-light)]">
               {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
               <Image
-                src="/img/prayer.png"
+                src="/img/prayer.webp"
                 alt="People praying quietly in a church pew"
                 fill
                 unoptimized

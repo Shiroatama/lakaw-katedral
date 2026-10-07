@@ -92,7 +92,7 @@ export default function HomePage() {
   if (!hydrated) {
     return (
       <HomeHero
-        src="/img/home-facade.jpg"
+        src="/img/home-facade.webp"
         alt={nagaTour.siteName}
         instant={showHomeAtOnce}
         headline={nagaTour.siteName}
@@ -115,7 +115,7 @@ export default function HomePage() {
   if (journeyComplete) {
     return (
       <HomeHero
-        src="/img/home-facade.jpg"
+        src="/img/home-facade.webp"
         alt={nagaTour.siteName}
         headline="You finished the walk"
         finishLabel="Help the parish"
@@ -136,7 +136,7 @@ export default function HomePage() {
   if (inProgress) {
     return (
       <HomeHero
-        src="/img/dome.jpg"
+        src="/img/dome.webp"
         alt="Cathedral dome"
         headline="Keep walking"
       >
@@ -160,7 +160,7 @@ export default function HomePage() {
 
   return (
     <HomeHero
-      src="/img/home-facade.jpg"
+      src="/img/home-facade.webp"
       alt={nagaTour.siteName}
       instant={showHomeAtOnce}
       headline={nagaTour.siteName}

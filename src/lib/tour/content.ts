@@ -26,9 +26,12 @@ export const nagaTour: Tour = {
       shortTitle: "Entrance",
       landmark:
         "At the main entrance of the Cathedral. Stand in front of the doors and look up at the façade.",
-      heroImage: "/img/entrance.jpg",
-      body: "The Naga Metropolitan Cathedral is the seat of the Archdiocese of Cáceres. That means it is the main church of a group of churches led by an archbishop. It is one of the oldest in the Philippines. It was created by a papal bull, an official letter from the Pope, on 14 August 1595. A fire destroyed an earlier church in 1768. Building of this stone Cathedral began in 1808, under Bishop Bernardo de la Concepción. It was finished and blessed in 1843. Look up at the façade. It is low and wide, with twin pilasters and two short belfries. Pilasters are flat columns, and belfries are bell towers. This style is called Earthquake Baroque. It was built to stay standing when the ground shakes.",
+      heroImage: "/img/entrance.webp",
+      about:
+        "The Naga Metropolitan Cathedral is the seat of the Archdiocese of Cáceres. That means it is the main church of a group of churches led by an archbishop. It is one of the oldest in the Philippines. It was created by a papal bull, an official letter from the Pope, on 14 August 1595.",
       fact: "The façade carries the coat of arms of Castile and León, two old kingdoms of Spain.",
+      history:
+        "A fire destroyed an earlier church in 1768. Building of this stone Cathedral began in 1808, under Bishop Bernardo de la Concepción. It was finished and blessed in 1843. Look up at the façade. It is low and wide, with twin pilasters and two short belfries. Pilasters are flat columns, and belfries are bell towers. This style is called Earthquake Baroque. It was built to stay standing when the ground shakes.",
       map: { x: 140, y: 307 },
     },
     {
@@ -39,9 +42,12 @@ export const nagaTour: Tour = {
       shortTitle: "Murals",
       landmark:
         "Walk into the nave, the long middle hall of the Cathedral. Stop at the first big column and look up at the murals.",
-      heroImage: "/img/murals.png",
-      body: "Step into the nave and look at the columns, arches, and ceiling. The paintings use a trick called trompe-l'oeil. It fools your eyes into seeing depth and carved details on flat walls. Can you tell what is painted? The heavy arcades, or rows of arches, also helped make the Cathedral stronger after the earthquake of 1820.",
+      heroImage: "/img/murals.webp",
+      about:
+        "Step into the nave and look at the columns, arches, and ceiling. The paintings use a trick called trompe-l'oeil. It fools your eyes into seeing depth and carved details on flat walls. Can you tell what is painted?",
       fact: "A typhoon damaged the Cathedral in 1856. An earthquake damaged it in 1887. It was restored each time. A major restoration began in 1987.",
+      history:
+        "The heavy arcades, or rows of arches, also helped make the Cathedral stronger after the earthquake of 1820.",
       map: { x: 140, y: 190 },
     },
     {
@@ -52,9 +58,12 @@ export const nagaTour: Tour = {
       shortTitle: "Statue",
       landmark:
         "Keep walking up the nave toward the altar. The statue of Saint John is near the sanctuary, the area around the altar.",
-      heroImage: "/img/statue.png",
-      body: "Near the sanctuary, pause at the statue of Saint John the Evangelist. He is the patron of this Cathedral, the saint it is named for. Early tradition remembers him as the beloved disciple and the author of the Fourth Gospel. Naga is a pilgrim city. This is a quiet place to look, pray, and remember who the Cathedral is named for.",
+      heroImage: "/img/statue.webp",
+      about:
+        "Near the sanctuary, pause at the statue of Saint John the Evangelist. He is the patron of this Cathedral, the saint it is named for.",
       fact: "The Archdiocese of Cáceres takes its name from the old Spanish colonial capital. The Cathedral is still its mother church.",
+      history:
+        "Early tradition remembers him as the beloved disciple and the author of the Fourth Gospel. Naga is a pilgrim city. This is a quiet place to look, pray, and remember who the Cathedral is named for.",
       map: { x: 140, y: 78 },
     },
   ],

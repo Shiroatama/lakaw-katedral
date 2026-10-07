@@ -202,7 +202,7 @@ Titles shown to visitors are the real names: **The Entrance and Façade**, **The
 - Precached: `/`, `/map`, `/finish`, `/~offline`, every `/s/<slug>`, `.next/static` (JS, CSS, fonts), and `public/` (images, icons). Donation pages are not cached.
 - Hero images are served unoptimized from `public/` (not `/_next/image`) so they can be precached by fixed URL.
 - Home shows "Tour saved on this phone" once every stop page is found in the precache.
-- Target total tour payload under about 3 MB. Current build: about 2.7 MB (images dominate; converting `murals.png` and `statue.png` to JPEG/WebP would save roughly 1 MB).
+- Target total tour payload under about 3 MB. Hero images and icons are WebP in `public/` (about 544 KB total).
 - Not available in `next dev`; verify with `next build && next start`, then test in airplane mode.
 - Strategy: cache-first for tour assets, network-only for donation.
 - Web app manifest included so "Add to Home Screen" works, but installing is optional and not part of the flow.
