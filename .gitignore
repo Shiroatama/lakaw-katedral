@@ -48,3 +48,4 @@ public/swe-worker*
 # OpenNext / Cloudflare
 .open-next
 .wrangler
+.dev.vars.bak
