@@ -5,8 +5,15 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
  * All tour routes are static (SSG). Use Workers Static Assets for the
  * incremental cache; no R2 / queue / tag cache needed.
  * @see https://opennext.js.org/cloudflare/caching#ssg-site
+ *
+ * `buildCommand` must call Next.js directly. OpenNext defaults to
+ * `npm run build`, and our `build` script is `opennextjs-cloudflare build`,
+ * which would recurse forever without this override.
  */
-export default defineCloudflareConfig({
-  incrementalCache: staticAssetsIncrementalCache,
-  enableCacheInterception: true,
-});
+export default {
+  ...defineCloudflareConfig({
+    incrementalCache: staticAssetsIncrementalCache,
+    enableCacheInterception: true,
+  }),
+  buildCommand: "npm run build:next",
+};
