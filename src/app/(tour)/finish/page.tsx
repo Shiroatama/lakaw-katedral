@@ -80,17 +80,20 @@ export default function FinishPage() {
         <main className="flex flex-1 flex-col gap-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-0">
           <header className="fade-up -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] bg-[var(--background)]">
             <div className="relative">
-              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--stone-light)]">
-                {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
-                <Image
-                  src="/img/finish-welcome.webp"
-                  alt="Naga Metropolitan Cathedral and the plaza in front of it"
-                  fill
-                  unoptimized
-                  className="hero-settle object-cover object-center"
-                  sizes="100vw"
-                  priority
-                />
+              {/* Shorter window only: image stays at 4:3 scale, top/bottom are clipped. */}
+              <div className="relative aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">
+                <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
+                  {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
+                  <Image
+                    src="/img/finish-welcome.webp"
+                    alt="Naga Metropolitan Cathedral and the plaza in front of it"
+                    fill
+                    unoptimized
+                    className="hero-settle object-cover object-center"
+                    sizes="100vw"
+                    priority
+                  />
+                </div>
               </div>
               <div
                 className="pop-in absolute bottom-0 left-1/2 z-10 flex h-16 w-16 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[0_8px_24px_rgba(79,107,74,0.35)] ring-4 ring-[var(--background)]"
@@ -133,18 +136,18 @@ export default function FinishPage() {
           </div>
 
           <section
-            className="fade-up space-y-4"
+            className="fade-up space-y-3"
             aria-labelledby="next-ideas-heading"
           >
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <h2
                 id="next-ideas-heading"
                 className="font-display text-xl text-[var(--foreground)]"
               >
-                What you can do next
+                Something to do
               </h2>
               <p className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]">
-                Stay a little longer if you want. Here are a few quiet ideas.
+                Stay a little longer if you want.
               </p>
             </div>
 

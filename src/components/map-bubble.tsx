@@ -287,7 +287,7 @@ export function MapBubble({
                   setOpen(false);
                   router.push("/scan", { transitionTypes: ["nav-forward"] });
                 }}
-                className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
+                className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
               >
                 <QrCodeIcon className="h-[1.1em] w-[1.1em] shrink-0" />
                 Scan with this phone
@@ -301,7 +301,7 @@ export function MapBubble({
                       transitionTypes: ["nav-forward"],
                     });
                   }}
-                  className="inline-flex h-12 shrink-0 items-center justify-center gap-1 rounded-full border border-dashed border-[var(--stone)] bg-transparent px-3 text-sm font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--background)] active:scale-[0.98]"
+                  className="inline-flex h-12 shrink-0 items-center justify-center gap-1 rounded-md border border-dashed border-[var(--stone)] bg-transparent px-3 text-sm font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--background)] active:scale-[0.98]"
                   aria-label={`Skip the scan: open place ${next.order}`}
                 >
                   Skip
