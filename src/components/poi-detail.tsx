@@ -44,22 +44,22 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
           </p>
         </div>
 
-        {poi.fact ? (
-          <aside
-            className="fade-up rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]"
-            style={delay(320)}
-          >
-            <h2 className="text-base font-bold">Interesting fact</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--accent-fg)]/90">
-              {poi.fact}
-            </p>
-          </aside>
-        ) : null}
+        <aside
+          className="fade-up rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]"
+          style={delay(320)}
+        >
+          <h2 className="text-base font-bold">Something to do</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--accent-fg)]/90">
+            {poi.action}
+          </p>
+        </aside>
 
         <section className="fade-up flex flex-col gap-2" style={delay(420)}>
-          <h2 className="text-lg font-bold text-[var(--foreground)]">History</h2>
+          <h2 className="text-lg font-bold text-[var(--foreground)]">
+            Interesting fact
+          </h2>
           <p className="text-base leading-relaxed text-[var(--foreground)]/90">
-            {poi.history}
+            {poi.fact}
           </p>
         </section>
       </div>

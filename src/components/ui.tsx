@@ -43,21 +43,27 @@ export function ProgressDots(props: ProgressBarProps) {
 }
 
 /**
- * Fixed bottom dock: optional map bubble on the left, primary action on the right.
- * Messenger-style: map is a circular launcher; progress lives on that circle.
+ * Fixed bottom dock: optional map chat-head on the left, primary action on the
+ * right (Messenger-style). Progress lives on the map circle.
  *
- * The slide-up runs on the inner row, never on the fixed wrapper, so
- * `position: fixed` keeps working and the map sheet (portaled to <body>) is
- * not trapped inside a transformed ancestor.
+ * When `map` is passed, its column is a fixed h-14 w-14 so the CTA width stays
+ * stable. Fresh home omits `map` for a full-width CTA and skips the shared
+ * view-transition name so Chrome does not morph full-width → map+CTA.
+ *
+ * The map sheet is portaled to <body> so it is not trapped in a transform.
  */
 export function StickyActionBar({
   map,
   children,
+  /** When false, dock is omitted from the shared view-transition snapshot. */
+  shareTransition = true,
 }: {
   map?: React.ReactNode;
   children?: React.ReactNode;
+  shareTransition?: boolean;
 }) {
   const hasActions = Boolean(children);
+  const hasMap = map != null;
 
   return (
     <>
@@ -66,9 +72,18 @@ export function StickyActionBar({
         style={{ height: "var(--action-bar-space, 5.5rem)" }}
         aria-hidden
       />
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30">
-        <div className="rise-in pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-          {map}
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
+        style={
+          shareTransition ? { viewTransitionName: "stop-dock" } : undefined
+        }
+      >
+        <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+          {hasMap ? (
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center">
+              {map}
+            </div>
+          ) : null}
           {hasActions ? (
             <div className="flex min-w-0 flex-1 flex-col gap-3">{children}</div>
           ) : null}

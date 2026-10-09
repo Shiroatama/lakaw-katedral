@@ -1,69 +1,82 @@
 import type { Tour } from "./types";
 
 /**
- * Draft content from public sources. Real names, places, dates and key terms
- * are kept as they are; the words around them are plain (about Grade 3), and
- * each hard term is explained in a few simple words the first time it appears.
- * Facts must be verified by the parish before launch. See docs/SPEC.md
- * sections 3.1 and 7.
+ * Visitor-facing copy for the MVP walk (guide items 1–3).
  *
+ * Source of truth: docs/PILGRIM-GUIDE.md (parish pilgrim guide).
+ * Real names and key terms stay exact; words around them are plain (about
+ * Grade 3). Each hard term is explained the first time it appears.
+ * See docs/SPEC.md sections 3.1 and 7.
+ *
+ * Each stop, in order: about (what is here), dark-card action (what to do),
+ * then one interesting fact. About never carries instructions.
  * `landmark` lines are placeholders until the parish confirms where each QR
- * sign will be mounted (SPEC §17).
+ * sign will be mounted (SPEC §17). Hero images reuse existing assets until
+ * dedicated photos are provided.
  */
 export const nagaTour: Tour = {
   id: "naga-cathedral",
-  version: 1,
+  version: 4,
   name: "Lakaw Katedral",
   siteName: "Naga Metropolitan Cathedral",
-  intro:
-    "A short walk through the Metropolitan Cathedral of Saint John the Evangelist. Learn its story, one place at a time.",
+  steward: {
+    name: "Archdiocese of Cáceres",
+    logo: "/img/archdiocese-caceres.png",
+  },
+  // Home landing copy. Drawn from the pilgrim guide welcome and tagline.
+  intro: {
+    hook: "Welcome, dear pilgrim and visitor.",
+    fact: "You are entering a living story of faith. This Cathedral has stood at the heart of Bicol for more than four centuries.",
+    teasers:
+      "Discover the heritage. Encounter the saints. Meet Christ.",
+  },
   pois: [
     {
-      id: "entrance",
-      slug: "entrance",
+      id: "saints",
+      slug: "saints",
       order: 1,
-      title: "The Entrance",
+      title: "The Cathedral Entrance",
       shortTitle: "Entrance",
       landmark:
-        "At the main entrance of the Cathedral. Stand in front of the doors and look up.",
+        "At the main door of the Cathedral. Stand in front of the doors.",
       heroImage: "/img/entrance.webp",
       about:
-        "The Naga Metropolitan Cathedral is the seat of the Archdiocese of Cáceres. That means it is the main church for many churches led by an archbishop. This diocese is one of the oldest in the Philippines. The Pope created it by a papal bull, an official letter, on 14 August 1595.",
-      fact: "Above the doors is the coat of arms of Castile and León, two old kingdoms of Spain.",
-      history:
-        "Fire destroyed an earlier church here in 1768. Work on this stone Cathedral began in 1808 under Bishop Bernardo de la Concepción. It was finished and blessed in 1843. Look up. The front is low and wide, with twin pilasters beside the doors. Pilasters are flat columns. Two short belfries stand at the sides. Belfries are bell towers. This style is called Earthquake Baroque. It was built to stay strong when the ground shakes.",
+        "Here at the main door are two patrons of this place: Saint John the Evangelist, Patron Saint of the Cathedral Parish, and Saint Peter Baptist, Patron Saint of the Archdiocese of Cáceres.",
+      action:
+        "Ask them to walk with you, protect you, and lead you closer to Christ.",
+      fact: "Every image, arch, bell, stone, and sacred space in this Cathedral has a story to tell you.",
       map: { x: 140, y: 307 },
     },
     {
-      id: "murals",
-      slug: "murals",
+      id: "mural",
+      slug: "mural",
       order: 2,
-      title: "The Interior Murals",
-      shortTitle: "Murals",
+      title: "The Alcomendas Mural",
+      shortTitle: "Mural",
       landmark:
-        "Walk into the nave, the long middle hall of the Cathedral. Stop at the first big column and look up at the murals.",
+        "Walk into the nave, the long middle hall of the Cathedral. Pause before the mural of Raul Alcomendas.",
       heroImage: "/img/murals.webp",
       about:
-        "You are in the nave, the long middle hall. Look up at the columns, arches, and ceiling. The paintings use a trick called trompe-l'oeil. It fools your eyes so flat walls look deep or carved. Can you tell what is painted and what is real?",
-      fact: "A typhoon hurt the Cathedral in 1856. An earthquake hurt it in 1887. It was repaired each time. A big restoration began in 1987, and the Cathedral was blessed again in 1988.",
-      history:
-        "After an earthquake in 1820, builders made the inside stronger. Heavy arcades, or rows of arches, hold up the nave and the side halls. The paintings on the columns, arches, and ceiling came later, when the Cathedral was restored.",
+        "This mural is by the Bicolano artist Raul Alcomendas. It tells the story of how the Gospel came to Bicol: the missionaries who came, the communities they served, and the generations who received and passed on the faith.",
+      action:
+        "Look closely at the mural. Give thanks that you are part of a story that began centuries ago.",
+      fact: "Evangelization means bringing the Good News of Jesus to people. This mural remembers that long work in Bicol.",
       map: { x: 140, y: 190 },
     },
     {
-      id: "statue",
-      slug: "statue",
+      id: "cathedra",
+      slug: "cathedra",
       order: 3,
-      title: "Saint John the Evangelist",
-      shortTitle: "Statue",
+      title: "The Cathedra",
+      shortTitle: "Cathedra",
       landmark:
-        "Keep walking up the nave toward the altar. The statue of Saint John is near the sanctuary, the area around the altar.",
+        "Keep walking toward the sanctuary, the area around the altar. Find the Archbishop's Chair.",
       heroImage: "/img/statue.webp",
       about:
-        "This Cathedral is named for Saint John the Evangelist. He is its patron, the saint it honors. Pause here near the sanctuary, the area around the altar.",
-      fact: "The Archdiocese of Cáceres takes its name from the old Spanish colonial capital. This Cathedral is still its mother church.",
-      history:
-        "Early tradition remembers Saint John as the beloved disciple of Jesus. He is also remembered as the author of the Fourth Gospel. Naga is a pilgrim city. This is a quiet place to look, pray, and remember who the Cathedral is named for.",
+        "This is the Cathedra, the Archbishop's Chair. It is where the Archbishop teaches and shepherds the flock.",
+      action:
+        "Pause here. Give thanks for the shepherds who teach and care for God's people.",
+      fact: "The Cathedra is more than a chair of honor. It shows the Archbishop's teaching and pastoral authority. Pastoral means caring for God's people. It also reminds us that the Cathedral is the mother church of the Archdiocese of Cáceres.",
       map: { x: 140, y: 78 },
     },
   ],

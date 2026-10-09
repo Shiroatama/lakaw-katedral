@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   // Phone / LAN testing: without this, Next blocks /_next/* from the LAN IP
   // (403), so JS never runs and the home page stays as the image-only SSR shell.
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
+  // Hide the bottom-left Next.js badge in development.
+  devIndicators: false,
 };
 
 export default withSerwist(nextConfig);

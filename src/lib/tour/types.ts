@@ -1,6 +1,6 @@
 export type Poi = {
   id: string;
-  /** Readable URL segment, e.g. "murals" -> /s/murals. Typeable by hand. */
+  /** Readable URL segment, e.g. "mural" -> /s/mural. Typeable by hand. */
   slug: string;
   order: number;
   title: string;
@@ -9,13 +9,35 @@ export type Poi = {
   heroImage: string;
   /** Plain-words directions to this place's sign / QR code. */
   landmark: string;
-  /** Short overview of what the visitor is looking at. */
+  /** What is here. Descriptive only; no instructions. */
   about: string;
-  /** Optional callout below the overview. */
-  fact?: string;
-  /** Longer story of how this place came to be. */
-  history: string;
+  /** Call to action in the dark card: pray, look, pause, and so on. */
+  action: string;
+  /** One short interesting fact below the action. */
+  fact: string;
   map: { x: number; y: number };
+};
+
+/**
+ * Fresh-visit home copy (Layout C: welcome, fact first, then invite).
+ * `fact` may use `\n` for two short impact lines.
+ */
+export type TourIntro = {
+  hook: string;
+  /** Drawn from the parish pilgrim guide welcome; keep claims aligned with docs/PILGRIM-GUIDE.md. */
+  fact: string;
+  /** Soft "Find out…" invite under the fact. */
+  teasers: string;
+};
+
+/**
+ * Quiet institutional crest on Home (upper left).
+ */
+export type TourSteward = {
+  /** Exact institutional name (used for alt text). */
+  name: string;
+  /** Crest / logo under /public. */
+  logo: string;
 };
 
 export type Tour = {
@@ -23,7 +45,8 @@ export type Tour = {
   version: number;
   name: string;
   siteName: string;
-  intro: string;
+  steward: TourSteward;
+  intro: TourIntro;
   pois: Poi[];
 };
 

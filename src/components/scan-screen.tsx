@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { Poi, ScanOutcome } from "@/lib/tour";
 import { useJourneyStore } from "@/lib/tour";
 import { PoiDetail } from "@/components/poi-detail";
@@ -26,8 +26,8 @@ function Banner({ outcome }: { outcome: ScanOutcome }) {
 
 /**
  * A visit to a stop. The story and bottom dock render at once (fast on weak
- * signal). Progress is recorded on mount; the status banner appears once that
- * outcome is ready.
+ * signal). Progress is recorded in useLayoutEffect so the dock's map head and
+ * CTA width settle before the browser paints.
  */
 export function ScanScreen({ poi }: { poi: Poi }) {
   const hydrated = useHydrated();
@@ -35,7 +35,7 @@ export function ScanScreen({ poi }: { poi: Poi }) {
   const scanPoi = useJourneyStore((s) => s.scanPoi);
   const lastOutcome = useJourneyStore((s) => s.lastOutcome);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (scanned.current) return;
     scanned.current = true;
     scanPoi(poi);

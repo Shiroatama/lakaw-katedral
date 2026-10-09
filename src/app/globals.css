@@ -14,7 +14,7 @@
   --ceremonial: #c4a35a;
   --success: #4f6b4a;
   --danger: #b33b2e;
-  /* Space for map bubble + Next dock */
+  /* Space for map chat-head + Next dock */
   --action-bar-space: 5.5rem;
 
   /* Motion tokens */
@@ -180,7 +180,7 @@ body {
   animation-delay: var(--delay, 0ms);
 }
 
-/* Bottom dock slides up into place. */
+/* Optional rise-in for non-dock surfaces. Dock itself stays put. */
 .rise-in {
   opacity: 1;
   transform: translateY(0);
@@ -236,8 +236,9 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Map / wayfinding sheet. Always mounted (portaled to <body>) so it can
-   animate both ways; data-open drives everything.
+   Map sheet. Always mounted (portaled to <body>) so it can animate both ways;
+   data-open drives everything. Bottom-anchored: height follows content, capped
+   at the top safe area (body scrolls when content exceeds that).
    -------------------------------------------------------------------------- */
 
 .sheet-root {
@@ -262,27 +263,57 @@ body {
 }
 
 .sheet-panel {
-  transform: translateY(100%);
-  transition: transform 300ms var(--ease-in);
-  will-change: transform;
+  transform-origin: bottom left;
+  transform: translateY(12px) scale(0.92);
+  opacity: 0;
+  transition:
+    transform 300ms var(--ease-in),
+    opacity 220ms var(--ease-in);
+  will-change: transform, opacity;
+}
+
+/* Soft speech-bubble tail: centered on the map chat-head (dock px-5 + half of 56px). */
+.sheet-tail {
+  position: absolute;
+  /* Panel inset-x-3 (0.75rem); head center = 1.25rem + 1.75rem → 2.25rem from panel left */
+  left: 2.25rem;
+  top: 100%;
+  margin-top: -1px;
+  width: 1.75rem;
+  height: 1.15rem;
+  overflow: visible;
+  pointer-events: none;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 6px 10px rgba(42, 33, 28, 0.14));
+}
+
+.sheet-panel--no-head {
+  transform-origin: bottom center;
+}
+
+.sheet-panel--no-head .sheet-tail {
+  display: none;
 }
 
 .sheet-root[data-open="true"] .sheet-panel {
-  transform: translateY(0);
-  transition: transform 480ms var(--ease-sheet);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition:
+    transform 480ms var(--ease-sheet),
+    opacity 320ms var(--ease-out);
 }
 
-/* Sheet contents reveal one after another each time it opens. */
+/* Sheet contents reveal on open. Prefer fade (no vertical travel). */
 .sheet-root[data-open="true"] .sheet-item {
   opacity: 1;
-  transform: translateY(0);
-  animation: fade-up 520ms var(--ease-out) backwards;
+  transform: none;
+  animation: fade-in 420ms var(--ease-out) backwards;
   animation-delay: calc(160ms + var(--i, 0) * 90ms);
 }
 
 .sheet-root[data-open="true"] .map-marker {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
   animation: pop-in 480ms var(--ease-spring) backwards;
   animation-delay: calc(420ms + var(--i, 0) * 110ms);
 }
@@ -345,6 +376,28 @@ body {
 ::view-transition {
   /* Let taps through while a transition runs. */
   pointer-events: none;
+}
+
+/*
+ * Dock stays put while the page slides between stops.
+ * Chrome's default group animation morphs width/height between snapshots;
+ * that is what made Find place look full-span then shrink. Keep geometry
+ * frozen (animation: none) and only attach view-transition-name when the
+ * map column is present on both sides (see StickyActionBar).
+ */
+::view-transition-group(stop-dock) {
+  z-index: 30;
+  animation: none;
+}
+
+::view-transition-old(stop-dock),
+::view-transition-new(stop-dock) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  width: 100%;
+  overflow: clip;
+  object-fit: none;
 }
 
 ::view-transition-old(.nav-forward) {
@@ -444,6 +497,7 @@ body {
   .rise-in,
   .pop-in,
   .hero-settle,
+  .sheet-root[data-open="true"] .sheet-panel,
   .sheet-root[data-open="true"] .sheet-item,
   .sheet-root[data-open="true"] .map-marker,
   .sheet-root[data-open="true"] .map-label,

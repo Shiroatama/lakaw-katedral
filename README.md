@@ -2,7 +2,7 @@
 
 Mobile web app for a QR-guided walk through Naga Metropolitan Cathedral.
 
-See [docs/SPEC.md](docs/SPEC.md) for the MVP product and technical spec, and [docs/DESIGN.md](docs/DESIGN.md) for color, UX flow, and screen inventory.
+See [docs/SPEC.md](docs/SPEC.md) for the MVP product and technical spec, [docs/DESIGN.md](docs/DESIGN.md) for color, UX flow, and screen inventory, and [docs/PILGRIM-GUIDE.md](docs/PILGRIM-GUIDE.md) for the parish source of truth for stop content.
 
 ## Stack
 
@@ -26,7 +26,7 @@ npm run dev:lan
 ipconfig getifaddr en0   # your Mac's LAN IP, e.g. 192.168.1.67
 ```
 
-On the phone open `http://<that-ip>:3000/s/entrance`.
+On the phone open `http://<that-ip>:3000/s/saints`.
 
 `next.config.ts` allows private LAN origins in development (`allowedDevOrigins`). Without that, Next returns 403 for `/_next` JS/CSS from the phone, React never starts, and you only see the hero image.
 
@@ -40,9 +40,9 @@ Stop URLs (readable on purpose, so they can be typed by hand):
 
 | Stop | URL |
 |------|-----|
-| Entrance | `/s/entrance` |
-| Murals | `/s/murals` |
-| Statue | `/s/statue` |
+| The Cathedral Entrance | `/s/saints` |
+| The Alcomendas Mural | `/s/mural` |
+| The Cathedra | `/s/cathedra` |
 
 ### QR codes
 

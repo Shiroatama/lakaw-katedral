@@ -1,4 +1,11 @@
-export type { Poi, Tour, JourneyProgress, ScanOutcome } from "./types";
+export type {
+  Poi,
+  Tour,
+  TourIntro,
+  TourSteward,
+  JourneyProgress,
+  ScanOutcome,
+} from "./types";
 export {
   nagaTour,
   getPoiById,
@@ -16,3 +23,4 @@ export {
 } from "./route-rules";
 export { ALLOW_SKIP } from "./config";
 export { showHomeAtOnce, useJourneyStore } from "./store";
+export { useJourneyHydrated } from "./use-journey-hydrated";

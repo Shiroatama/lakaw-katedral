@@ -78,8 +78,8 @@ Aim for WCAG AA on text and CTAs. Prefer mid-brick terracotta over muted clay so
 | Rule | Choice |
 |------|--------|
 | Tab bar | None |
-| Persistent chrome | Progress ring on the map button in the bottom dock (`2/3`). Finish shows a full progress bar. |
-| Map access | After the walk has begun |
+| Persistent chrome | Progress ring on the map chat-head beside the main CTA. Finish shows a full progress bar. |
+| Map access | After the walk has begun (not on Home) |
 | Home role | Resume hub (see screens) |
 | Back | In-screen secondary actions only. No universal back chevron required for MVP. |
 
@@ -90,8 +90,8 @@ Aim for WCAG AA on text and CTAs. Prefer mid-brick terracotta over muted clay so
 ```mermaid
 flowchart LR
   QR1["Scan any stop QR"] --> POI["Stop detail (story at once)"]
-  Home["Home: landing / resume"] -->|Start the walk| POI
-  POI --> Find["Find place N: landmark + map"]
+  Home["Home: landing / resume"] -->|Come find out| POI
+  POI --> Find["Find place N: map bubble"]
   Find --> QR1
   POI -->|all visited| Fin["Finish: quiet moment + gift"]
   Fin --> Don["Help the parish (placeholder)"]
@@ -111,28 +111,31 @@ flowchart LR
 
 ### 5.1 Home (`/`): landing and resume hub
 
-Not a required step on site (the entrance QR goes straight to stop 1). Used by people who arrive from a link, and as the resume point. Shows only the hero until saved progress is read, so a returning visitor never sees "Start the walk" flash.
+Not a required step on site (the entrance QR goes straight to stop 1). Used by people who arrive from a link, and as the resume point. Shows only the hero until saved progress is read, so a returning visitor never sees "Come find out" flash.
 
 **Fresh visit**
 
+- Quiet steward credit, upper left: Archdiocese of Cáceres crest beside the name. No floating badge, no pill chip.
 - Brand: Lakaw Katedral as hero-level signal, over a full-bleed photo from the top edge of the screen (no card, no rounded corners)
-- Cathedral name + short intro
-- Quiet line when cached: "Saved on your phone. It works with no signal."
-- Dock: map button + **Start the walk** (opens place 1; that visit starts the walk)
+- Hook: "Welcome, dear pilgrim and visitor."
+- Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
+- Invite: "Discover the heritage. Encounter the saints. Meet Christ." (no question stack)
+- No cathedral-name headline, no QR mention
+- Dock: **Come find out** opens place 1 immediately. The map chat-head never appears on Home.
 - No stop list, schedule, stats, or address block in the first viewport
 
 **In progress**
 
 - Brand quieter; "Your next stop is {title}"
-- Dock: map button + **Find place N**
+- Dock: map chat-head + **Find place N**
 - Quiet destructive: Start over (confirm, then clear journey)
 
 **Complete**
 
-- Dock: map button + **Help the parish** (to Finish)
+- Dock: map chat-head + **Help the parish** (to Finish)
 - Quiet destructive: Start over
 
-### 5.2 Entrance QR (`/s/entrance`)
+### 5.2 First-stop QR (`/s/saints`)
 
 - Same as any stop. Scanning it starts the journey. No redirect, no Start tap.
 
@@ -145,21 +148,24 @@ Top to bottom:
 1. Full-bleed photo across the screen, from the top edge (no card, no rounded corners)
 2. Optional one-line note (out of suggested order, or journey complete)
 3. Stop title
-4. Short body
-5. Optional Did you know?
-6. Dock: map button (progress ring) + **Find place N**, or **Finish** when all stops are visited
+4. About (what is here; descriptive only, no instructions)
+5. Dark card: **Something to do** (instruction / call to action: pray, look, pause)
+6. Interesting fact
+7. Dock: map button (progress ring) + **Find place N**, or **Finish** when all stops are visited
 
 MVP: no audio, share, or save.
 
-### 5.4 Wayfinding sheet (map)
+### 5.4 Wayfinding map (chat bubble)
 
-- Circular **Map** button lower-left in the bottom dock, beside the primary action
+- Circular **Map** chat-head beside the primary CTA (Messenger-style) on journey screens only. **Never on Home.**
 - Progress `done/total` and ring fill live on the circle
-- Tap the map button **or** "Find place N" to open a bottom sheet:
+- Fresh start (Home): **Come find out** opens place 1 immediately.
+- On journey screens: tap the map chat-head **or** **Find place N** to open a tall map panel (rounded, height from dock up to the top safe area):
   1. Next stop card: stop number, title, **landmark** in plain words, "Scan the QR code there to read the story."
   2. Floor plan (completed / here / next)
-- `/map` is a deep-link fallback that opens the same sheet
-- **Trial mode only:** a dashed "Skip the scan: open place N" button pinned at the bottom of the sheet. Controlled by `NEXT_PUBLIC_ALLOW_SKIP`; remove for launch.
+- Dock stays visible under the bubble (backdrop stops above the dock)
+- `/map` is a deep-link fallback that opens the same bubble
+- **Trial mode only:** a dashed "Skip the scan: open place N" button at the bottom (also before the walk has begun, for desktop testing). Controlled by `NEXT_PUBLIC_ALLOW_SKIP`; remove for launch.
 
 ### 5.5 Finish (`/finish`)
 
@@ -221,7 +227,7 @@ Motion gives presence and hierarchy, never decoration. Premium feel comes from c
 | Where | Motion | Timing |
 |-------|--------|--------|
 | Page to page (in-app links) | Slide + fade + slight blur. Forward rises from below; back drops in from above. React `<ViewTransition>` with `transitionTypes` (`nav-forward` / `nav-back`). QR scans and browser back just load normally. | 420 to 480 ms |
-| Wayfinding sheet | Panel slides up; backdrop fades; contents rise in one by one (title, next place card, map, skip); map markers pop in with a small overshoot, labels fade after; the "next" marker sends out a soft ring while open. Closing is faster (300 ms, ease-in). Focus moves into the sheet and back to the map button. | 480 ms open, 300 ms close |
+| Wayfinding chat bubble | Bubble scales up from the map chat-head; backdrop fades; contents rise in one by one; map markers pop in; the "next" marker soft-rings. Closing is faster. Focus moves into the bubble and back to the chat-head. | 480 ms open, 300 ms close |
 | Bottom dock | Slides up into place after the visit is recorded | 560 ms |
 | Map button | Progress ring sweeps from empty to current; the count pops when it changes | 900 ms |
 | Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |

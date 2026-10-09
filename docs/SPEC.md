@@ -44,7 +44,7 @@ Design implications: big tap targets, high contrast, short text, readable in dim
 
 Visitor-facing copy uses plain words at about a **Grade 3 reading level**: short sentences (under about 12 words), common everyday words. Visitors may be children, older people, or reading English as a second language, and often read standing up in a crowd.
 
-**Real names and key terms are never simplified.** Keep proper nouns and important terms exactly as they are: Naga Metropolitan Cathedral, Archdiocese of Cáceres, Saint John the Evangelist, Bishop Bernardo de la Concepción, Castile and León, parish, façade, nave, sanctuary, Earthquake Baroque, trompe-l'oeil, dates and years. The first time a hard term appears, add a few simple words to explain it ("Pilasters are flat columns, and belfries are bell towers."). Only the words *around* the names get simpler.
+**Real names and key terms are never simplified.** Keep proper nouns and important terms exactly as they are: Naga Metropolitan Cathedral, Archdiocese of Cáceres, Saint John the Evangelist, Saint Peter Baptist, Raul Alcomendas, Cathedra, parish, nave, sanctuary, evangelization, dates and years, and other names from [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md). The first time a hard term appears, add a few simple words to explain it ("The Cathedra is the Archbishop's Chair."). Only the words *around* the names get simpler.
 
 Word choices for everyday words (code and internal docs still say "POI", "stop", "journey"; only what visitors read changes):
 
@@ -60,13 +60,13 @@ Rules: one idea per sentence; say what to do first ("Look up at the façade."); 
 
 ## 4. Journey and route
 
-Fixed route, in order:
+Fixed route, in order (from the parish pilgrim guide; see [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md)):
 
 | # | POI | Placement of QR | URL |
 |---|-----|-----------------|-----|
-| 1 | Entrance (Façade) | Main entrance, starting line | `/s/entrance` |
-| 2 | Interior murals (trompe-l'oeil) | Nave, near a key column | `/s/murals` |
-| 3 | Statue (St. John the Evangelist) | Beside the statue | `/s/statue` |
+| 1 | The Cathedral Entrance | Main door, starting line | `/s/saints` |
+| 2 | The Alcomendas Mural | Nave, at the Raul Alcomendas mural | `/s/mural` |
+| 3 | The Cathedra | Near the Archbishop's Chair | `/s/cathedra` |
 | End | Finish + Donate | Shown after POI 3 | `/finish` |
 
 **URL design (consideration).** Stop URLs are short readable words, not random tokens, so a visitor can type one by hand if a code won't scan (glare, dim light, damaged sticker). Trade-offs, accepted for MVP:
@@ -127,43 +127,38 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 - No GPS. Indoor GPS is unreliable; location = last scanned POI.
 - No Mapbox or Google Maps. If zooming is needed later, Leaflet with `CRS.Simple` over the SVG.
 
-## 7. Content (hardcoded, draft)
+## 7. Content (hardcoded)
 
-All copy below is **draft from public sources and must be verified by the parish** before launch.
+**Source of truth:** [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md), the parish pilgrim guide. MVP ships guide items **1–3** only. Items 4–16 stay in that document until a later release.
 
-> Section 7 keeps the original source-based draft for the parish to verify. The text visitors actually read is the Grade 3 rewrite in `src/lib/tour/content.ts` (see 7.3).
+The text visitors read is the Grade 3 rewrite in `src/lib/tour/content.ts` (see 7.3). When the rewrite and the guide differ in tone, the guide wins on facts and names; the rewrite only simplifies the words around them.
 
-### POI 1: The Entrance and Façade
-The Naga Metropolitan Cathedral is the seat of the Archdiocese of Cáceres, one of the oldest dioceses in the Philippines, created by papal bull on 14 August 1595. After fire destroyed an earlier church in 1768, construction of the present stone cathedral began in 1808 under Bishop Bernardo de la Concepción. It was completed and blessed in 1843. Look up: the squat façade, twin pilasters, and two short hexagonal belfries are typical of "Earthquake Baroque," built to survive the quakes that shaped this region.
-*Did you know?* The façade carries the coat of arms of Castile and León.
+### POI 1: The Cathedral Entrance
+At the main door: St. John the Evangelist, Patron Saint of the Cathedral Parish, and St. Peter Baptist, Patron Saint of the Archdiocese of Cáceres. Ask them to walk with you, protect you, and lead you closer to Christ.
 
-### POI 2: The Interior Murals
-Step into the nave and look at the columns, arches, and ceiling. The paintings use trompe-l'oeil, a technique that tricks the eye into seeing depth and carved detail on flat surfaces. The heavy arcades themselves were part of how the cathedral was strengthened after the 1820 earthquake.
-*Did you know?* The cathedral was damaged by a typhoon in 1856 and an earthquake in 1887, and was restored each time. A major restoration began in 1987.
+### POI 2: The Alcomendas Mural
+The mural by Bicolano artist Raul Alcomendas. Through his work, discover Bicol's evangelization: the missionaries who came, the communities they served, and the generations who received and passed on the faith. You are part of a story that began centuries ago.
 
-### POI 3: St. John the Evangelist
-Near the sanctuary, pause at the statue of St. John the Evangelist, patron of this cathedral. Early tradition remembers him as the beloved disciple and the author of the Fourth Gospel. In a pilgrim city, this stop is a quiet moment to look, pray, and remember who the church is named for.
-*Did you know?* The Archdiocese of Cáceres takes its name from the old Spanish colonial capital; the cathedral remains its mother church.
-*Statue choice and exact location still to be confirmed with the parish.*
+### POI 3: The Cathedra
+The Cathedra (the Archbishop's Chair). It is more than a chair of honor. It symbolizes the Archbishop's teaching and pastoral authority and reminds us that the Cathedral is the mother church of the Archdiocese.
 
 ### 7.2 Landmarks (wayfinding copy)
 Each stop has a one- or two-sentence `landmark` in plain words, shown in the wayfinding sheet under "Find place N". It tells the visitor where to look for the sign and QR code, since a map marker alone is not enough in a busy nave. Current lines are **placeholders** until the parish confirms where each QR sign will be mounted.
-
-**Sources:** [Wikipedia: Naga Cathedral](https://en.wikipedia.org/wiki/Naga_Cathedral), [NHCP historical marker](http://nhcphistoricsites.blogspot.com/2011/10/church-of-naga.html), [City of Naga](https://www2.naga.gov.ph/the-cathedral-that-stood-the-test-of-time-naga-metropolitan-cathedral/), [TheOldChurches](https://www.theoldchurches.com/philippines/camarines-sur/naga-city/naga-city-metropolitan-cathedral/)
 
 ### 7.1 Content model
 
 ```ts
 type Poi = {
-  id: string;            // "entrance"
-  slug: string;          // readable URL segment, e.g. "murals" -> /s/murals
+  id: string;            // "saints"
+  slug: string;          // readable URL segment, e.g. "mural" -> /s/mural
   order: number;         // 1..3
   title: string;
   shortTitle: string;    // one word for the floor plan label
   landmark: string;      // plain-words directions to this stop's sign / QR
   heroImage: string;     // compressed, e.g. /img/entrance.webp
-  body: string;          // short story (MDX or markdown)
-  fact?: string;         // "Did you know?"
+  about: string;         // what is here (no instructions)
+  action: string;        // dark-card call to action (pray, look, pause)
+  fact: string;          // one interesting fact
   map: { x: number; y: number }; // SVG coords
 };
 
@@ -174,7 +169,7 @@ Stored as typed JSON/MDX in the repo. Keep route rules and content in plain Type
 
 ### 7.3 Visitor-facing wording
 
-Titles shown to visitors are the real names: **The Entrance and Façade**, **The Interior Murals**, **Saint John the Evangelist**. The stories in `src/lib/tour/content.ts` keep every name, date and key term from the drafts above and use short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording changed, the parish should verify the rewritten text, not only the originals. Landmark lines and every UI string follow the same rules.
+Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (what is here, no instructions), dark-card **action** (what to do: pray, look, pause), then one **interesting fact**. The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
 
 ## 8. Progress and state
 
@@ -201,7 +196,7 @@ Titles shown to visitors are the real names: **The Entrance and Façade**, **The
 - Precache happens when the service worker **installs** (first load of any page), not on a button tap. By the time a visitor reaches stop 2, every stop page, the map, fonts, JS/CSS, and hero images are already on the phone.
 - Precached: `/`, `/map`, `/finish`, `/~offline`, every `/s/<slug>`, `.next/static` (JS, CSS, fonts), and `public/` (images, icons). Donation pages are not cached.
 - Hero images are served unoptimized from `public/` (not `/_next/image`) so they can be precached by fixed URL.
-- Home shows "Tour saved on this phone" once every stop page is found in the precache.
+- Precache still runs in the background; Home does not show a "saved on phone" status line.
 - Target total tour payload under about 3 MB. Hero images and icons are WebP in `public/` (about 544 KB total).
 - Not available in `next dev`; verify with `next build && next start`, then test in airplane mode.
 - Strategy: cache-first for tour assets, network-only for donation.
@@ -252,7 +247,7 @@ Not in MVP. Dim lighting, crowds, battery, and model size make recognition unrel
 
 ## 14. QR codes
 
-- Each encodes `https://<domain>/s/<slug>` (for example `/s/murals`). Slugs are short words so they can also be typed by hand if a code won't scan; print the short URL under the QR.
+- Each encodes `https://<domain>/s/<slug>` (for example `/s/mural`). Slugs are short words so they can also be typed by hand if a code won't scan; print the short URL under the QR.
 - Printed with Lakaw Katedral branding plus a short instruction: "Scan with your camera to begin / continue the journey."
 - Use high error correction (level Q or H); print at least 4 x 4 cm; matte finish to avoid glare.
 - Placement agreed with the parish; respectful of liturgical spaces.
@@ -275,12 +270,11 @@ Not in MVP. Dim lighting, crowds, battery, and model size make recognition unrel
 
 ## 17. Open items
 
-- Parish to verify all historical copy.
-- Confirm the statue for POI 3 and its exact location.
-- Confirm where each QR sign is mounted, then finalize the `landmark` wayfinding lines (section 7.2).
+- Parish to verify the Grade 3 rewrite in `content.ts` against [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md).
+- Confirm exact QR placement for the Cathedra (POI 3) and finalize all `landmark` wayfinding lines (section 7.2).
 - Before launch: set `NEXT_PUBLIC_ALLOW_SKIP=false` to remove the trial "Skip the scan" button.
 - Donation step is a placeholder: the button reads "coming soon" but still shows the thank-you screen. Replace with a real gateway, or hide the form, before launch.
-- Photos for each POI (permission to photograph).
+- Dedicated photos for each POI (permission to photograph); MVP reuses existing assets.
 - Payment gateway and receiving account (deferred).
 - Domain name.
 - QR placement approval from the parish.
