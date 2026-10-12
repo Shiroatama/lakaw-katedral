@@ -33,7 +33,7 @@ export default function MapPage() {
                   ? "Tap the map button to see the map."
                   : isJourneyStarted(progress)
                     ? `Next place: ${next.title}. Tap the map button to see how to get there.`
-                    : "Start at the main entrance. The map opens after you begin."}
+                    : "Start at the main entrance. Tap the map button to see where to go."}
             </p>
           ) : null}
         </div>

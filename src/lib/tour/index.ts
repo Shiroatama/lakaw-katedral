@@ -1,5 +1,6 @@
 export type {
   Poi,
+  ObservationKey,
   Tour,
   TourIntro,
   TourSteward,
@@ -13,6 +14,7 @@ export {
   getOrderedPois,
 } from "./content";
 export {
+  applyObservationSuccess,
   applyScanOutcome,
   createInitialProgress,
   evaluateScan,
@@ -20,6 +22,8 @@ export {
   getNextExpectedPoi,
   isJourneyComplete,
   isJourneyStarted,
+  isObservationCorrect,
+  normalizeObservationAnswer,
 } from "./route-rules";
 export { ALLOW_SKIP } from "./config";
 export { showHomeAtOnce, useJourneyStore } from "./store";

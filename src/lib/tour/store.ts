@@ -4,9 +4,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nagaTour } from "./content";
 import {
+  applyObservationSuccess,
   applyScanOutcome,
   createInitialProgress,
   evaluateScan,
+  isObservationCorrect,
 } from "./route-rules";
 import type { JourneyProgress, Poi, ScanOutcome } from "./types";
 
@@ -15,6 +17,8 @@ type JourneyStore = JourneyProgress & {
   lastOutcome: ScanOutcome | null;
   hydrateTourVersion: () => void;
   scanPoi: (poi: Poi) => ScanOutcome;
+  /** Mark a place complete when the observation key is correct. */
+  completePoi: (poi: Poi, answer: string) => boolean;
   markDonated: () => void;
   reset: () => void;
 };
@@ -50,6 +54,13 @@ export const useJourneyStore = create<JourneyStore>()(
           lastOutcome: outcome,
         });
         return outcome;
+      },
+
+      completePoi: (poi, answer) => {
+        if (!isObservationCorrect(poi, answer)) return false;
+        const state = get();
+        set(applyObservationSuccess(state, poi, nagaTour));
+        return true;
       },
 
       markDonated: () => set({ donated: true }),

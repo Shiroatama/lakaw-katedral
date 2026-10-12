@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   getEntrancePoi,
   getNextExpectedPoi,
+  getPoiBySlug,
   isJourneyComplete,
   isJourneyStarted,
   nagaTour,
@@ -21,29 +22,38 @@ type StopDockProps = {
   startLabel?: string;
   /** Open the wayfinding sheet on first render. */
   defaultOpen?: boolean;
+  /**
+   * Unstarted gate on place 2+: always offer begin-at-entrance + map to find
+   * the door. Skips the "Solve the quest first" lock for the previewed stop.
+   */
+  startGate?: boolean;
 };
 
 /**
- * Bottom dock shared by every journey screen. One consistent action:
+ * Bottom dock shared by every journey screen: map chat-head + one CTA.
  *
- * - walk not begun: Come find out (goes to place 1)
+ * - walk not begun: Come find out (goes to place 1); map urges that CTA
+ * - startGate:      Begin at the entrance + map focused on place 1
+ * - on a stop, quest unsolved: Solve the quest first (locked)
  * - stops left:     Find place N (opens wayfinding map)
- * - all visited:    Finish
+ * - all solved:     Finish
  *
- * Journey screens (and home once started) pass a map head so the CTA width
- * stays stable. Fresh home keeps a full-width CTA and skips the shared
- * view-transition name so Chrome does not morph full-width → map+CTA.
+ * The map head is always present (including Home) so pilgrims can check where
+ * they are or where to begin. The observation key unlocks "Find place N"
+ * after you finish the quest at the current stop.
  */
 export function StopDock({
   finishLabel = "Finish",
   startLabel = "Come find out",
   defaultOpen = false,
+  startGate = false,
 }: StopDockProps) {
   const pathname = usePathname();
   const onHome = pathname === "/";
   const journeyReady = useJourneyHydrated();
   const [mapOpen, setMapOpen] = useState(defaultOpen);
-  // Deep-link /map opens wayfinding. Chat-head opens "you are here".
+  // Deep-link /map opens wayfinding. Chat-head opens "you are here" when known,
+  // otherwise "Start here" / next place.
   const [mapFocus, setMapFocus] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
   );
@@ -52,26 +62,28 @@ export function StopDock({
   const started = isJourneyStarted(progress);
   const next = getNextExpectedPoi(progress, nagaTour);
   const entrance = getEntrancePoi(nagaTour);
+  // Home before the walk: map is for orientation only. Come find out starts place 1.
+  const mapOrientationOnly = onHome && !started;
 
-  // Map head on every non-home screen, and on home after the walk begins.
-  const showMapHead = !onHome || (journeyReady && started);
-  // Only share the VT snapshot when geometry matches journey docks.
-  const shareTransition = showMapHead;
+  const stopSlug = pathname.startsWith("/s/")
+    ? pathname.slice(3).split("/")[0]
+    : null;
+  const currentStop = stopSlug ? (getPoiBySlug(stopSlug) ?? null) : null;
+  const currentUnsolved =
+    currentStop !== null && !progress.completed.includes(currentStop.id);
 
   function openMap(focus: MapFocus) {
     setMapFocus(focus);
     setMapOpen(true);
   }
 
-  // Wait for persisted progress before choosing layout. Journey screens keep
-  // the map column so width matches the hydrated dock; fresh home stays full-width.
+  // Wait for persisted progress before choosing the CTA. Map column stays so
+  // home and journey docks share the same geometry (no full-width flash).
   if (!journeyReady) {
     return (
       <StickyActionBar
         shareTransition={false}
-        map={
-          onHome ? undefined : <div className="h-14 w-14" aria-hidden />
-        }
+        map={<div className="h-14 w-14" aria-hidden />}
       >
         <div
           className="min-h-14 w-full rounded-md bg-[var(--accent)] shadow-[0_4px_16px_rgba(184,92,56,0.35)]"
@@ -82,7 +94,19 @@ export function StopDock({
   }
 
   let action: React.ReactNode;
-  if (complete || !next) {
+  if (startGate) {
+    action = (
+      <PrimaryButton href={`/s/${entrance.slug}`}>
+        Begin at the entrance
+      </PrimaryButton>
+    );
+  } else if (currentUnsolved) {
+    action = (
+      <PrimaryButton disabled icon="none">
+        Solve the quest first
+      </PrimaryButton>
+    );
+  } else if (complete || !next) {
     action = <PrimaryButton href="/finish">{finishLabel}</PrimaryButton>;
   } else if (!started) {
     action = (
@@ -98,17 +122,23 @@ export function StopDock({
 
   return (
     <StickyActionBar
-      shareTransition={shareTransition}
+      elevated={mapOpen}
       map={
-        showMapHead ? (
-          <MapBubble
-            open={mapOpen}
-            onOpenChange={setMapOpen}
-            focus={mapFocus}
-            onFocusChange={setMapFocus}
-            onTriggerOpen={() => openMap("here")}
-          />
-        ) : undefined
+        <MapBubble
+          open={mapOpen}
+          onOpenChange={setMapOpen}
+          focus={mapFocus}
+          onFocusChange={setMapFocus}
+          hideActions={mapOrientationOnly}
+          beginLabel={startLabel}
+          onTriggerOpen={() =>
+            openMap(
+              startGate || !(started && progress.lastScannedPoiId)
+                ? "next"
+                : "here",
+            )
+          }
+        />
       }
     >
       {action}

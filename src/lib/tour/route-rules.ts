@@ -23,7 +23,7 @@ export function isJourneyComplete(
   return tour.pois.every((poi) => progress.completed.includes(poi.id));
 }
 
-/** The first stop, in route order, that has not been visited yet. */
+/** The first stop, in route order, that has not been solved yet. */
 export function getNextExpectedPoi(
   progress: JourneyProgress,
   tour: Tour,
@@ -44,12 +44,34 @@ export function getEntrancePoi(tour: Tour): Poi {
 }
 
 /**
+ * Normalize a typed observation answer for comparison.
+ * Lower case, trim, strip light punctuation, collapse spaces.
+ */
+export function normalizeObservationAnswer(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** True when the typed answer matches any accepted answer for this place. */
+export function isObservationCorrect(poi: Poi, raw: string): boolean {
+  const guess = normalizeObservationAnswer(raw);
+  if (!guess) return false;
+  return poi.observation.answers.some(
+    (answer) => normalizeObservationAnswer(answer) === guess,
+  );
+}
+
+/**
  * Evaluate a stop visit (SPEC §4.2).
  *
- * Order is a suggestion, not a gate: any stop shows its full story and counts
- * toward completion. This keeps the walk forgiving when a visitor enters from
- * a side door, drifts in a crowd, or loses local progress by opening a link in
- * a different browser.
+ * Before the walk starts, only the entrance opens. After that, order is a
+ * suggestion: any later stop shows its full story. Arrival (scan) starts the
+ * walk and sets "you are here", but the place only counts as complete after
+ * the observation key is solved.
  *
  * Pure function: no framework imports, reusable by a future Expo app.
  */
@@ -66,20 +88,34 @@ export function evaluateScan(
     return { kind: "replay", poi };
   }
 
+  const entrance = getEntrancePoi(tour);
+  if (!isJourneyStarted(progress) && poi.id !== entrance.id) {
+    return { kind: "start_here", poi, entrance };
+  }
+
   const expected = getNextExpectedPoi(progress, tour);
   return {
     kind: "advance",
     poi,
-    progress: progress.completed.length + 1,
+    progress: progress.completed.length,
     suggested: expected && expected.id !== poi.id ? expected : null,
   };
 }
 
+/**
+ * Record arrival at a place. Does not mark the place complete; that waits
+ * for a correct observation answer (`applyObservationSuccess`).
+ * `start_here` leaves progress unchanged (teaser only; not a real visit).
+ */
 export function applyScanOutcome(
   progress: JourneyProgress,
   outcome: ScanOutcome,
-  tour: Tour,
+  _tour: Tour,
 ): JourneyProgress {
+  if (outcome.kind === "start_here") {
+    return progress;
+  }
+
   const next: JourneyProgress = {
     ...progress,
     lastScannedPoiId: outcome.poi.id,
@@ -89,15 +125,38 @@ export function applyScanOutcome(
     return next;
   }
 
-  const completed = progress.completed.includes(outcome.poi.id)
-    ? progress.completed
-    : [...progress.completed, outcome.poi.id];
+  return {
+    ...next,
+    startedAt: progress.startedAt ?? new Date().toISOString(),
+  };
+}
+
+/**
+ * Mark a place complete after a correct observation answer.
+ * Idempotent if the place is already in `completed`.
+ */
+export function applyObservationSuccess(
+  progress: JourneyProgress,
+  poi: Poi,
+  tour: Tour,
+): JourneyProgress {
+  if (progress.completed.includes(poi.id)) {
+    return {
+      ...progress,
+      lastScannedPoiId: poi.id,
+      startedAt: progress.startedAt ?? new Date().toISOString(),
+    };
+  }
+
+  const completed = [...progress.completed, poi.id];
   const finished =
     completed.length === tour.pois.length
       ? new Date().toISOString()
       : progress.finishedAt;
+
   return {
-    ...next,
+    ...progress,
+    lastScannedPoiId: poi.id,
     startedAt: progress.startedAt ?? new Date().toISOString(),
     completed,
     finishedAt: finished,

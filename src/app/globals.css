@@ -13,6 +13,8 @@
   --stone-light: #e8d8c8;
   --ceremonial: #c4a35a;
   --success: #4f6b4a;
+  /* Lighter success for text on dark quest cards. */
+  --success-on-dark: #b8d4b0;
   --danger: #b33b2e;
   /* Space for map chat-head + Next dock */
   --action-bar-space: 5.5rem;
@@ -118,6 +120,61 @@ body {
   from {
     width: 0;
   }
+}
+
+@keyframes observation-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.observation-shake {
+  animation: observation-shake 350ms var(--ease-out);
+}
+
+/*
+ * Tiny CSS-only celebration burst. ~12 spans, transform + opacity only,
+ * one shot then unmounted. No canvas, no library, no rAF loop.
+ */
+@keyframes quest-flare-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.quest-flare {
+  pointer-events: none;
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  z-index: 1;
+  height: 0;
+  width: 0;
+  overflow: visible;
+}
+
+.quest-flare-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--flare-color, var(--ceremonial));
+  animation: quest-flare-burst 900ms var(--ease-out) forwards;
+  animation-delay: var(--fd, 0ms);
 }
 
 @keyframes ring-fill {
@@ -510,6 +567,10 @@ body {
   .marker-ping {
     animation: none !important;
     opacity: 0;
+  }
+
+  .quest-flare {
+    display: none !important;
   }
 
   ::view-transition-old(*),

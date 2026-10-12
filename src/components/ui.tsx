@@ -1,5 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
+import { useHydrated } from "@/lib/use-hydrated";
+
+/** Match `.sheet-root` visibility hold so the dock stays above the fading blur. */
+const SHEET_CLOSE_MS = 320;
 
 type ProgressBarProps = {
   total: number;
@@ -47,23 +55,61 @@ export function ProgressDots(props: ProgressBarProps) {
  * right (Messenger-style). Progress lives on the map circle.
  *
  * When `map` is passed, its column is a fixed h-14 w-14 so the CTA width stays
- * stable. Fresh home omits `map` for a full-width CTA and skips the shared
- * view-transition name so Chrome does not morph full-width → map+CTA.
+ * stable (including Home).
  *
- * The map sheet is portaled to <body> so it is not trapped in a transform.
+ * Dock and map sheet both portal to <body> so z-index competes with the blur
+ * backdrop (page ViewTransition wrappers would otherwise trap the dock under it).
  */
 export function StickyActionBar({
   map,
   children,
   /** When false, dock is omitted from the shared view-transition snapshot. */
   shareTransition = true,
+  /**
+   * Lift above the map sheet backdrop so the map head + primary CTA stay
+   * sharp and tappable while the rest of the screen is blurred. Stays lifted
+   * through the close fade so the dock does not slip under the blur mid-animation.
+   */
+  elevated = false,
 }: {
   map?: React.ReactNode;
   children?: React.ReactNode;
   shareTransition?: boolean;
+  elevated?: boolean;
 }) {
+  const hydrated = useHydrated();
+  const [lifted, setLifted] = useState(elevated);
   const hasActions = Boolean(children);
   const hasMap = map != null;
+
+  useEffect(() => {
+    if (elevated) {
+      setLifted(true);
+      return;
+    }
+    const id = window.setTimeout(() => setLifted(false), SHEET_CLOSE_MS);
+    return () => window.clearTimeout(id);
+  }, [elevated]);
+
+  const dock = (
+    <div
+      className={`pointer-events-none fixed inset-x-0 bottom-0 ${lifted ? "z-50" : "z-30"}`}
+      style={
+        shareTransition ? { viewTransitionName: "stop-dock" } : undefined
+      }
+    >
+      <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+        {hasMap ? (
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center">
+            {map}
+          </div>
+        ) : null}
+        {hasActions ? (
+          <div className="flex min-w-0 flex-1 flex-col gap-3">{children}</div>
+        ) : null}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -72,23 +118,7 @@ export function StickyActionBar({
         style={{ height: "var(--action-bar-space, 5.5rem)" }}
         aria-hidden
       />
-      <div
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
-        style={
-          shareTransition ? { viewTransitionName: "stop-dock" } : undefined
-        }
-      >
-        <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-          {hasMap ? (
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center">
-              {map}
-            </div>
-          ) : null}
-          {hasActions ? (
-            <div className="flex min-w-0 flex-1 flex-col gap-3">{children}</div>
-          ) : null}
-        </div>
-      </div>
+      {hydrated ? createPortal(dock, document.body) : dock}
     </>
   );
 }
@@ -128,6 +158,7 @@ export function PrimaryButton({
   className = "",
   direction = "forward",
   icon,
+  disabled = false,
 }: {
   children: React.ReactNode;
   href?: string;
@@ -137,13 +168,14 @@ export function PrimaryButton({
   direction?: Direction;
   /** Arrow for page moves. Defaults to next/back from direction; submit stays plain. */
   icon?: ButtonIcon;
+  disabled?: boolean;
 }) {
   const resolvedIcon: ButtonIcon =
     icon ?? (type === "submit" ? "none" : direction === "back" ? "back" : "next");
-  const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] hover:shadow-[0_8px_22px_rgba(184,92,56,0.4)] hover:brightness-95 active:brightness-90 ${buttonMotion}`;
+  const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] hover:shadow-[0_8px_22px_rgba(184,92,56,0.4)] hover:brightness-95 active:brightness-90 disabled:pointer-events-none disabled:translate-y-0 disabled:scale-100 disabled:bg-[var(--stone-light)] disabled:text-[var(--muted-fg)] disabled:shadow-none disabled:hover:brightness-100 ${buttonMotion}`;
   const label = <ButtonLabel icon={resolvedIcon}>{children}</ButtonLabel>;
 
-  if (href) {
+  if (href && !disabled) {
     return (
       <Link
         href={href}
@@ -156,7 +188,12 @@ export function PrimaryButton({
   }
 
   return (
-    <button type={type} onClick={onClick} className={`${base} ${className}`.trim()}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${className}`.trim()}
+    >
       {label}
     </button>
   );

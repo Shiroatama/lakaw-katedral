@@ -1,3 +1,21 @@
+/**
+ * On-site clue that proves the pilgrim looked closely.
+ * Compared with `normalizeObservationAnswer` (trim, lower case, light cleanup).
+ */
+export type ObservationKey = {
+  /** Where to look. Shown after "Then", normal weight. */
+  look: string;
+  /** The ask itself. Shown bold. */
+  question: string;
+  /** Accepted answers after normalization. Keep several spellings. */
+  answers: string[];
+  /**
+   * What the answer means. Shown under "You are right" after a correct
+   * answer; the quest text above stays visible.
+   */
+  reveal: string;
+};
+
 export type Poi = {
   id: string;
   /** Readable URL segment, e.g. "mural" -> /s/mural. Typeable by hand. */
@@ -11,10 +29,10 @@ export type Poi = {
   landmark: string;
   /** What is here. Descriptive only; no instructions. */
   about: string;
-  /** Call to action in the dark card: pray, look, pause, and so on. */
+  /** Imperative quest in the dark card: pray, look, pause, and so on. */
   action: string;
-  /** One short interesting fact below the action. */
-  fact: string;
+  /** Look-and-answer clue. Solving it marks the place complete. */
+  observation: ObservationKey;
   map: { x: number; y: number };
 };
 
@@ -61,13 +79,19 @@ export type JourneyProgress = {
 };
 
 /**
- * Result of visiting a stop. Every stop always shows its full story; order is
- * a suggestion, not a gate (see SPEC §4.2).
+ * Result of arriving at a stop (scan). The place is marked complete only after
+ * the observation key is solved. Before the walk starts, only the entrance
+ * opens; later stops may be visited out of order (see SPEC §4.2).
  */
 export type ScanOutcome =
-  /** First visit to this stop. `suggested` is the stop the route expected instead, or null if in order. */
+  /**
+   * Walk not started and this is not the entrance. Show a place teaser
+   * (hero + about) and a start-at-entrance gate. Progress is unchanged.
+   */
+  | { kind: "start_here"; poi: Poi; entrance: Poi }
+  /** First arrival at this stop (not yet solved). `suggested` is the stop the route expected instead, or null if in order. */
   | { kind: "advance"; poi: Poi; progress: number; suggested: Poi | null }
-  /** Stop already visited. */
+  /** Stop already solved. */
   | { kind: "replay"; poi: Poi }
   /** Whole journey already finished. */
   | { kind: "completed"; poi: Poi };

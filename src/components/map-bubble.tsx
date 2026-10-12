@@ -28,8 +28,15 @@ type MapBubbleProps = {
   onFocusChange?: (focus: MapFocus) => void;
   /** Open on first render (e.g. deep link to /map) */
   defaultOpen?: boolean;
-  /** Sheet only (no chat-head). Used on home so the map never appears in the dock. */
+  /** Sheet only (no chat-head). Used when a parent opens the map without a dock button. */
   hideTrigger?: boolean;
+  /**
+   * Home before the walk: orientation only. No Scan / Skip, and the body
+   * urges the dock CTA (beginLabel) instead of "go scan" directions.
+   */
+  hideActions?: boolean;
+  /** Dock start CTA label, used in orientation copy when hideActions. */
+  beginLabel?: string;
   /**
    * Called when the chat-head is tapped. Parent should open with focus "here".
    * When omitted, the bubble opens itself with focus "here".
@@ -60,6 +67,8 @@ export function MapBubble({
   onFocusChange,
   defaultOpen = false,
   hideTrigger = false,
+  hideActions = false,
+  beginLabel = "Come find out",
   onTriggerOpen,
 }: MapBubbleProps) {
   const router = useRouter();
@@ -158,7 +167,7 @@ export function MapBubble({
       <button
         type="button"
         tabIndex={-1}
-        className="sheet-backdrop pointer-events-auto absolute inset-x-0 top-0 bottom-[var(--action-bar-space)] bg-[var(--foreground)]/35 backdrop-blur-[2px]"
+        className="sheet-backdrop pointer-events-auto absolute inset-0 bg-[var(--foreground)]/35 backdrop-blur-[2px]"
         aria-label="Close map"
         onClick={() => setOpen(false)}
       />
@@ -215,8 +224,12 @@ export function MapBubble({
             ) : (
               <>
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-fg)]">
-                  {started ? "Next place" : "Start here"} · {featured.order} of{" "}
-                  {total}
+                  {hideActions
+                    ? "Ready to begin"
+                    : started
+                      ? "Next place"
+                      : "Start here"}{" "}
+                  · {featured.order} of {total}
                 </p>
                 <h2
                   id={titleId}
@@ -256,7 +269,18 @@ export function MapBubble({
             />
           </div>
 
-          {!showingHere && featured && !complete ? (
+          {hideActions && featured && !complete ? (
+            <p
+              className="sheet-item text-base leading-relaxed text-[var(--foreground)]/90"
+              style={{ "--i": 3 } as React.CSSProperties}
+            >
+              The first place is marked on the map. Tap{" "}
+              <span className="font-semibold text-[var(--foreground)]">
+                {beginLabel}
+              </span>{" "}
+              below when you are ready to read the story.
+            </p>
+          ) : !showingHere && featured && !complete ? (
             <section
               className="sheet-item space-y-2"
               style={{ "--i": 3 } as React.CSSProperties}
@@ -275,7 +299,7 @@ export function MapBubble({
           ) : null}
         </div>
 
-        {!complete && !showingHere ? (
+        {!complete && !showingHere && !hideActions ? (
           <div
             className="sheet-item shrink-0 space-y-1.5 pt-3"
             style={{ "--i": 4 } as React.CSSProperties}
@@ -373,7 +397,7 @@ export function MapBubble({
             strokeWidth={1.75}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="relative z-10 text-[var(--foreground)]"
+            className="relative z-10 text-[var(--muted)]"
             aria-hidden
           >
             <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />

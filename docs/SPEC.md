@@ -81,9 +81,14 @@ Fixed route, in order (from the parish pilgrim guide; see [`PILGRIM-GUIDE.md`](.
 
 ```mermaid
 flowchart TD
-  A[Scan QR at a stop, or open /s/slug] --> B[Show that stop's story at once]
-  B --> C[Record the visit: start the journey if needed, progress +1]
-  C --> D{All 3 visited?}
+  A[Scan QR at a stop, or open /s/slug] --> S{Walk started?}
+  S -->|No, and not entrance| SH[Start at the entrance interstitial]
+  SH --> E1[Link to place 1]
+  E1 --> A
+  S -->|Yes, or is entrance| B[Show that stop's story]
+  B --> C[Record arrival: start the journey if needed]
+  C --> Q[Solve observation quest to mark complete]
+  Q --> D{All 3 solved?}
   D -->|No| E["Dock: Find place N"]
   E --> F[Wayfinding sheet: landmark in words + floor plan]
   F --> A
@@ -97,14 +102,17 @@ Home (`/`) is a landing and resume hub. It is not a required step: scanning the 
 
 ### 4.2 Route rules
 
-Order is a **suggestion, not a gate.** Every stop always shows its full story and counts toward completion. Reasons: with 3 stops a gate adds little, crowds and Mass make the exact route unpredictable, and progress can be lost when a QR opens in a different browser (see section 8). A forgiving rule means lost state is harmless.
+**Before the walk starts,** only the entrance opens. Opening place 2 or 3 with no `startedAt` shows a teaser of that stop (short hero, title, `about`), then a dark welcome card (what the walk is, three places, scan the QR at the main door) and the usual map + "Begin at the entrance" dock. No quest or progress; come back after starting at the entrance.
 
-1. **First visit to any stop:** show the story, mark it visited, set `startedAt` if this is the first visit. Scanning the entrance QR therefore *is* the start; there is no Start tap and no redirect.
-2. **Visiting a stop out of the suggested order:** same as rule 1, plus a one-line note: "The suggested route goes to stop N next. Any order works."
-3. **Re-visiting a stop:** show the story again; progress unchanged.
-4. **Journey complete (all stops visited):** any scan shows the story plus a slim "You have completed the journey" banner linking to Finish.
-5. **Next suggested stop:** the lowest-numbered unvisited stop. The dock action "Find place N" targets it.
-6. **"Find place N" never opens the next story.** It opens the wayfinding sheet (landmark + map). The next story opens by scanning that stop's QR (or, in trial mode only, the Skip button).
+**After the walk has started,** order is a **suggestion, not a gate.** Any later stop shows its full story. Reasons: crowds and Mass make the exact route unpredictable, and progress can be lost when a QR opens in a different browser (see section 8). A forgiving mid-walk rule means lost state is harmless once they have begun.
+
+1. **Unstarted + place 2/3 (or any non-entrance):** show the start interstitial only. Do not record a visit.
+2. **First visit to the entrance (or any stop after the walk has started):** show the story, set `startedAt` if needed. The place counts as complete only after the observation key is solved. Scanning the entrance QR therefore *is* the start.
+3. **Visiting a stop out of the suggested order (walk already started):** same as rule 2, plus a one-line note: "Place N is next on the path. But you can see the places in any order."
+4. **Re-visiting a stop:** show the story again; progress unchanged.
+5. **Journey complete (all stops solved):** any scan shows the story; dock offers Finish.
+6. **Next suggested stop:** the lowest-numbered unsolved stop. The dock action "Find place N" targets it.
+7. **"Find place N" never opens the next story.** It opens the wayfinding sheet (landmark + map). The next story opens by scanning that stop's QR (or, in trial mode only, the Skip button).
 
 ## 5. Screens
 
@@ -113,11 +121,12 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 1. **Home (`/`):** landing and resume hub (welcome, continue, or complete). Not required on site; the entrance QR skips it.
 2. **Stop detail** (`/s/[slug]`): hero photo, title, short story, "Did you know?", bottom dock with the map button (progress ring) and one primary action: **Find place N** (or **Finish**).
 3. **Wayfinding sheet (map):** next stop's title and a plain-words landmark, SVG floor plan (completed / here / next). Opens from the map button or "Find place N". Available anytime. Trial mode adds a "Skip the scan" button.
-4. **Out-of-order note:** a one-line banner on a stop visited out of the suggested order. No blocking screen.
-5. **Finish:** reward first (success check + thank-you), then a compact quiet closing moment, then **inline** Help the parish (custom amount only, no presets), with **Start over** below it. No stop checklist. No "Not now" button.
-6. **Donate route:** redirects to Finish.
-7. **Thank you:** thanks; receipt when gateway is live.
-8. **Offline / error state:** tour readable after start; donate needs network.
+4. **Start-at-entrance interstitial:** when the walk has not started and someone opens place 2+, show that stop's hero + about only, then a warm gate note and a primary link to place 1.
+5. **Out-of-order note:** a one-line banner on a stop visited out of the suggested order after the walk has started. No blocking screen.
+6. **Finish:** reward first (success check + thank-you), then a compact quiet closing moment, then **inline** Help the parish (custom amount only, no presets), with **Start over** below it. No stop checklist. No "Not now" button.
+7. **Donate route:** redirects to Finish.
+8. **Thank you:** thanks; receipt when gateway is live.
+9. **Offline / error state:** tour readable after start; donate needs network.
 
 ## 6. Map
 

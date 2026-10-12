@@ -52,11 +52,11 @@ function StewardCredit() {
         <Image
           src={steward.logo}
           alt=""
-          width={36}
-          height={36}
+          width={503}
+          height={868}
           unoptimized
           priority
-          className="size-9 shrink-0 object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
+          className="h-11 w-auto shrink-0 object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
         />
         <span className="flex flex-col gap-[0.15em] font-display text-sm leading-none text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
           <span className="[text-box-trim:trim-both] [text-box-edge:cap_alphabetic]">

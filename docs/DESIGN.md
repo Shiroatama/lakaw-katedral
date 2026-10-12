@@ -98,8 +98,8 @@ flowchart LR
   Don --> TY["Thank you"]
 ```
 
-1. **Order is a suggestion:** any stop shows its full story and counts. Out-of-order visits get a one-line note, never a block.
-2. **Scan is the start:** the entrance QR opens stop 1 directly. No Start tap, no redirect.
+1. **Entrance first:** if the walk has not started, place 2+ shows a start interstitial only (no story teaser). After the walk has started, order is a suggestion: any stop shows its full story; out-of-order visits get a one-line note, never a block.
+2. **Scan is the start:** the entrance QR opens stop 1 directly. No Start tap required from Home.
 3. **"Find place N" is wayfinding, not navigation:** it opens the sheet with a plain-words landmark and the floor plan. It never opens the next story.
 4. **Finish, then what is next, then the ask:** thank the walker first, then a quiet reflection, then the gift.
 5. **Offline:** the whole tour is cached when the service worker installs. Donate needs network. No offline payment queue in MVP.
@@ -121,13 +121,13 @@ Not a required step on site (the entrance QR goes straight to stop 1). Used by p
 - Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
 - Invite: "Discover the heritage. Encounter the saints. Meet Christ." (no question stack)
 - No cathedral-name headline, no QR mention
-- Dock: **Come find out** opens place 1 immediately. The map chat-head never appears on Home.
+- Dock: map chat-head + **Come find out** (opens place 1). Tap the map to see where place 1 is.
 - No stop list, schedule, stats, or address block in the first viewport
 
 **In progress**
 
 - Brand quieter; "Your next stop is {title}"
-- Dock: map chat-head + **Find place N**
+- Dock: map chat-head + **Find place N**. Map shows where you last were, or the next place.
 - Quiet destructive: Start over (confirm, then clear journey)
 
 **Complete**
@@ -157,11 +157,11 @@ MVP: no audio, share, or save.
 
 ### 5.4 Wayfinding map (chat bubble)
 
-- Circular **Map** chat-head beside the primary CTA (Messenger-style) on journey screens only. **Never on Home.**
+- Circular **Map** chat-head beside the primary CTA (Messenger-style) on every screen, including Home
 - Progress `done/total` and ring fill live on the circle
-- Fresh start (Home): **Come find out** opens place 1 immediately.
-- On journey screens: tap the map chat-head **or** **Find place N** to open a tall map panel (rounded, height from dock up to the top safe area):
-  1. Next stop card: stop number, title, **landmark** in plain words, "Scan the QR code there to read the story."
+- Fresh start (Home): **Come find out** opens place 1. Map chat-head opens "Ready to begin" with place 1 on the floor plan and a short nudge to tap **Come find out** (no Scan / Skip, no go-scan directions).
+- Tap the map chat-head **or** **Find place N** to open a tall map panel (rounded, height from dock up to the top safe area):
+  1. Stop card: "You are here", or next/start number + title, **landmark** in plain words, "Scan the QR code there to read the story."
   2. Floor plan (completed / here / next)
 - Dock stays visible under the bubble (backdrop stops above the dock)
 - `/map` is a deep-link fallback that opens the same bubble
@@ -189,19 +189,26 @@ No stop checklist: progress already says all places are done. No "Not now" butto
 - Receipt-when-live copy only (no fake receipt UI)
 - Home + Map
 
-### 5.8 Out-of-order visit
+### 5.8 Start at the entrance (unstarted + place 2+)
 
-- Full story, always. Order is a suggestion.
+- Place first: short cropped hero (finish-style 2:1 window over a 4:3 image), title, `about`.
+- Then the dark quest-style card (two paragraphs max): welcome headline, what Lakaw Katedral is, three places on the walk, scan the QR at the main door + tap the map.
+- Same bottom dock as other journey screens: map chat-head (opens the sheet on place 1) + "Begin at the entrance".
+- No observation quest or progress. Progress unchanged.
+
+### 5.9 Out-of-order visit (walk already started)
+
+- Full story. Order is a suggestion after the walk has begun.
 - One-line note: "Place N is next on the path. But you can see the places in any order. Enjoy this one!"
-- Dock "Find place N" points at the lowest unvisited stop.
+- Dock "Find place N" points at the lowest unsolved stop.
 
-### 5.9 Completed re-visit
+### 5.10 Completed re-visit
 
 - Full stop replay
 - Slim banner: "You finished the walk." with link to Finish
 - No blocking modal every time
 
-### 5.10 Offline (`/~offline`)
+### 5.11 Offline (`/~offline`)
 
 - Shown only if a page was never cached (for example, a very first visit with no signal)
 - Title "No internet". Explain: the walk saves on your phone after the first load; giving to the parish needs internet
