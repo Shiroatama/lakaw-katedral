@@ -6,14 +6,9 @@ import { useJourneyStore } from "@/lib/tour";
 import { stubPaymentProvider } from "@/lib/payments/provider";
 import { PrimaryButton } from "@/components/ui";
 
-type ParishGiftProps = {
-  /** Extra action under the give button (e.g. Start over) */
-  footer?: React.ReactNode;
-};
-
 const AMOUNT_TEMPLATES = [20, 50, 100] as const;
 
-export function ParishGift({ footer }: ParishGiftProps) {
+export function ParishGift() {
   const router = useRouter();
   const pathname = usePathname();
   const markDonated = useJourneyStore((s) => s.markDonated);
@@ -51,22 +46,19 @@ export function ParishGift({ footer }: ParishGiftProps) {
       aria-describedby="parish-gift-description"
     >
       <div className="space-y-1">
-        <h2
-          id="parish-gift-heading"
-          className="font-display text-xl text-[var(--foreground)]"
-        >
+        <h2 id="parish-gift-heading" className="text-base font-bold">
           Help the parish
         </h2>
         <p
           id="parish-gift-description"
-          className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]"
+          className="max-w-sm text-sm leading-relaxed text-[var(--accent-fg)]/90"
         >
           Your gift helps care for this church and the people who come here.
         </p>
       </div>
 
       <fieldset className="space-y-1.5">
-        <legend className="text-sm font-medium text-[var(--foreground)]">
+        <legend className="text-sm font-medium text-[var(--accent-fg)]">
           How much?
         </legend>
         <div className="flex flex-wrap gap-1.5">
@@ -81,7 +73,7 @@ export function ParishGift({ footer }: ParishGiftProps) {
                 className={`inline-flex min-h-11 min-w-[4.5rem] items-center justify-center rounded-md border px-5 py-2.5 text-sm font-semibold leading-none transition-[transform,background-color,border-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
                   selected
                     ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--accent)]/50"
+                    : "border-white/20 bg-white/10 text-[var(--accent-fg)] hover:border-white/40"
                 }`}
               >
                 ₱{value}
@@ -92,11 +84,11 @@ export function ParishGift({ footer }: ParishGiftProps) {
       </fieldset>
 
       <label className="block space-y-1.5">
-        <span className="text-sm font-medium text-[var(--foreground)]">
+        <span className="text-sm font-medium text-[var(--accent-fg)]">
           Or type your own
         </span>
-        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.15)]">
-          <span className="text-sm font-semibold leading-none text-[var(--muted-fg)]">
+        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.25)]">
+          <span className="text-sm font-semibold leading-none text-[var(--accent-fg)]/45">
             ₱
           </span>
           <input
@@ -105,17 +97,16 @@ export function ParishGift({ footer }: ParishGiftProps) {
             pattern="[0-9]+([.][0-9]{1,2})?"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-transparent text-sm font-semibold leading-none outline-none"
+            className="w-full bg-transparent text-sm font-semibold leading-none text-[var(--accent-fg)] outline-none placeholder:text-[var(--accent-fg)]/45"
             placeholder="0"
           />
         </div>
       </label>
 
-      <div className="flex flex-col gap-2 pt-0.5">
+      <div className="pt-0.5">
         <PrimaryButton type="submit">
-          {submitting ? "Please wait…" : "Give (coming soon)"}
+          {submitting ? "Please wait…" : "Donate"}
         </PrimaryButton>
-        {footer}
       </div>
     </form>
   );

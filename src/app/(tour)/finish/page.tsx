@@ -78,61 +78,64 @@ export default function FinishPage() {
     <>
       <PageTransition>
         <main className="flex flex-1 flex-col gap-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-0">
-          <header className="fade-up -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] bg-[var(--background)]">
-            <div className="relative">
-              {/* Shorter window only: image stays at 4:3 scale, top/bottom are clipped. */}
-              <div className="relative aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">
-                <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
-                  {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
-                  <Image
-                    src="/img/finish-welcome.webp"
-                    alt="Naga Metropolitan Cathedral and the plaza in front of it"
-                    fill
-                    unoptimized
-                    className="hero-settle object-cover object-center"
-                    sizes="100vw"
-                    priority
-                  />
+          <div className="space-y-5">
+            <header className="fade-up -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] bg-[var(--background)]">
+              <div className="relative">
+                {/* Shorter window only: image stays at 4:3 scale, top/bottom are clipped. */}
+                <div className="relative aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">
+                  <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
+                    {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
+                    <Image
+                      src="/img/finish-welcome.webp"
+                      alt="Naga Metropolitan Cathedral and the plaza in front of it"
+                      fill
+                      unoptimized
+                      className="hero-settle object-cover object-center"
+                      sizes="100vw"
+                      priority
+                    />
+                  </div>
+                </div>
+                <div
+                  className="pop-in absolute bottom-0 left-1/2 z-10 flex h-16 w-16 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[0_8px_24px_rgba(79,107,74,0.35)] ring-4 ring-[var(--background)]"
+                  style={{ "--delay": "80ms" } as React.CSSProperties}
+                  aria-hidden
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
               </div>
-              <div
-                className="pop-in absolute bottom-0 left-1/2 z-10 flex h-16 w-16 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[0_8px_24px_rgba(79,107,74,0.35)] ring-4 ring-[var(--background)]"
-                style={{ "--delay": "80ms" } as React.CSSProperties}
-                aria-hidden
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-8 w-8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="space-y-2 px-5 pb-0 pt-12 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--success)]">
+                  Walk complete
+                </p>
+                <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
+                  We are glad you came
+                </h1>
+                <p className="mx-auto max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
+                  Thank you for learning about the Cathedral. We hope the walk
+                  stays with you.
+                </p>
+              </div>
+            </header>
+
+            <div className="fade-up space-y-2">
+              <aside className="rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]">
+                <ParishGift />
+              </aside>
+              <div className="flex justify-center">
+                <StartOver />
               </div>
             </div>
-            <div className="space-y-2 px-5 pb-6 pt-12 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--success)]">
-                Walk complete
-              </p>
-              <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
-                We are glad you came
-              </h1>
-              <p className="mx-auto max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
-                Thank you for learning about the Cathedral. We hope the walk
-                stays with you.
-              </p>
-            </div>
-            <div
-              className="mx-5 h-px bg-[var(--border)]"
-              aria-hidden
-            />
-          </header>
-
-          <div className="fade-up">
-            <ParishGift footer={<StartOver />} />
           </div>
 
           <section
