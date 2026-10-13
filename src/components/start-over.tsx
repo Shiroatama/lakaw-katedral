@@ -130,10 +130,12 @@ export function StartOver({ className = "" }: { className?: string }) {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`mx-auto inline-flex min-h-12 items-center justify-center gap-1.5 px-4 text-sm text-[var(--danger)] transition-opacity duration-200 hover:opacity-70 active:opacity-50 ${className}`.trim()}
+        className={`mx-auto inline-flex min-h-12 items-center justify-center px-4 text-sm transition-colors duration-200 active:opacity-70 ${
+          className ||
+          "text-[var(--muted-fg)] hover:text-[var(--foreground)]"
+        }`.trim()}
       >
-        <RepeatIcon className="h-3.5 w-3.5" />
-        <span className="underline underline-offset-2">Start over</span>
+        Start over
       </button>
       {hydrated ? createPortal(dialog, document.body) : null}
     </>

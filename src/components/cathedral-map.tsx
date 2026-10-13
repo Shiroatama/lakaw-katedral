@@ -4,13 +4,23 @@ import { getOrderedPois, useJourneyStore } from "@/lib/tour";
 
 type CathedralMapProps = {
   highlightNext?: boolean;
+  variant?: "vector" | "interior";
 };
 
-export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
+/** Squared twin-tower footprint from the aerial top view. */
+const FOOTPRINT =
+  "M105 42 H175 L187 56 V84 H204 V122 H192 V270 H214 V326 H176 V338 H104 V326 H66 V270 H88 V122 H76 V84 H93 V56 Z";
+
+export function CathedralMap({
+  highlightNext = true,
+  variant = "vector",
+}: CathedralMapProps) {
   const completed = useJourneyStore((s) => s.completed);
   const lastScannedPoiId = useJourneyStore((s) => s.lastScannedPoiId);
   const pois = getOrderedPois();
-  const nextPoi = pois.find((p) => !completed.includes(p.id)) ?? null;
+  const nextPoi = pois.find((poi) => !completed.includes(poi.id)) ?? null;
+  const currentPoi = pois.find((p) => p.id === lastScannedPoiId) ?? null;
+  const featuredPoi = highlightNext ? nextPoi : currentPoi;
 
   return (
     <div className="w-full">
@@ -18,7 +28,11 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
         viewBox="0 0 280 360"
         className="h-auto w-full overflow-visible"
         role="img"
-        aria-label="Simple map of Naga Metropolitan Cathedral"
+        aria-label={
+          featuredPoi
+            ? `Map of Naga Metropolitan Cathedral. Place ${featuredPoi.order}, ${featuredPoi.shortTitle}, is highlighted.`
+            : "Map of Naga Metropolitan Cathedral"
+        }
       >
         <defs>
           <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
@@ -30,86 +44,39 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
               floodOpacity="0.08"
             />
           </filter>
+          <clipPath id="mapFrame">
+            <rect width="280" height="360" rx="16" />
+          </clipPath>
         </defs>
 
         {/* Courtyard / outside */}
         <rect width="280" height="360" fill="var(--background)" rx="16" />
 
-        {/* Building mass: Latin-cross basilica */}
-        <g filter="url(#softShadow)">
-          {/* Nave + aisles */}
-          <path
-            d="M70 95
-               H100 V55 H180 V95 H210
-               V300
-               H180 V320 H100 V300 H70 Z"
-            fill="var(--stone-light)"
-            stroke="var(--stone)"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
+        {variant === "interior" ? (
+          <image
+            href="/img/cathedral-painted-interior.jpg"
+            width="280"
+            height="360"
+            preserveAspectRatio="xMidYMid slice"
+            clipPath="url(#mapFrame)"
           />
-          {/* Sanctuary / apse */}
-          <path
-            d="M100 55 Q140 18 180 55 Z"
-            fill="var(--stone-light)"
-            stroke="var(--stone)"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-          />
-        </g>
+        ) : (
+          <>
+            <g filter="url(#softShadow)">
+              <path
+                d={FOOTPRINT}
+                fill="#E8D8C8"
+                stroke="var(--stone)"
+                strokeWidth="3"
+                strokeLinejoin="round"
+              />
+            </g>
+          </>
+        )}
 
-        {/* Inner nave floor */}
-        <rect
-          x="108"
-          y="88"
-          width="64"
-          height="200"
-          fill="var(--surface)"
-          opacity="0.9"
-        />
-
-        {/* Column rhythm */}
-        {[110, 150, 190, 230].map((y) => (
-          <g key={y}>
-            <circle cx="118" cy={y} r="3.5" fill="var(--stone)" opacity="0.45" />
-            <circle cx="162" cy={y} r="3.5" fill="var(--stone)" opacity="0.45" />
-          </g>
-        ))}
-
-        {/* Altar platform */}
-        <rect
-          x="118"
-          y="62"
-          width="44"
-          height="18"
-          rx="2"
-          fill="var(--ceremonial)"
-          opacity="0.35"
-        />
         <text
           x="140"
-          y="74"
-          textAnchor="middle"
-          fill="var(--muted-fg)"
-          fontSize="9"
-          fontFamily="var(--font-body), sans-serif"
-        >
-          Altar
-        </text>
-
-        {/* Entrance threshold */}
-        <rect
-          x="118"
-          y="300"
-          width="44"
-          height="14"
-          rx="2"
-          fill="var(--accent)"
-          opacity="0.28"
-        />
-        <text
-          x="140"
-          y="342"
+          y="352"
           textAnchor="middle"
           fill="var(--muted-fg)"
           fontSize="10"
@@ -119,6 +86,17 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
         </text>
 
         {/* Walking route */}
+        {variant === "interior" ? (
+          <polyline
+            points={pois.map((p) => `${p.map.x},${p.map.y}`).join(" ")}
+            fill="none"
+            stroke="var(--surface)"
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.82"
+          />
+        ) : null}
         <polyline
           points={pois.map((p) => `${p.map.x},${p.map.y}`).join(" ")}
           fill="none"
@@ -126,32 +104,33 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeDasharray="5 6"
-          opacity="0.55"
+          strokeDasharray="5 7"
+          opacity="0.62"
         />
 
         {pois.map((poi) => {
           const isDone = completed.includes(poi.id);
           const isCurrent = lastScannedPoiId === poi.id;
-          const isNext = highlightNext && nextPoi?.id === poi.id;
-          const labelX = poi.map.x + 46;
-          const fill = isDone
-            ? "var(--success)"
-            : isCurrent
-              ? "var(--foreground)"
+          const isNext = nextPoi?.id === poi.id;
+          // Green = here or finished, orange = next, gray = not unlocked.
+          const fill =
+            isCurrent || isDone
+              ? "var(--success)"
               : isNext
                 ? "var(--accent)"
-                : "var(--stone)";
+                : "var(--muted)";
+          const isHighlighted =
+            (highlightNext && isNext) || (!highlightNext && isCurrent);
 
           return (
             <g key={poi.id}>
-              {isNext ? (
+              {isHighlighted ? (
                 <circle
                   cx={poi.map.x}
                   cy={poi.map.y}
-                  r="16"
+                  r="17"
                   fill="none"
-                  stroke="var(--accent)"
+                  stroke={fill}
                   strokeWidth="2"
                   className="marker-ping"
                 />
@@ -163,16 +142,17 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
                 <circle
                   cx={poi.map.x}
                   cy={poi.map.y}
-                  r="11"
+                  r="12"
                   fill={fill}
                   stroke="var(--surface)"
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                   style={{ transition: "fill 400ms var(--ease-out)" }}
                 />
                 <text
                   x={poi.map.x}
-                  y={poi.map.y + 4}
+                  y={poi.map.y}
                   textAnchor="middle"
+                  dominantBaseline="central"
                   fill="var(--accent-fg)"
                   fontSize="10"
                   fontWeight="700"
@@ -181,19 +161,6 @@ export function CathedralMap({ highlightNext = true }: CathedralMapProps) {
                   {poi.order}
                 </text>
               </g>
-              <text
-                className="map-label"
-                style={{ "--i": poi.order - 1 } as React.CSSProperties}
-                x={labelX}
-                y={poi.map.y + 4}
-                fill="var(--foreground)"
-                fontSize="11"
-                fontFamily="var(--font-body), sans-serif"
-              >
-                {poi.shortTitle}
-                {isCurrent ? " · here" : ""}
-                {isNext && !isCurrent ? " · next" : ""}
-              </text>
             </g>
           );
         })}

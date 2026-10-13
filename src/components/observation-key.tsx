@@ -6,6 +6,7 @@ import {
   getNextExpectedPoi,
   isJourneyComplete,
   nagaTour,
+  nextPlaceCtaLabel,
   useJourneyStore,
 } from "@/lib/tour";
 
@@ -24,18 +25,18 @@ function asContinuation(text: string) {
  * Kept tiny so low-end phones only paint a short CSS animation once.
  */
 const FLARE_BITS = [
-  { fx: "-28px", fy: "-42px", fr: "-40deg", color: "var(--success-on-dark)", fd: "0ms" },
+  { fx: "-28px", fy: "-42px", fr: "-40deg", color: "var(--success)", fd: "0ms" },
   { fx: "8px", fy: "-48px", fr: "18deg", color: "var(--ceremonial)", fd: "40ms" },
   { fx: "36px", fy: "-36px", fr: "55deg", color: "var(--accent)", fd: "20ms" },
   { fx: "-42px", fy: "-18px", fr: "-70deg", color: "var(--ceremonial)", fd: "60ms" },
-  { fx: "48px", fy: "-12px", fr: "80deg", color: "var(--success-on-dark)", fd: "30ms" },
+  { fx: "48px", fy: "-12px", fr: "80deg", color: "var(--success)", fd: "30ms" },
   { fx: "-18px", fy: "-56px", fr: "-12deg", color: "var(--accent)", fd: "70ms" },
   { fx: "22px", fy: "-58px", fr: "28deg", color: "var(--ceremonial)", fd: "10ms" },
-  { fx: "-50px", fy: "-34px", fr: "-95deg", color: "var(--success-on-dark)", fd: "50ms" },
+  { fx: "-50px", fy: "-34px", fr: "-95deg", color: "var(--success)", fd: "50ms" },
   { fx: "54px", fy: "-30px", fr: "100deg", color: "var(--accent)", fd: "80ms" },
   { fx: "0px", fy: "-62px", fr: "8deg", color: "var(--ceremonial)", fd: "25ms" },
   { fx: "-34px", fy: "-50px", fr: "-48deg", color: "var(--accent)", fd: "55ms" },
-  { fx: "40px", fy: "-46px", fr: "62deg", color: "var(--success-on-dark)", fd: "35ms" },
+  { fx: "40px", fy: "-46px", fr: "62deg", color: "var(--success)", fd: "35ms" },
 ] as const;
 
 /**
@@ -82,22 +83,22 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
   const proceedHint = journeyDone
     ? "You can finish the walk now. Tap Finish below when you are ready."
     : next
-      ? `You can go on. Tap Find place ${next.order} below when you are ready.`
+      ? `You can go on. Tap "${nextPlaceCtaLabel(next)}" below when you are ready.`
       : "You can go on when you are ready.";
 
   return (
     <aside
-      className={`rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]${shake ? " observation-shake" : ""}`}
+      className={`border-l-[3px] border-[var(--accent)] py-1 pl-4${shake ? " observation-shake" : ""}`}
     >
-      <h2 className="text-base font-bold">Your quest</h2>
+      <h2 className="sr-only">Your quest</h2>
 
-      <div className="mt-3 space-y-3">
-        <p className="text-sm leading-relaxed text-[var(--accent-fg)]/90">
+      <div className="space-y-3">
+        <p className="text-base leading-relaxed text-[var(--foreground)]/90">
           {poi.action}
         </p>
-        <p className="text-sm leading-relaxed text-[var(--accent-fg)]/90">
+        <p className="text-base leading-relaxed text-[var(--foreground)]/90">
           Then {asContinuation(poi.observation.look)}{" "}
-          <span className="font-semibold text-[var(--accent-fg)]">
+          <span className="font-semibold text-[var(--foreground)]">
             {poi.observation.question}
           </span>
         </p>
@@ -124,13 +125,13 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
               ))}
             </div>
           ) : null}
-          <p className="text-sm font-semibold text-[var(--success-on-dark)]">
+          <p className="text-sm font-semibold text-[var(--success)]">
             You are right.
           </p>
-          <p className="text-sm leading-relaxed text-[var(--accent-fg)]/90">
+          <p className="text-base leading-relaxed text-[var(--foreground)]/90">
             {poi.observation.reveal}
           </p>
-          <p className="text-sm leading-relaxed text-[var(--accent-fg)]/80">
+          <p className="text-sm leading-relaxed text-[var(--muted-fg)]">
             {proceedHint}
           </p>
         </div>
@@ -156,7 +157,7 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
               if (error) setError(null);
             }}
             placeholder="Type your answer"
-            className="min-h-12 w-full rounded-md border border-white/20 bg-white/10 px-3 text-base text-[var(--accent-fg)] outline-none ring-[var(--accent)] placeholder:text-[var(--accent-fg)]/45 focus:ring-2"
+            className="min-h-12 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-base text-[var(--foreground)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted-fg)]/60 focus:ring-2"
             aria-invalid={error ? true : undefined}
           />
 
@@ -174,7 +175,7 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
             type="submit"
             className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
           >
-            Check answer
+            Submit answer
           </button>
         </form>
       )}

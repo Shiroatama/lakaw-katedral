@@ -46,7 +46,7 @@ Stop URLs (readable on purpose, so they can be typed by hand):
 
 ### QR codes
 
-- Print sheet: [http://localhost:3000/print/qr](http://localhost:3000/print/qr) (set `NEXT_PUBLIC_SITE_URL` to the public or LAN origin before printing).
+- Print sheet: [http://localhost:3000/qr](http://localhost:3000/qr) (set `NEXT_PUBLIC_SITE_URL` to the public or LAN origin before printing).
 - In-app scanner: `/scan` (also from the map sheet: **Scan with this phone**). Needs camera permission. On a phone, prefer HTTPS or `localhost`; plain `http://192.168…` may block the camera.
 - Phone camera app still works: each printed code is a normal `/s/<slug>` link.
 

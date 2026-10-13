@@ -68,10 +68,11 @@ export function isObservationCorrect(poi: Poi, raw: string): boolean {
 /**
  * Evaluate a stop visit (SPEC §4.2).
  *
- * Before the walk starts, only the entrance opens. After that, order is a
- * suggestion: any later stop shows its full story. Arrival (scan) starts the
- * walk and sets "you are here", but the place only counts as complete after
- * the observation key is solved.
+ * Places open in order. Only the next unsolved place shows its full quest.
+ * Opening any other unsolved place shows a teaser and a gate toward the
+ * expected stop. Arrival at the expected place starts the walk (if needed)
+ * and sets "you are here"; the place counts as complete only after the
+ * observation key is solved.
  *
  * Pure function: no framework imports, reusable by a future Expo app.
  */
@@ -88,17 +89,19 @@ export function evaluateScan(
     return { kind: "replay", poi };
   }
 
-  const entrance = getEntrancePoi(tour);
-  if (!isJourneyStarted(progress) && poi.id !== entrance.id) {
-    return { kind: "start_here", poi, entrance };
+  const expected = getNextExpectedPoi(progress, tour);
+  if (!expected || expected.id !== poi.id) {
+    return {
+      kind: "start_here",
+      poi,
+      expected: expected ?? getEntrancePoi(tour),
+    };
   }
 
-  const expected = getNextExpectedPoi(progress, tour);
   return {
     kind: "advance",
     poi,
     progress: progress.completed.length,
-    suggested: expected && expected.id !== poi.id ? expected : null,
   };
 }
 
@@ -133,7 +136,8 @@ export function applyScanOutcome(
 
 /**
  * Mark a place complete after a correct observation answer.
- * Idempotent if the place is already in `completed`.
+ * Only the next unsolved place in order can be completed. Idempotent if the
+ * place is already in `completed`.
  */
 export function applyObservationSuccess(
   progress: JourneyProgress,
@@ -146,6 +150,11 @@ export function applyObservationSuccess(
       lastScannedPoiId: poi.id,
       startedAt: progress.startedAt ?? new Date().toISOString(),
     };
+  }
+
+  const expected = getNextExpectedPoi(progress, tour);
+  if (!expected || expected.id !== poi.id) {
+    return progress;
   }
 
   const completed = [...progress.completed, poi.id];

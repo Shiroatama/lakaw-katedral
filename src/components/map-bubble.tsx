@@ -55,7 +55,7 @@ function landmarkSteps(landmark: string): string[] {
 /**
  * Circular map chat-head with a progress ring. Opens a sheet above the dock:
  * floor plan, either where you are now (chat-head) or directions to the next
- * place (Find place N), plus trial-mode Skip.
+ * place (Next: the mural), plus trial-mode Skip.
  *
  * The sheet is always mounted (portaled to <body>) and driven by `data-open`.
  * See `.sheet-*` in globals.css.
@@ -68,7 +68,7 @@ export function MapBubble({
   defaultOpen = false,
   hideTrigger = false,
   hideActions = false,
-  beginLabel = "Come find out",
+  beginLabel = "Start the walk",
   onTriggerOpen,
 }: MapBubbleProps) {
   const router = useRouter();
@@ -78,6 +78,7 @@ export function MapBubble({
   const [focusInternal, setFocusInternal] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
   );
+  const [mapVariant, setMapVariant] = useState<"vector" | "interior">("vector");
   const open = openControlled ?? openInternal;
   const focus = focusControlled ?? focusInternal;
 
@@ -264,9 +265,33 @@ export function MapBubble({
             className="sheet-item"
             style={{ "--i": 2 } as React.CSSProperties}
           >
-            <CathedralMap
-              highlightNext={!complete && !showingHere && featured !== null}
-            />
+            <div className="relative">
+              <div
+                className="absolute right-2 top-2 z-10 inline-flex rounded-sm bg-[var(--surface)]/70 p-px ring-1 ring-[var(--border)]/60 backdrop-blur-[1px]"
+                role="group"
+                aria-label="Map appearance"
+              >
+                {(["vector", "interior"] as const).map((variant) => (
+                  <button
+                    key={variant}
+                    type="button"
+                    aria-pressed={mapVariant === variant}
+                    onClick={() => setMapVariant(variant)}
+                    className={`min-h-6 rounded-sm px-1.5 text-[9px] font-medium capitalize tracking-wide transition-[background-color,color] duration-200 ${
+                      mapVariant === variant
+                        ? "bg-[var(--stone-light)]/80 text-[var(--muted-fg)]"
+                        : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {variant}
+                  </button>
+                ))}
+              </div>
+              <CathedralMap
+                highlightNext={!complete && !showingHere && featured !== null}
+                variant={mapVariant}
+              />
+            </div>
           </div>
 
           {hideActions && featured && !complete ? (
@@ -274,11 +299,11 @@ export function MapBubble({
               className="sheet-item text-base leading-relaxed text-[var(--foreground)]/90"
               style={{ "--i": 3 } as React.CSSProperties}
             >
-              The first place is marked on the map. Tap{" "}
+              Use this map to find your way. At each place, read and look. Tap{" "}
               <span className="font-semibold text-[var(--foreground)]">
                 {beginLabel}
               </span>{" "}
-              below when you are ready to read the story.
+              when you are ready.
             </p>
           ) : !showingHere && featured && !complete ? (
             <section

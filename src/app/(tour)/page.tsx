@@ -7,6 +7,7 @@ import {
   isJourneyComplete,
   isJourneyStarted,
   nagaTour,
+  nextPlaceCtaLabel,
   showHomeAtOnce,
   useJourneyStore,
 } from "@/lib/tour";
@@ -179,7 +180,7 @@ export default function HomePage() {
           Thank you for walking with us. You can help the parish if you like.
         </p>
         <div className="fade-up mt-5" style={delay(450)}>
-          <StartOver />
+          <StartOver className="text-white/70 hover:text-white" />
         </div>
       </>
     );
@@ -195,11 +196,13 @@ export default function HomePage() {
           style={delay(350)}
         >
           {next
-            ? `Your next place is ${next.title}. Tap Find place ${next.order} to see how to get there.`
+            ? next.order === 1
+              ? `You still have a quest at the entrance. Tap "${nextPlaceCtaLabel(next)}" when you are ready.`
+              : `Your next place is ${next.title}. Tap "${nextPlaceCtaLabel(next)}" to see how to get there.`
             : "Tap the map to see where to go."}
         </p>
         <div className="fade-up mt-5" style={delay(450)}>
-          <StartOver />
+          <StartOver className="text-white/70 hover:text-white" />
         </div>
       </>
     );

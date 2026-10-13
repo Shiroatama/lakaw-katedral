@@ -8,9 +8,11 @@ import {
   applyScanOutcome,
   createInitialProgress,
   evaluateScan,
+  getNextExpectedPoi,
   isObservationCorrect,
 } from "./route-rules";
 import type { JourneyProgress, Poi, ScanOutcome } from "./types";
+import { clearFinishSuccessSeen } from "./finish-success";
 
 type JourneyStore = JourneyProgress & {
   /** Outcome of the most recent stop visit. In memory only, never persisted. */
@@ -59,6 +61,8 @@ export const useJourneyStore = create<JourneyStore>()(
       completePoi: (poi, answer) => {
         if (!isObservationCorrect(poi, answer)) return false;
         const state = get();
+        const expected = getNextExpectedPoi(state, nagaTour);
+        if (!expected || expected.id !== poi.id) return false;
         set(applyObservationSuccess(state, poi, nagaTour));
         return true;
       },
@@ -67,6 +71,7 @@ export const useJourneyStore = create<JourneyStore>()(
 
       reset: () => {
         showHomeAtOnce = true;
+        clearFinishSuccessSeen();
         set({ ...createInitialProgress(nagaTour), lastOutcome: null });
       },
     }),

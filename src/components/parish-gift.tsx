@@ -6,7 +6,7 @@ import { useJourneyStore } from "@/lib/tour";
 import { stubPaymentProvider } from "@/lib/payments/provider";
 import { PrimaryButton } from "@/components/ui";
 
-const AMOUNT_TEMPLATES = [20, 50, 100] as const;
+const AMOUNT_TEMPLATES = [20, 50, 100, 500] as const;
 
 export function ParishGift() {
   const router = useRouter();
@@ -46,19 +46,23 @@ export function ParishGift() {
       aria-describedby="parish-gift-description"
     >
       <div className="space-y-1">
-        <h2 id="parish-gift-heading" className="text-base font-bold">
-          Help the parish
+        <h2
+          id="parish-gift-heading"
+          className="font-display text-xl text-[var(--foreground)]"
+        >
+          If you wish to give
         </h2>
         <p
           id="parish-gift-description"
-          className="max-w-sm text-sm leading-relaxed text-[var(--accent-fg)]/90"
+          className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]"
         >
           Your gift helps care for this church and the people who come here.
+          Giving is welcome, but never required.
         </p>
       </div>
 
       <fieldset className="space-y-1.5">
-        <legend className="text-sm font-medium text-[var(--accent-fg)]">
+        <legend className="text-sm font-medium text-[var(--foreground)]">
           How much?
         </legend>
         <div className="flex flex-wrap gap-1.5">
@@ -70,10 +74,10 @@ export function ParishGift() {
                 type="button"
                 aria-pressed={selected}
                 onClick={() => setAmount(String(value))}
-                className={`inline-flex min-h-11 min-w-[4.5rem] items-center justify-center rounded-md border px-5 py-2.5 text-sm font-semibold leading-none transition-[transform,background-color,border-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
+                className={`inline-flex min-h-11 min-w-[3.75rem] items-center justify-center rounded-md px-3.5 py-2.5 text-sm font-semibold leading-none transition-[transform,background-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
                   selected
-                    ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
-                    : "border-white/20 bg-white/10 text-[var(--accent-fg)] hover:border-white/40"
+                    ? "bg-[var(--accent)] text-[var(--accent-fg)]"
+                    : "bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--stone-light)]"
                 }`}
               >
                 ₱{value}
@@ -84,11 +88,11 @@ export function ParishGift() {
       </fieldset>
 
       <label className="block space-y-1.5">
-        <span className="text-sm font-medium text-[var(--accent-fg)]">
+        <span className="text-sm font-medium text-[var(--foreground)]">
           Or type your own
         </span>
-        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.25)]">
-          <span className="text-sm font-semibold leading-none text-[var(--accent-fg)]/45">
+        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.25)]">
+          <span className="text-sm font-semibold leading-none text-[var(--muted-fg)]">
             ₱
           </span>
           <input
@@ -97,7 +101,7 @@ export function ParishGift() {
             pattern="[0-9]+([.][0-9]{1,2})?"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-transparent text-sm font-semibold leading-none text-[var(--accent-fg)] outline-none placeholder:text-[var(--accent-fg)]/45"
+            className="w-full bg-transparent text-sm font-semibold leading-none text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]"
             placeholder="0"
           />
         </div>
@@ -105,7 +109,7 @@ export function ParishGift() {
 
       <div className="pt-0.5">
         <PrimaryButton type="submit">
-          {submitting ? "Please wait…" : "Donate"}
+          {submitting ? "Please wait…" : "Give"}
         </PrimaryButton>
       </div>
     </form>

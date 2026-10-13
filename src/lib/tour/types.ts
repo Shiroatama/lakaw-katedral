@@ -27,9 +27,14 @@ export type Poi = {
   heroImage: string;
   /** Plain-words directions to this place's sign / QR code. */
   landmark: string;
-  /** What is here. Descriptive only; no instructions. */
+  /** What is here. Short; always visible. Descriptive only; no instructions. */
   about: string;
-  /** Imperative quest in the dark card: pray, look, pause, and so on. */
+  /**
+   * Extra history and meaning behind "Read more". One string per paragraph.
+   * Descriptive only; no instructions.
+   */
+  aboutMore: string[];
+  /** Imperative quest: pray, look, pause, and so on. */
   action: string;
   /** Look-and-answer clue. Solving it marks the place complete. */
   observation: ObservationKey;
@@ -80,17 +85,17 @@ export type JourneyProgress = {
 
 /**
  * Result of arriving at a stop (scan). The place is marked complete only after
- * the observation key is solved. Before the walk starts, only the entrance
- * opens; later stops may be visited out of order (see SPEC §4.2).
+ * the observation key is solved. Stops open in order: only the next unsolved
+ * place shows its full quest (see SPEC §4.2).
  */
 export type ScanOutcome =
   /**
-   * Walk not started and this is not the entrance. Show a place teaser
-   * (hero + about) and a start-at-entrance gate. Progress is unchanged.
+   * This is not the next place to solve. Show a teaser (hero + about) and a
+   * gate toward `expected`. Progress is unchanged.
    */
-  | { kind: "start_here"; poi: Poi; entrance: Poi }
-  /** First arrival at this stop (not yet solved). `suggested` is the stop the route expected instead, or null if in order. */
-  | { kind: "advance"; poi: Poi; progress: number; suggested: Poi | null }
+  | { kind: "start_here"; poi: Poi; expected: Poi }
+  /** First arrival at the next place to solve (not yet solved). */
+  | { kind: "advance"; poi: Poi; progress: number }
   /** Stop already solved. */
   | { kind: "replay"; poi: Poi }
   /** Whole journey already finished. */

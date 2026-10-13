@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  FootstepsIcon,
+} from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** Match `.sheet-root` visibility hold so the dock stays above the fading blur. */
@@ -129,9 +134,9 @@ type Direction = "forward" | "back";
 const transitionFor = (direction: Direction) => [`nav-${direction}`];
 
 const buttonMotion =
-  "transition-[transform,filter,box-shadow,background-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-px active:translate-y-0 active:scale-[0.97]";
+  "transition-[transform,filter,background-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-px active:translate-y-0 active:scale-[0.97]";
 
-type ButtonIcon = "next" | "back" | "none";
+type ButtonIcon = "next" | "back" | "walk" | "check" | "none";
 
 function ButtonLabel({
   children,
@@ -146,6 +151,8 @@ function ButtonLabel({
       {icon === "back" ? <ArrowLeftIcon className="h-[1.1em] w-[1.1em]" /> : null}
       <span>{children}</span>
       {icon === "next" ? <ArrowRightIcon className="h-[1.1em] w-[1.1em]" /> : null}
+      {icon === "walk" ? <FootstepsIcon className="h-[1.1em] w-[1.1em]" /> : null}
+      {icon === "check" ? <CheckIcon className="h-[1.1em] w-[1.1em]" /> : null}
     </span>
   );
 }
@@ -166,13 +173,13 @@ export function PrimaryButton({
   type?: "button" | "submit";
   className?: string;
   direction?: Direction;
-  /** Arrow for page moves. Defaults to next/back from direction; submit stays plain. */
+  /** Trailing/leading mark. Defaults to next/back from direction; submit stays plain. Use walk for begin / find-place, check for finish. */
   icon?: ButtonIcon;
   disabled?: boolean;
 }) {
   const resolvedIcon: ButtonIcon =
     icon ?? (type === "submit" ? "none" : direction === "back" ? "back" : "next");
-  const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] hover:shadow-[0_8px_22px_rgba(184,92,56,0.4)] hover:brightness-95 active:brightness-90 disabled:pointer-events-none disabled:translate-y-0 disabled:scale-100 disabled:bg-[var(--stone-light)] disabled:text-[var(--muted-fg)] disabled:shadow-none disabled:hover:brightness-100 ${buttonMotion}`;
+  const base = `inline-flex min-h-14 w-full items-center justify-center rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] hover:brightness-95 active:brightness-90 disabled:pointer-events-none disabled:translate-y-0 disabled:scale-100 disabled:bg-[var(--stone-light)] disabled:text-[var(--muted-fg)] disabled:hover:brightness-100 ${buttonMotion}`;
   const label = <ButtonLabel icon={resolvedIcon}>{children}</ButtonLabel>;
 
   if (href && !disabled) {

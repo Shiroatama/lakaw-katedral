@@ -76,6 +76,42 @@ body {
   }
 }
 
+.about-more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-start;
+  padding: 0.15rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--accent);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-underline-offset: 2px;
+}
+
+.about-more-toggle:hover {
+  text-decoration: underline;
+}
+
+/* Read more / Show less: height opens and closes top to bottom. */
+.about-more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 600ms var(--ease-out);
+}
+
+.about-more[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.about-more-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -438,7 +474,7 @@ body {
 /*
  * Dock stays put while the page slides between stops.
  * Chrome's default group animation morphs width/height between snapshots;
- * that is what made Find place look full-span then shrink. Keep geometry
+ * that is what made the next-place CTA look full-span then shrink. Keep geometry
  * frozen (animation: none) and only attach view-transition-name when the
  * map column is present on both sides (see StickyActionBar).
  */
@@ -506,7 +542,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Print QR sheet (/print/qr)
+   Print QR sheet (/qr)
    -------------------------------------------------------------------------- */
 
 @media print {
@@ -562,6 +598,11 @@ body {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .about-more,
+  .about-more[data-open="true"] {
+    transition: none !important;
   }
 
   .marker-ping {

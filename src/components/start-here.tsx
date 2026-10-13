@@ -1,16 +1,25 @@
 import Image from "next/image";
 import type { Poi } from "@/lib/tour";
-import { nagaTour } from "@/lib/tour";
+import { nagaTour, placeCtaName } from "@/lib/tour";
 import { StopDock } from "@/components/stop-dock";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as React.CSSProperties;
 
+type StartHereProps = {
+  poi: Poi;
+  /** The place they should solve next (entrance, or a later stop). */
+  expected: Poi;
+  /** Walk has not begun yet; CTA goes to Home. Otherwise continue at expected. */
+  unstarted: boolean;
+};
+
 /**
- * Soft gate when someone opens place 2+ before the walk has begun.
- * Place first (short crop + about), then a dark welcome card, then the usual
- * map head + begin-at-entrance dock.
+ * Soft gate when someone opens a place that is not next to solve.
+ * Place first (short crop, title, about), then a sans editorial caption
+ * (place N of M + short intro), then Start the walk (Home) or Continue at
+ * the expected place.
  */
-export function StartHere({ poi }: { poi: Poi }) {
+export function StartHere({ poi, expected, unstarted }: StartHereProps) {
   const placeCount = nagaTour.pois.length;
 
   return (
@@ -49,25 +58,49 @@ export function StartHere({ poi }: { poi: Poi }) {
         </div>
 
         <aside
-          className="fade-up rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]"
+          className="fade-up border-l-[3px] border-[var(--accent)] py-1 pl-4"
           style={delay(320)}
-          role="status"
         >
-          <h2 className="text-base font-bold">This walk is made for you</h2>
-          <div className="mt-3 space-y-3 text-sm leading-relaxed text-[var(--accent-fg)]/90">
-            <p>
-              Lakaw Katedral is a short walk through this Cathedral. At each
-              place, you read a story and look closely.
-            </p>
-            <p>
-              To start, go to the main door and scan the QR there. There are{" "}
-              {placeCount} places. Tap the map to find the door.
-            </p>
-          </div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-fg)]">
+            This is place {poi.order} of {placeCount}
+          </p>
+          {unstarted ? (
+            <div className="mt-2 space-y-2 text-sm leading-relaxed text-[var(--foreground)]/90">
+              <p>
+                Lakaw Katedral is a short walk through {placeCount} places in
+                this Cathedral. Did you know this house of God has stood at the
+                heart of Bicol for more than 400 years, through earthquakes,
+                typhoons, and fire?
+              </p>
+              <p>
+                Do you want to know why it is called a cathedral, and not just
+                a big church? Ready to walk from the door and learn more about
+                this Cathedral and its story?
+              </p>
+              <p className="text-[var(--muted-fg)]">
+                Tap Start the walk below.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-2 space-y-2 text-sm leading-relaxed text-[var(--foreground)]/90">
+              <p>
+                You found this place a little early. Finish the quest at the{" "}
+                {placeCtaName(expected)} first, then come back here.
+              </p>
+              <p className="text-[var(--muted-fg)]">
+                The walk goes in order. Tap Continue at the{" "}
+                {placeCtaName(expected)} below when you are ready.
+              </p>
+            </div>
+          )}
         </aside>
       </div>
 
-      <StopDock startGate startLabel="Begin at the entrance" />
+      {unstarted ? (
+        <StopDock startGate hideMap />
+      ) : (
+        <StopDock continueTo={expected} hideMap />
+      )}
     </article>
   );
 }

@@ -7,6 +7,7 @@ import {
   nagaTour,
   useJourneyStore,
 } from "@/lib/tour";
+import { FinishSuccessModal } from "@/components/finish-success-modal";
 import { ParishGift } from "@/components/parish-gift";
 import { StartOver } from "@/components/start-over";
 import { ThankYouModal } from "@/components/thank-you-modal";
@@ -17,23 +18,23 @@ import { useHydrated } from "@/lib/use-hydrated";
 const NEXT_IDEAS = [
   {
     title: "Light a candle",
-    body: "Leave a small light for someone you love or remember.",
+    body: "Go to the candle stand near the side altar on your left as you face the front. Light one small candle for someone you love or remember.",
     image: "/img/prayer.webp",
-    alt: "People praying quietly in a church pew",
+    alt: "People praying quietly inside the cathedral",
     objectPosition: "object-[center_30%]",
   },
   {
-    title: "Sit in a pew",
-    body: "Rest for a minute. People have walked these stone floors since 1843.",
+    title: "Sit for a minute",
+    body: "Find a wooden bench in the long middle hall. Sit down. Rest. People have walked these stone floors since 1843.",
     image: "/img/dome.webp",
     alt: "Looking up at the cathedral dome",
     objectPosition: "object-center",
   },
   {
     title: "Say a short prayer",
-    body: "Take a quiet moment before you go back outside.",
+    body: "Walk toward the front, near the main altar, or find a quiet spot along the side wall. Speak to God in your own words, then go when you are ready.",
     image: "/img/statue.webp",
-    alt: "Statue inside the cathedral",
+    alt: "View toward the cathedral and plaza",
     objectPosition: "object-[center_20%]",
   },
 ] as const;
@@ -41,6 +42,7 @@ const NEXT_IDEAS = [
 export default function FinishPage() {
   const hydrated = useHydrated();
   const progress = useJourneyStore();
+  const donated = useJourneyStore((s) => s.donated);
   const total = nagaTour.pois.length;
   // Keep the ending on screen after Start over clears progress. Otherwise this
   // page flips to "not done yet" for the moment before Home replaces it.
@@ -49,12 +51,13 @@ export default function FinishPage() {
     endingRef.current = progress;
   }
   const ending = endingRef.current;
+  const complete = isJourneyComplete(ending, nagaTour);
 
   if (!hydrated) {
     return <main className="flex flex-1 flex-col" />;
   }
 
-  if (!isJourneyComplete(ending, nagaTour)) {
+  if (!complete) {
     return (
       <PageTransition>
         <main className="flex flex-1 flex-col justify-center gap-6 py-10 text-center">
@@ -77,65 +80,24 @@ export default function FinishPage() {
   return (
     <>
       <PageTransition>
-        <main className="flex flex-1 flex-col gap-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-0">
-          <div className="space-y-5">
-            <header className="fade-up -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] bg-[var(--background)]">
-              <div className="relative">
-                {/* Shorter window only: image stays at 4:3 scale, top/bottom are clipped. */}
-                <div className="relative aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">
-                  <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
-                    {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
-                    <Image
-                      src="/img/finish-welcome.webp"
-                      alt="Naga Metropolitan Cathedral and the plaza in front of it"
-                      fill
-                      unoptimized
-                      className="hero-settle object-cover object-center"
-                      sizes="100vw"
-                      priority
-                    />
-                  </div>
-                </div>
-                <div
-                  className="pop-in absolute bottom-0 left-1/2 z-10 flex h-16 w-16 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[0_8px_24px_rgba(79,107,74,0.35)] ring-4 ring-[var(--background)]"
-                  style={{ "--delay": "80ms" } as React.CSSProperties}
-                  aria-hidden
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-8 w-8"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
+        <main className="flex flex-1 flex-col gap-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2">
+          <div className="fade-up">
+            <aside className="overflow-hidden rounded-xl bg-[var(--surface)]">
+              <div className="relative aspect-[5/2] bg-[var(--stone-light)]">
+                <Image
+                  src="/img/give-people.webp"
+                  alt="People in the cathedral raising their hands in prayer"
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
+                  sizes="(max-width: 512px) 100vw, 512px"
+                  priority
+                />
               </div>
-              <div className="space-y-2 px-5 pb-0 pt-12 text-center">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--success)]">
-                  Walk complete
-                </p>
-                <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
-                  We are glad you came
-                </h1>
-                <p className="mx-auto max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
-                  Thank you for learning about the Cathedral. We hope the walk
-                  stays with you.
-                </p>
-              </div>
-            </header>
-
-            <div className="fade-up space-y-2">
-              <aside className="rounded-xl bg-[var(--foreground)] px-5 py-4 text-[var(--accent-fg)]">
+              <div className="px-5 py-4">
                 <ParishGift />
-              </aside>
-              <div className="flex justify-center">
-                <StartOver />
               </div>
-            </div>
+            </aside>
           </div>
 
           <section
@@ -145,12 +107,12 @@ export default function FinishPage() {
             <div className="space-y-1">
               <h2
                 id="next-ideas-heading"
-                className="font-display text-xl text-[var(--foreground)]"
+                className="font-display text-2xl text-[var(--foreground)]"
               >
-                Something to do
+                While you are here
               </h2>
               <p className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]">
-                Stay a little longer if you want.
+                If you have time, try one of these.
               </p>
             </div>
 
@@ -159,7 +121,6 @@ export default function FinishPage() {
                 <li key={idea.title}>
                   <aside className="overflow-hidden rounded-xl bg-[var(--surface)]">
                     <div className="relative aspect-[5/2] bg-[var(--stone-light)]">
-                      {/* Served as-is (not via /_next/image) so the service worker can precache it. */}
                       <Image
                         src={idea.image}
                         alt={idea.alt}
@@ -182,8 +143,13 @@ export default function FinishPage() {
               ))}
             </ul>
           </section>
+
+          <div className="fade-up flex justify-center">
+            <StartOver />
+          </div>
         </main>
       </PageTransition>
+      <FinishSuccessModal open={!donated} />
       <ThankYouModal />
     </>
   );

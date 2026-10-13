@@ -12,6 +12,9 @@ export {
   getPoiById,
   getPoiBySlug,
   getOrderedPois,
+  nextPlaceCtaLabel,
+  continuePlaceCtaLabel,
+  placeCtaName,
 } from "./content";
 export {
   applyObservationSuccess,

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Poi } from "@/lib/tour";
+import { AboutSection } from "@/components/about-section";
 import { ObservationKeyForm } from "@/components/observation-key";
 
 type PoiDetailProps = {
@@ -30,19 +31,14 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
           />
         </div>
         {banner}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col">
           <header className="fade-up" style={delay(120)}>
             <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
               {poi.title}
             </h1>
           </header>
 
-          <p
-            className="fade-up text-base leading-relaxed text-[var(--foreground)]/90"
-            style={delay(220)}
-          >
-            {poi.about}
-          </p>
+          <AboutSection about={poi.about} aboutMore={poi.aboutMore} />
         </div>
 
         <div className="fade-up" style={delay(320)}>

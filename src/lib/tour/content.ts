@@ -1,4 +1,4 @@
-import type { Tour } from "./types";
+import type { Poi, Tour } from "./types";
 
 /**
  * Visitor-facing copy for the MVP walk (guide items 1–3).
@@ -8,8 +8,9 @@ import type { Tour } from "./types";
  * Grade 3). Each hard term is explained the first time it appears.
  * See docs/SPEC.md sections 3.1 and 7.
  *
- * Each stop, in order: about (what is here), dark-card action (what to do),
- * observation key (look and answer). About never carries instructions.
+ * Each stop, in order: about (short, what is here), aboutMore (Read more),
+ * action (what to do), observation key (look and answer). About copy never
+ * carries instructions.
  * `landmark` lines are placeholders until the parish confirms where each QR
  * sign will be mounted (SPEC §17). Hero images reuse existing assets until
  * dedicated photos are provided.
@@ -20,7 +21,7 @@ import type { Tour } from "./types";
  */
 export const nagaTour: Tour = {
   id: "naga-cathedral",
-  version: 5,
+  version: 11,
   name: "Lakaw Katedral",
   siteName: "Naga Metropolitan Cathedral",
   steward: {
@@ -45,16 +46,29 @@ export const nagaTour: Tour = {
         "At the main door of the Cathedral. Stand in front of the doors.",
       heroImage: "/img/entrance.webp",
       about:
-        "Here at the main door are two patrons of this place: Saint John the Evangelist, Patron Saint of the Cathedral Parish, and Saint Peter Baptist, Patron Saint of the Archdiocese of Cáceres.",
+        "Did you know this Cathedral has stood at the heart of Bicol for more than four centuries, through earthquakes, typhoons, and fire? At this door are two patrons: Saint John the Evangelist, Patron Saint of the Cathedral Parish, and Saint Peter Baptist, Patron Saint of the Archdiocese of Cáceres.",
+      aboutMore: [
+        "The present church was begun in 1808 and finished in 1843. It has a Romanesque look, with strong stone walls, twin towers, and a dome. It was restored and rededicated in 1988.",
+        "The diocese was founded in 1595. This is the mother church of the Archdiocese of Cáceres.",
+        "When you stand at this door, you stand where generations of Bicolano faithful have entered to pray, give thanks, and ask for help.",
+      ],
       action:
-        "Take holy water. Make the Sign of the Cross. Ask Saint John and Saint Peter Baptist to walk with you, protect you, and lead you closer to Christ.",
+        "Stand at the main door. Begin with prayer. Ask Saint John and Saint Peter Baptist to walk with you, protect you, and lead you closer to Christ.",
       observation: {
-        look: "Look at the main doors.",
-        question: "How many tall wooden doors stand side by side?",
-        answers: ["2", "two"],
-        // Placeholder meaning until confirmed on site with the parish.
+        look: "Look above the main door. Find the gold coat of arms, then the crown above it.",
+        question: "What animal do you see above the crown?",
+        answers: [
+          "bird",
+          "a bird",
+          "dove",
+          "a dove",
+          "the dove",
+          "white bird",
+          "white dove",
+        ],
+        // Confirmed from facade photos: dove (Holy Spirit) in the panel above the crown.
         reveal:
-          "Those two doors welcome everyone who enters this house of God. Side by side, they open the way for you to walk with the saints into the Cathedral.",
+          "That bird is a dove, a sign of the Holy Spirit. Above the crown at the door, it welcomes you as you enter the house of God.",
       },
       map: { x: 140, y: 307 },
     },
@@ -65,10 +79,16 @@ export const nagaTour: Tour = {
       title: "The Alcomendas Mural",
       shortTitle: "Mural",
       landmark:
-        "Walk into the nave, the long middle hall of the Cathedral. Pause before the mural of Raul Alcomendas.",
+        // Placeholder until parish confirms exact QR mount. Aim: visible cue
+        // inside the door, not the mural title again.
+        "Walk in through the main doors. Find the angels that hold the holy water. The QR is behind those angels.",
       heroImage: "/img/murals.webp",
       about:
-        "This mural is by the Bicolano artist Raul Alcomendas. It tells the story of how the Gospel came to Bicol: the missionaries who came, the communities they served, and the generations who received and passed on the faith.",
+        "You are part of a story that began centuries ago. This mural by Bicolano artist Raul Alcomendas is a visual story of Naga and Bicol: life before the Spanish came, the years of faith and mission, and the life of the people today.",
+      aboutMore: [
+        "It also tells how the Gospel came to Bicol: the missionaries who came, the communities they served, and the generations who received and passed on the faith.",
+        "Look for scenes of prayer, community, and local life. Sacred and everyday stories sit side by side, so the wall feels both holy and close to home.",
+      ],
       action:
         "Stand before the mural. Find one scene of the missionaries or the people of Bicol. Give thanks that you are part of a story that began centuries ago.",
       observation: {
@@ -91,16 +111,20 @@ export const nagaTour: Tour = {
         "Keep walking toward the sanctuary, the area around the altar. Find the Archbishop's Chair.",
       heroImage: "/img/statue.webp",
       about:
-        "This is the Cathedra, the Archbishop's Chair. It is where the Archbishop teaches and shepherds the flock.",
+        "Did you know a cathedral takes its name from the cathedra? This is the Archbishop's Chair. Because this chair is here, this church is a cathedral: the mother church of the Archdiocese of Cáceres.",
+      aboutMore: [
+        "It is more than a seat of honor. Here the Archbishop teaches and shepherds the people of Bicol.",
+        "When you pause here, remember the shepherds who have guided this Church, and the faithful who gather under their care.",
+      ],
       action:
         "Find the Archbishop's Chair. Pause. Give thanks for the shepherds who teach and care for God's people.",
       observation: {
-        look: "Look at the Cathedra.",
-        question: "What is it mainly made of: wood, stone, or metal?",
-        answers: ["wood", "wooden"],
-        // Placeholder meaning until confirmed on site with the parish.
+        look: "Look at the Cathedra. Find the cloth or cushion on the seat.",
+        question: "What color is it?",
+        answers: ["white", "pure white"],
+        // Confirmed with parish / on-site: seat cloth is white.
         reveal:
-          "Wood is living material shaped by human hands. The Cathedra is a chair of teaching and care, not a throne of gold. It reminds us that the Archbishop shepherds God's people with humble strength.",
+          "White is a color of light and holiness. On the Cathedra, it marks a chair of teaching and care, not a throne of gold. It reminds us that the Archbishop shepherds God's people with humble strength.",
       },
       map: { x: 140, y: 78 },
     },
@@ -117,4 +141,28 @@ export function getPoiById(id: string) {
 
 export function getOrderedPois() {
   return [...nagaTour.pois].sort((a, b) => a.order - b.order);
+}
+
+/** Plain place name for CTAs. Cathedra keeps its exact casing. */
+export function placeCtaName(poi: Poi): string {
+  return poi.shortTitle === "Cathedra"
+    ? "Cathedra"
+    : poi.shortTitle.toLowerCase();
+}
+
+/**
+ * Soft dock CTA when moving on after a solved quest.
+ * Entrance resume (left mid-quest): "Continue at the entrance".
+ * Later places: "Next: the mural" (opens the map).
+ */
+export function nextPlaceCtaLabel(poi: Poi): string {
+  if (poi.order === 1) {
+    return "Continue at the entrance";
+  }
+  return `Next: the ${placeCtaName(poi)}`;
+}
+
+/** Gate CTA when this place must be finished before another can open. */
+export function continuePlaceCtaLabel(poi: Poi): string {
+  return `Continue at the ${placeCtaName(poi)}`;
 }

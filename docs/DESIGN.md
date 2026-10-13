@@ -90,20 +90,22 @@ Aim for WCAG AA on text and CTAs. Prefer mid-brick terracotta over muted clay so
 ```mermaid
 flowchart LR
   QR1["Scan any stop QR"] --> POI["Stop detail (story at once)"]
-  Home["Home: landing / resume"] -->|Come find out| POI
-  POI --> Find["Find place N: map bubble"]
+  Home["Home: landing / resume"] -->|Start the walk| POI
+  POI --> Find["Next: the mural: map bubble"]
   Find --> QR1
-  POI -->|all visited| Fin["Finish: quiet moment + gift"]
-  Fin --> Don["Help the parish (placeholder)"]
-  Don --> TY["Thank you"]
+  POI -->|all visited| Fin["/finish: next + gift"]
+  Fin --> Suc["Success modal on arrival"]
+  Suc --> Cont[Continue dismisses modal]
+  Cont --> Fin
+  Fin --> TY["Thank you modal after gift"]
 ```
 
-1. **Entrance first:** if the walk has not started, place 2+ shows a start interstitial only (no story teaser). After the walk has started, order is a suggestion: any stop shows its full story; out-of-order visits get a one-line note, never a block.
+1. **In order:** only the next unsolved place shows its full quest. Opening any other unsolved place shows a teaser interstitial (hero + about + gate). Unstarted: **Start the walk** → Home. Mid-walk early: **Continue at the …** → expected place.
 2. **Scan is the start:** the entrance QR opens stop 1 directly. No Start tap required from Home.
-3. **"Find place N" is wayfinding, not navigation:** it opens the sheet with a plain-words landmark and the floor plan. It never opens the next story.
-4. **Finish, then what is next, then the ask:** thank the walker first, then a quiet reflection, then the gift.
+3. **"Next: the …" is wayfinding, not navigation:** it opens the sheet with a plain-words landmark and the floor plan. It never opens the next story. Label comes from `nextPlaceCtaLabel` (e.g. "Next: the mural"). **Continue at the entrance** links straight back to place 1 if they left mid-quest.
+4. **Celebrate as a modal, then the ask, then what is next:** `/finish` leads with the gift, then next ideas. A big Success modal opens on first arrival; Continue dismisses it. Home complete CTA **Help the parish** also opens `/finish`.
 5. **Offline:** the whole tour is cached when the service worker installs. Donate needs network. No offline payment queue in MVP.
-6. **Start over:** allowed from Home and from Finish (below the donate button), with confirm before clearing progress.
+6. **Start over:** allowed from Home and from `/finish` (below the gift), with confirm before clearing progress. Trigger is muted utility text (not danger-colored); danger stays on the confirm action only.
 
 ---
 
@@ -111,7 +113,7 @@ flowchart LR
 
 ### 5.1 Home (`/`): landing and resume hub
 
-Not a required step on site (the entrance QR goes straight to stop 1). Used by people who arrive from a link, and as the resume point. Shows only the hero until saved progress is read, so a returning visitor never sees "Come find out" flash.
+Not a required step on site (the entrance QR goes straight to stop 1). Used by people who arrive from a link, and as the resume point. Shows only the hero until saved progress is read, so a returning visitor never sees "Start the walk" flash.
 
 **Fresh visit**
 
@@ -121,18 +123,18 @@ Not a required step on site (the entrance QR goes straight to stop 1). Used by p
 - Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
 - Invite: "Discover the heritage. Encounter the saints. Meet Christ." (no question stack)
 - No cathedral-name headline, no QR mention
-- Dock: map chat-head + **Come find out** (opens place 1). Tap the map to see where place 1 is.
+- Dock: map chat-head + **Start the walk** (opens place 1). Tap the map to see where place 1 is.
 - No stop list, schedule, stats, or address block in the first viewport
 
 **In progress**
 
 - Brand quieter; "Your next stop is {title}"
-- Dock: map chat-head + **Find place N**. Map shows where you last were, or the next place.
+- Dock: map chat-head + **Next: the mural** (or the next place name). Map shows where you last were, or the next place.
 - Quiet destructive: Start over (confirm, then clear journey)
 
 **Complete**
 
-- Dock: map chat-head + **Help the parish** (to Finish)
+- Dock: map chat-head + **Help the parish** (to `/finish`)
 - Quiet destructive: Start over
 
 ### 5.2 First-stop QR (`/s/saints`)
@@ -146,12 +148,12 @@ The story is static and renders immediately. The banner and dock appear once the
 Top to bottom:
 
 1. Full-bleed photo across the screen, from the top edge (no card, no rounded corners)
-2. Optional one-line note (out of suggested order, or journey complete)
+2. Optional one-line note (journey complete)
 3. Stop title
-4. About (what is here; descriptive only, no instructions)
-5. Dark card: **Something to do** (instruction / call to action: pray, look, pause)
+4. About (short; descriptive only, no instructions) with optional **Read more** / **Show less** for `aboutMore` history so the quest stays near the first screen
+5. Quest block, editorial style (no box; terracotta left rule; no visible "Your quest" label, only `sr-only` for the form region; action and clue in regular body weight, only the question semibold, cream `--surface` answer field): **Something to do** (instruction / call to action: pray, look, pause)
 6. Interesting fact
-7. Dock: map button (progress ring) + **Find place N**, or **Finish** when all stops are visited
+7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited
 
 MVP: no audio, share, or save.
 
@@ -159,8 +161,8 @@ MVP: no audio, share, or save.
 
 - Circular **Map** chat-head beside the primary CTA (Messenger-style) on every screen, including Home
 - Progress `done/total` and ring fill live on the circle
-- Fresh start (Home): **Come find out** opens place 1. Map chat-head opens "Ready to begin" with place 1 on the floor plan and a short nudge to tap **Come find out** (no Scan / Skip, no go-scan directions).
-- Tap the map chat-head **or** **Find place N** to open a tall map panel (rounded, height from dock up to the top safe area):
+- Fresh start (Home): **Start the walk** opens place 1. Map chat-head opens "Ready to begin" with place 1 on the floor plan and a short nudge to tap **Start the walk** (no Scan / Skip, no go-scan directions).
+- Tap the map chat-head **or** **Next: the …** to open a tall map panel (rounded, height from dock up to the top safe area):
   1. Stop card: "You are here", or next/start number + title, **landmark** in plain words, "Scan the QR code there to read the story."
   2. Floor plan (completed / here / next)
 - Dock stays visible under the bubble (backdrop stops above the dock)
@@ -169,15 +171,14 @@ MVP: no audio, share, or save.
 
 ### 5.5 Finish (`/finish`)
 
-Order, top to bottom. Hierarchy is reward first, then what is next, then the ask:
+One page for next ideas and the gift. Congratulations is a big Success modal on first arrival (not competing in the scroll).
 
-1. Full progress bar
-2. **Reward (hero of the screen):** success check mark, "Thank you for walking with us", places count + time. This is the emotional peak.
-3. **Before you go (secondary):** compact quiet-moment card with a short prayer photo strip; sit, candle, or prayer. Not the visual focus.
-4. **Help the parish** inline (custom amount only, no preset chips; placeholder for now)
-5. **Start over** below the donate button (confirm, then back to Home)
+1. **Success modal (first visit):** large check, green "You finished the walk", thank-you line, **Continue** dismisses. Shown once per session until Start over.
+2. **Gift:** heading "If you wish to give"; soft surface treatment. Amount presets + custom; submit stub opens thank-you modal. First content after the modal.
+3. **While you are here:** next ideas (candle, sit, pray) with place cues.
+4. **Start over** as muted utility text (confirm, then back to Home; danger color only on the confirm action)
 
-No stop checklist: progress already says all places are done. No "Not now" button: leaving is simply leaving. If the walk is not finished, the page says so and links back instead of showing the ending.
+No stop checklist. No "Not now" button: leaving is simply leaving. If the walk is not finished, the page says so and links back instead of showing the ending.
 
 ### 5.6 Donate (`/donate`)
 
@@ -185,30 +186,24 @@ No stop checklist: progress already says all places are done. No "Not now" butto
 
 ### 5.7 Thank you (`/thank-you`)
 
-- Warm confirmation
-- Receipt-when-live copy only (no fake receipt UI)
-- Home + Map
+- Redirects to `/finish` (acknowledgment is a modal there after a gift)
+- Warm confirmation copy on the modal; Home CTA
 
-### 5.8 Start at the entrance (unstarted + place 2+)
+### 5.8 Not-yet interstitial (place is not next to solve)
 
 - Place first: short cropped hero (finish-style 2:1 window over a 4:3 image), title, `about`.
-- Then the dark quest-style card (two paragraphs max): welcome headline, what Lakaw Katedral is, three places on the walk, scan the QR at the main door + tap the map.
-- Same bottom dock as other journey screens: map chat-head (opens the sheet on place 1) + "Begin at the entrance".
-- No observation quest or progress. Progress unchanged.
+- Sans editorial caption (terracotta left rule): "This is place N of M", then a short intro.
+- **Unstarted:** Lakaw Katedral intro + "Did you know" teaser (more than 400 years; earthquakes, typhoons, and fire) then "Do you want to know why… Ready to walk from the door and learn more about this Cathedral and its story?"; dock **Start the walk** → Home. No map chat-head.
+- **Mid-walk too early:** say they found this place early, finish the expected place first; dock **Continue at the …** → expected place. No map chat-head.
+- No observation quest. Progress unchanged.
 
-### 5.9 Out-of-order visit (walk already started)
-
-- Full story. Order is a suggestion after the walk has begun.
-- One-line note: "Place N is next on the path. But you can see the places in any order. Enjoy this one!"
-- Dock "Find place N" points at the lowest unsolved stop.
-
-### 5.10 Completed re-visit
+### 5.9 Completed re-visit
 
 - Full stop replay
-- Slim banner: "You finished the walk." with link to Finish
+- Slim banner: "You finished the walk." with link to `/finish`
 - No blocking modal every time
 
-### 5.11 Offline (`/~offline`)
+### 5.10 Offline (`/~offline`)
 
 - Shown only if a page was never cached (for example, a very first visit with no signal)
 - Title "No internet". Explain: the walk saves on your phone after the first load; giving to the parish needs internet
@@ -239,7 +234,7 @@ Motion gives presence and hierarchy, never decoration. Premium feel comes from c
 | Map button | Progress ring sweeps from empty to current; the count pops when it changes | 900 ms |
 | Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |
 | Home | Hero settles; name overlay, intro and status lines rise in order | 350 ms start |
-| Finish | Progress bar fills; success check pops; thank-you rises; quiet card then gift arrive after | about 1.1 s total |
+| Finish | Success modal pops on arrival; Continue reveals gift then next ideas | about 1.1 s total |
 | Thank you | Gold rule draws in, then heading, text, button | 300 to 750 ms |
 | Buttons | Lift 1 px on hover (pointer devices only), press down to 97% | 200 ms |
 | Inputs | Focus ring fades in | 200 ms |
@@ -275,10 +270,10 @@ Update `SPEC.md` donate and screen notes to match when editing product docs.
 - [x] Home fresh vs resume (+ Start over confirm)
 - [x] Thin progress on journey screens
 - [x] Donate custom amount only (no presets)
-- [x] Wayfinding sheet with landmarks; "Find place N" never opens the next story
-- [x] Suggested (not enforced) order; entrance scan starts the journey directly
+- [x] Wayfinding sheet with landmarks; "Next: the …" never opens the next story
+- [x] Progressive order (full quest only on the next unsolved place); entrance scan starts the journey directly
 - [x] Whole tour precached at service-worker install
-- [x] Finish: quiet-moment panel + gift; "Not now" removed; Start over below donate
+- [x] Finish: success modal then soft gift + next ideas; "Not now" removed; Start over on finish
 - [x] Motion system: page slides, animated map sheet, dock, ring, staggered reveals, reduced-motion fallback
 - [x] Finish ceremonial treatment using `--ceremonial`
 - [x] Edge copy/layout pass for ahead, midroute, offline, completed banner

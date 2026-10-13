@@ -50,7 +50,7 @@ Word choices for everyday words (code and internal docs still say "POI", "stop",
 
 | Instead of | Say |
 |------------|-----|
-| stop / POI | place ("Find place 2") |
+| stop / POI | place ("Next: the mural") |
 | journey / tour | walk ("Start the walk") |
 | donate, support | give, help ("Help the parish") |
 | directions, navigate, progress | how to get there, see, steps so far |
@@ -67,11 +67,11 @@ Fixed route, in order (from the parish pilgrim guide; see [`PILGRIM-GUIDE.md`](.
 | 1 | The Cathedral Entrance | Main door, starting line | `/s/saints` |
 | 2 | The Alcomendas Mural | Nave, at the Raul Alcomendas mural | `/s/mural` |
 | 3 | The Cathedra | Near the Archbishop's Chair | `/s/cathedra` |
-| End | Finish + Donate | Shown after POI 3 | `/finish` |
+| End | Finish (success modal + give/next) | After POI 3 | `/finish` |
 
 **URL design (consideration).** Stop URLs are short readable words, not random tokens, so a visitor can type one by hand if a code won't scan (glare, dim light, damaged sticker). Trade-offs, accepted for MVP:
 
-- Anyone can open any stop by guessing its URL, so the QR is not a lock. This is fine because order is a suggestion (section 4.2), not a gate, and the content is public history.
+- Anyone can open any stop by guessing its URL, so the QR is not a physical lock. The app still gates the full quest to the next unsolved place (section 4.2); other URLs only show a teaser. The content is public history.
 - Codes never need reprinting for rotation, since the slugs are stable.
 - If the parish later wants a real "you must be here" check, reintroduce random tokens (`/s/<token>`) behind the same `slug` field; nothing else in the flow depends on the URL being readable.
 
@@ -89,48 +89,51 @@ flowchart TD
   B --> C[Record arrival: start the journey if needed]
   C --> Q[Solve observation quest to mark complete]
   Q --> D{All 3 solved?}
-  D -->|No| E["Dock: Find place N"]
+  D -->|No| E["Dock: Next: the mural"]
   E --> F[Wayfinding sheet: landmark in words + floor plan]
   F --> A
   D -->|Yes| G[Dock: Finish]
-  G --> H[Finish: quiet moment + gift]
-  H --> I[Help the parish: custom amount, placeholder]
-  I --> J[Thank-you screen + email receipt later]
+  G --> H["/finish: next ideas + gift"]
+  H --> M[Success modal on arrival]
+  M --> Cta[Continue dismisses modal]
+  Cta --> H
+  H --> J[Thank-you modal after gift]
 ```
 
 Home (`/`) is a landing and resume hub. It is not a required step: scanning the entrance QR goes straight to stop 1.
 
 ### 4.2 Route rules
 
-**Before the walk starts,** only the entrance opens. Opening place 2 or 3 with no `startedAt` shows a teaser of that stop (short hero, title, `about`), then a dark welcome card (what the walk is, three places, scan the QR at the main door) and the usual map + "Begin at the entrance" dock. No quest or progress; come back after starting at the entrance.
+**Places open in order.** Only the next unsolved place shows its full quest. Opening any other unsolved place shows a teaser and a gate toward the expected stop. Quests cannot be completed out of order.
 
-**After the walk has started,** order is a **suggestion, not a gate.** Any later stop shows its full story. Reasons: crowds and Mass make the exact route unpredictable, and progress can be lost when a QR opens in a different browser (see section 8). A forgiving mid-walk rule means lost state is harmless once they have begun.
+**Before the walk starts,** only the entrance opens. Opening place 2 or 3 with no `startedAt` shows a teaser of that stop (short hero, title, `about`), then a sans editorial caption ("This is place N of M", a short Lakaw Katedral intro, and a nudge to the CTA) and a full-width "Start the walk" dock (links to Home, not straight to place 1; no map chat-head). No quest or progress.
 
-1. **Unstarted + place 2/3 (or any non-entrance):** show the start interstitial only. Do not record a visit.
-2. **First visit to the entrance (or any stop after the walk has started):** show the story, set `startedAt` if needed. The place counts as complete only after the observation key is solved. Scanning the entrance QR therefore *is* the start.
-3. **Visiting a stop out of the suggested order (walk already started):** same as rule 2, plus a one-line note: "Place N is next on the path. But you can see the places in any order."
-4. **Re-visiting a stop:** show the story again; progress unchanged.
+**After the walk has started,** the same gate applies: if they open place 3 while place 2 is still unsolved, they see that place's teaser and **Continue at the mural** (or whichever place is next). They cannot finish a later quest early.
+
+1. **Unstarted + place 2/3 (or any non-next place):** show the start interstitial only. Do not record a visit. CTA: **Start the walk** → Home.
+2. **First visit to the next place (entrance first):** show the story, set `startedAt` if needed. The place counts as complete only after the observation key is solved. Scanning the entrance QR therefore *is* the start.
+3. **Started + opening a later place too early:** same teaser interstitial, CTA **Continue at the …** linking to the expected place. Progress unchanged.
+4. **Re-visiting a solved stop:** show the story again; progress unchanged.
 5. **Journey complete (all stops solved):** any scan shows the story; dock offers Finish.
-6. **Next suggested stop:** the lowest-numbered unsolved stop. The dock action "Find place N" targets it.
-7. **"Find place N" never opens the next story.** It opens the wayfinding sheet (landmark + map). The next story opens by scanning that stop's QR (or, in trial mode only, the Skip button).
+6. **Next place:** the lowest-numbered unsolved stop. Dock label: **Continue at the entrance** (link back to place 1 if they left mid-quest) or **Next: the mural** / **Next: the Cathedra** (opens the wayfinding map).
+7. **"Next: the …" never opens the next story.** It opens the wayfinding sheet (landmark + map). The next story opens by scanning that stop's QR (or, in trial mode only, the Skip button). **Continue at the entrance** is the exception: it links straight to place 1.
 
 ## 5. Screens
 
 Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./DESIGN.md). Summary:
 
 1. **Home (`/`):** landing and resume hub (welcome, continue, or complete). Not required on site; the entrance QR skips it.
-2. **Stop detail** (`/s/[slug]`): hero photo, title, short story, "Did you know?", bottom dock with the map button (progress ring) and one primary action: **Find place N** (or **Finish**).
-3. **Wayfinding sheet (map):** next stop's title and a plain-words landmark, SVG floor plan (completed / here / next). Opens from the map button or "Find place N". Available anytime. Trial mode adds a "Skip the scan" button.
-4. **Start-at-entrance interstitial:** when the walk has not started and someone opens place 2+, show that stop's hero + about only, then a warm gate note and a primary link to place 1.
-5. **Out-of-order note:** a one-line banner on a stop visited out of the suggested order after the walk has started. No blocking screen.
-6. **Finish:** reward first (success check + thank-you), then a compact quiet closing moment, then **inline** Help the parish (custom amount only, no presets), with **Start over** below it. No stop checklist. No "Not now" button.
-7. **Donate route:** redirects to Finish.
-8. **Thank you:** thanks; receipt when gateway is live.
-9. **Offline / error state:** tour readable after start; donate needs network.
+2. **Stop detail** (`/s/[slug]`): hero photo, title, short story, "Did you know?", bottom dock with the map button (progress ring) and one primary action: **Next: the mural** (or **Finish**).
+3. **Wayfinding sheet (map):** next stop's title and a plain-words landmark, SVG floor plan (completed / here / next). Opens from the map button or "Next: the …". Available anytime. Trial mode adds a "Skip the scan" button.
+4. **Not-yet interstitial:** when someone opens a place that is not next to solve, show that stop's hero + about only, then a warm gate note. Unstarted: **Start the walk** → Home. Mid-walk: **Continue at the …** → expected place.
+5. **Finish (`/finish`):** success modal on first arrival; underneath: Help the parish first (amount presets + custom stub), then while-you-are-here ideas, then **Start over**. Thank-you modal after a gift. Home **Help the parish** opens this route. No "Not now" button.
+6. **Donate (`/donate`):** redirects to Finish.
+7. **Thank you (`/thank-you`):** redirects to `/finish`; gift acknowledgment is a modal there. Receipt when gateway is live.
+8. **Offline / error state:** tour readable after start; donate needs network.
 
 ## 6. Map
 
-- Hand-drawn simplified SVG floor plan of the cathedral (nave, aisles, entrance, altar), not an architectural drawing.
+- Hand-drawn simplified SVG floor plan of the cathedral (nave, aisles, entrance, altar), not an architectural drawing. **Soon:** replace with a commissioned 2D illustrated map (artist outsourced); see [`CHECKLIST.md`](./CHECKLIST.md).
 - POI markers positioned by coordinates in the SVG's own coordinate space.
 - States: completed, current ("You are here"), next (highlighted/pulsing), locked.
 - No GPS. Indoor GPS is unreliable; location = last scanned POI.
@@ -152,7 +155,7 @@ The mural by Bicolano artist Raul Alcomendas. Through his work, discover Bicol's
 The Cathedra (the Archbishop's Chair). It is more than a chair of honor. It symbolizes the Archbishop's teaching and pastoral authority and reminds us that the Cathedral is the mother church of the Archdiocese.
 
 ### 7.2 Landmarks (wayfinding copy)
-Each stop has a one- or two-sentence `landmark` in plain words, shown in the wayfinding sheet under "Find place N". It tells the visitor where to look for the sign and QR code, since a map marker alone is not enough in a busy nave. Current lines are **placeholders** until the parish confirms where each QR sign will be mounted.
+Each stop has a one- or two-sentence `landmark` in plain words, shown in the wayfinding sheet under "Next: the …". It tells the visitor where to look for the sign and QR code, since a map marker alone is not enough in a busy nave. Current lines are **placeholders** until the parish confirms where each QR sign will be mounted.
 
 ### 7.1 Content model
 
@@ -165,9 +168,9 @@ type Poi = {
   shortTitle: string;    // one word for the floor plan label
   landmark: string;      // plain-words directions to this stop's sign / QR
   heroImage: string;     // compressed, e.g. /img/entrance.webp
-  about: string;         // what is here (no instructions)
-  action: string;        // dark-card call to action (pray, look, pause)
-  fact: string;          // one interesting fact
+  about: string;         // short: what is here (no instructions)
+  aboutMore: string[];   // extra paragraphs behind Read more
+  action: string;        // quest call to action (pray, look, pause)
   map: { x: number; y: number }; // SVG coords
 };
 
@@ -178,7 +181,7 @@ Stored as typed JSON/MDX in the repo. Keep route rules and content in plain Type
 
 ### 7.3 Visitor-facing wording
 
-Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (what is here, no instructions), dark-card **action** (what to do: pray, look, pause), then one **interesting fact**. The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
+Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (short; what is here, no instructions), optional **Read more** (`aboutMore` history), then **action** and the observation quest (what to do: pray, look, pause). The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
 
 ## 8. Progress and state
 
@@ -279,11 +282,6 @@ Not in MVP. Dim lighting, crowds, battery, and model size make recognition unrel
 
 ## 17. Open items
 
-- Parish to verify the Grade 3 rewrite in `content.ts` against [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md).
-- Confirm exact QR placement for the Cathedra (POI 3) and finalize all `landmark` wayfinding lines (section 7.2).
-- Before launch: set `NEXT_PUBLIC_ALLOW_SKIP=false` to remove the trial "Skip the scan" button.
-- Donation step is a placeholder: the button reads "coming soon" but still shows the thank-you screen. Replace with a real gateway, or hide the form, before launch.
-- Dedicated photos for each POI (permission to photograph); MVP reuses existing assets.
-- Payment gateway and receiving account (deferred).
-- Domain name.
-- QR placement approval from the parish.
+Working checklist (mark done there, not here): [`CHECKLIST.md`](./CHECKLIST.md).
+
+Includes parish content review, QR placement and landmarks, trial-mode flag, donation placeholder, photos, domain, outsourced 2D map art, and deferred post-MVP work.
