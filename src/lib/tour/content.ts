@@ -33,7 +33,7 @@ export const nagaTour: Tour = {
     hook: "Welcome, dear pilgrim and visitor.",
     fact: "You are entering a living story of faith. This Cathedral has stood at the heart of Bicol for more than four centuries.",
     teasers:
-      "Discover the heritage. Encounter the saints. Meet Christ.",
+      "Discover the heritage. Encounter the saints. Meet Christ. Finish for a small surprise prize.",
   },
   pois: [
     {

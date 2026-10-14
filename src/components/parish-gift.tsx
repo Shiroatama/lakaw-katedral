@@ -8,24 +8,33 @@ import { PrimaryButton } from "@/components/ui";
 
 const AMOUNT_TEMPLATES = [20, 50, 100, 500] as const;
 
+function parseAmount(value: string): number | null {
+  const trimmed = value.trim();
+  if (!/^[0-9]+(\.[0-9]{1,2})?$/.test(trimmed)) return null;
+  const amount = Number(trimmed);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return amount;
+}
+
+function formatPeso(amount: number): string {
+  return Number.isInteger(amount) ? `₱${amount}` : `₱${amount.toFixed(2)}`;
+}
+
 export function ParishGift() {
   const router = useRouter();
   const pathname = usePathname();
   const markDonated = useJourneyStore((s) => s.markDonated);
-  const [amount, setAmount] = useState("");
+  const [amountText, setAmountText] = useState("20");
   const [submitting, setSubmitting] = useState(false);
-
-  const selectedTemplate = AMOUNT_TEMPLATES.find(
-    (value) => amount === String(value),
-  );
+  const amount = parseAmount(amountText);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (amount == null || submitting) return;
     setSubmitting(true);
     try {
-      const value = Number(amount);
       const { redirectUrl } = await stubPaymentProvider.createPayment({
-        amount: value,
+        amount,
         currency: "PHP",
       });
       markDonated();
@@ -50,14 +59,14 @@ export function ParishGift() {
           id="parish-gift-heading"
           className="font-display text-xl text-[var(--foreground)]"
         >
-          If you wish to give
+          Help the parish
         </h2>
         <p
           id="parish-gift-description"
           className="max-w-sm text-sm leading-relaxed text-[var(--muted-fg)]"
         >
-          Your gift helps care for this church and the people who come here.
-          Giving is welcome, but never required.
+          If you liked this walk, your help matters. It makes this experience
+          better, and helps us serve everyone who comes.
         </p>
       </div>
 
@@ -65,19 +74,19 @@ export function ParishGift() {
         <legend className="text-sm font-medium text-[var(--foreground)]">
           How much?
         </legend>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex w-full flex-wrap gap-1.5">
           {AMOUNT_TEMPLATES.map((value) => {
-            const selected = selectedTemplate === value;
+            const selected = amount === value;
             return (
               <button
                 key={value}
                 type="button"
                 aria-pressed={selected}
-                onClick={() => setAmount(String(value))}
-                className={`inline-flex min-h-11 min-w-[3.75rem] items-center justify-center rounded-md px-3.5 py-2.5 text-sm font-semibold leading-none transition-[transform,background-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
+                onClick={() => setAmountText(String(value))}
+                className={`inline-flex min-h-11 min-w-[3.75rem] flex-1 items-center justify-center rounded-md px-2 py-2.5 text-sm font-semibold leading-none transition-[transform,background-color,color] duration-200 ease-[var(--ease-out)] active:scale-[0.97] ${
                   selected
                     ? "bg-[var(--accent)] text-[var(--accent-fg)]"
-                    : "bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--stone-light)]"
+                    : "bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--stone-light)]"
                 }`}
               >
                 ₱{value}
@@ -87,29 +96,31 @@ export function ParishGift() {
         </div>
       </fieldset>
 
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium text-[var(--foreground)]">
-          Or type your own
-        </span>
-        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.25)]">
+      <label className="block">
+        <span className="sr-only">Amount</span>
+        <div className="flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-within:border-[var(--accent)] focus-within:shadow-[0_0_0_3px_rgba(184,92,56,0.25)]">
           <span className="text-sm font-semibold leading-none text-[var(--muted-fg)]">
             ₱
           </span>
           <input
             required
             inputMode="decimal"
+            autoComplete="off"
             pattern="[0-9]+([.][0-9]{1,2})?"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-transparent text-sm font-semibold leading-none text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]"
-            placeholder="0"
+            value={amountText}
+            onChange={(event) => setAmountText(event.target.value)}
+            className="w-full bg-transparent text-sm font-semibold leading-none text-[var(--foreground)] outline-none"
           />
         </div>
       </label>
 
       <div className="pt-0.5">
-        <PrimaryButton type="submit">
-          {submitting ? "Please wait…" : "Give"}
+        <PrimaryButton type="submit" disabled={amount == null || submitting}>
+          {submitting
+            ? "Please wait…"
+            : amount == null
+              ? "Give"
+              : `Give ${formatPeso(amount)}`}
         </PrimaryButton>
       </div>
     </form>

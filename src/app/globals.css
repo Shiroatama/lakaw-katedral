@@ -143,15 +143,6 @@ body {
   }
 }
 
-@keyframes rule-grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
 @keyframes bar-fill {
   from {
     width: 0;
@@ -211,12 +202,6 @@ body {
   background: var(--flare-color, var(--ceremonial));
   animation: quest-flare-burst 900ms var(--ease-out) forwards;
   animation-delay: var(--fd, 0ms);
-}
-
-@keyframes ring-fill {
-  from {
-    stroke-dashoffset: var(--ring-circ);
-  }
 }
 
 @keyframes count-pop {
@@ -293,17 +278,131 @@ body {
   animation: hero-settle 1100ms var(--ease-out) both;
 }
 
-.gold-rule {
-  transform-origin: center;
-  animation: rule-grow 900ms var(--ease-out) both;
-}
-
 .bar-fill {
   animation: bar-fill 1000ms var(--ease-out) both;
 }
 
-.ring-fill {
-  animation: ring-fill 900ms var(--ease-out) 150ms both;
+/* Percent / map icon swap in the chat-head (sequenced in JS, not parallel). */
+.map-progress-pct {
+  font-size: 0.95rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  animation: pop-in 360ms var(--ease-spring) both;
+}
+
+.map-progress-icon {
+  animation: pop-in 360ms var(--ease-spring) both;
+}
+
+/* Dock CTA: locked → terracotta ink wipe + label rewrite after map celebrate. */
+@keyframes quest-ink-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes quest-label-out {
+  to {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+}
+
+@keyframes quest-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quest-unlock {
+  background: var(--stone-light);
+  color: var(--muted-fg);
+  box-shadow: none;
+}
+
+.quest-unlock-ink {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--accent);
+}
+
+.quest-unlock[data-phase="animating"] .quest-unlock-ink {
+  animation: quest-ink-fill 720ms var(--ease-out) forwards;
+}
+
+.quest-unlock.is-live .quest-unlock-ink,
+.quest-unlock[data-phase="live"] .quest-unlock-ink {
+  transform: scaleX(1);
+  animation: none;
+}
+
+.quest-unlock.is-live .quest-unlock-from,
+.quest-unlock[data-phase="live"] .quest-unlock-from {
+  opacity: 0;
+}
+
+.quest-unlock.is-live .quest-unlock-to,
+.quest-unlock[data-phase="live"] .quest-unlock-to {
+  opacity: 1;
+  animation: none;
+  transform: none;
+}
+
+.quest-unlock-labels {
+  display: grid;
+  width: 100%;
+  place-items: center;
+}
+
+.quest-unlock-from,
+.quest-unlock-to {
+  grid-area: 1 / 1;
+  text-align: center;
+}
+
+.quest-unlock-from {
+  color: var(--muted-fg);
+}
+
+.quest-unlock-to {
+  opacity: 0;
+  color: var(--accent-fg);
+}
+
+.quest-unlock-from.is-out {
+  animation: quest-label-out 320ms var(--ease-in) forwards;
+}
+
+.quest-unlock-to.is-in {
+  animation: quest-label-in 420ms var(--ease-out) 220ms forwards;
+}
+
+.quest-unlock.is-live,
+.quest-unlock[data-phase="live"] {
+  color: var(--accent-fg);
+  box-shadow: 0 4px 16px rgba(184, 92, 56, 0.35);
+  transition: filter 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+
+.quest-unlock.is-live:hover,
+.quest-unlock[data-phase="live"]:hover {
+  filter: brightness(0.95);
+}
+
+.quest-unlock.is-live:active,
+.quest-unlock[data-phase="live"]:active {
+  transform: scale(0.97);
 }
 
 .count-pop {
@@ -612,6 +711,36 @@ body {
 
   .quest-flare {
     display: none !important;
+  }
+
+  .map-progress-pct,
+  .map-progress-icon {
+    animation: none !important;
+  }
+
+  .quest-unlock-ink,
+  .quest-unlock-from,
+  .quest-unlock-to {
+    animation: none !important;
+  }
+
+  .quest-unlock[data-phase="animating"] .quest-unlock-ink,
+  .quest-unlock.is-live .quest-unlock-ink,
+  .quest-unlock[data-phase="live"] .quest-unlock-ink {
+    transform: scaleX(1) !important;
+  }
+
+  .quest-unlock[data-phase="animating"] .quest-unlock-from,
+  .quest-unlock.is-live .quest-unlock-from,
+  .quest-unlock[data-phase="live"] .quest-unlock-from {
+    opacity: 0 !important;
+  }
+
+  .quest-unlock[data-phase="animating"] .quest-unlock-to,
+  .quest-unlock.is-live .quest-unlock-to,
+  .quest-unlock[data-phase="live"] .quest-unlock-to {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   ::view-transition-old(*),

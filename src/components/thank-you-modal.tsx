@@ -1,38 +1,38 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { useJourneyStore } from "@/lib/tour";
 import { PrimaryButton } from "@/components/ui";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** Centered reward acknowledgment after a gift. Backdrop is non-dismissible. */
 export function ThankYouModal() {
-  const router = useRouter();
   const hydrated = useHydrated();
   const donated = useJourneyStore((s) => s.donated);
+  const [dismissed, setDismissed] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
-  const open = hydrated && donated;
+  const open = hydrated && donated && !dismissed;
+
+  useEffect(() => {
+    if (donated) setDismissed(false);
+  }, [donated]);
 
   useEffect(() => {
     if (!open) return;
-    const goHome = () => {
-      router.push("/", { transitionTypes: ["nav-back"] });
-    };
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") goHome();
+      if (event.key === "Escape") setDismissed(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, router]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     panelRef.current
-      ?.querySelector<HTMLElement>("a, button")
+      ?.querySelector<HTMLElement>('a, button:not([aria-label="Close"])')
       ?.focus({ preventScroll: true });
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -61,12 +61,16 @@ export function ThankYouModal() {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative w-full max-w-sm rounded-xl bg-[var(--surface)] px-5 py-5 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative w-full max-w-sm rounded-xl bg-[var(--surface)] px-5 pb-5 pt-10 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
       >
-        <div
-          className="gold-rule mx-auto mb-4 h-px w-full max-w-[8rem] bg-[var(--ceremonial)]/70"
-          aria-hidden
-        />
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-3xl leading-none text-[var(--foreground)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
+          aria-label="Close"
+        >
+          ×
+        </button>
         <h2
           id={titleId}
           className="font-display text-2xl leading-tight text-[var(--foreground)]"

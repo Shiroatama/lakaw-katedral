@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   getEntrancePoi,
@@ -16,6 +16,7 @@ import {
   type Poi,
 } from "@/lib/tour";
 import { MapBubble, type MapFocus } from "@/components/map-bubble";
+import { QuestUnlockCta } from "@/components/quest-unlock-cta";
 import { PrimaryButton, StickyActionBar } from "@/components/ui";
 
 type StopDockProps = {
@@ -40,6 +41,15 @@ type StopDockProps = {
   hideMap?: boolean;
 };
 
+type UnlockPhase = "idle" | "animating" | "done";
+
+type UnlockedTarget = {
+  label: string;
+  icon: "walk" | "check";
+  href?: string;
+  onClick?: () => void;
+};
+
 /**
  * Bottom dock shared by every journey screen: map chat-head + one CTA.
  *
@@ -47,13 +57,10 @@ type StopDockProps = {
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
  * - on a stop, quest unsolved: Solve the quest first (locked)
+ * - after solve:    ink-fill unlock to Next / Finish starts with the map celebrate
  * - next is entrance: Continue at the entrance (link to place 1)
  * - later places:   Next: the mural (opens wayfinding map)
  * - all solved:     Finish
- *
- * The map head is present on Home and stop screens so pilgrims can check where
- * they are or where to begin. Preview gates hide it. The observation key
- * unlocks the next-place CTA after you finish the quest at the current stop.
  */
 export function StopDock({
   finishLabel = "Finish",
@@ -67,8 +74,6 @@ export function StopDock({
   const onHome = pathname === "/";
   const journeyReady = useJourneyHydrated();
   const [mapOpen, setMapOpen] = useState(defaultOpen);
-  // Deep-link /map opens wayfinding. Chat-head opens "you are here" when known,
-  // otherwise "Start here" / next place.
   const [mapFocus, setMapFocus] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
   );
@@ -77,7 +82,6 @@ export function StopDock({
   const started = isJourneyStarted(progress);
   const next = getNextExpectedPoi(progress, nagaTour);
   const entrance = getEntrancePoi(nagaTour);
-  // Home before the walk: map is for orientation only. Start the walk opens place 1.
   const mapOrientationOnly = onHome && !started;
 
   const stopSlug = pathname.startsWith("/s/")
@@ -87,14 +91,52 @@ export function StopDock({
   const currentUnsolved =
     currentStop !== null && !progress.completed.includes(currentStop.id);
 
+  const [unlockPhase, setUnlockPhase] = useState<UnlockPhase>("idle");
+  const wasUnsolved = useRef(currentUnsolved);
+  const unlockingStopId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (currentUnsolved) {
+      unlockingStopId.current = null;
+      setUnlockPhase("idle");
+      wasUnsolved.current = true;
+      return;
+    }
+    if (
+      wasUnsolved.current &&
+      currentStop &&
+      unlockingStopId.current !== currentStop.id
+    ) {
+      unlockingStopId.current = currentStop.id;
+      // Start with the map percent celebrate, not after it.
+      setUnlockPhase("animating");
+    }
+    wasUnsolved.current = false;
+  }, [currentUnsolved, currentStop]);
+
   function openMap(focus: MapFocus) {
     setMapFocus(focus);
     setMapOpen(true);
   }
 
-  // Wait for persisted progress before choosing the CTA. Map column stays so
-  // home and journey docks share the same geometry (no full-width flash),
-  // except preview gates that hide the map.
+  function unlockedTarget(): UnlockedTarget {
+    if (complete || !next) {
+      return { label: finishLabel, icon: "check", href: "/finish" };
+    }
+    if (next.order === 1) {
+      return {
+        label: nextPlaceCtaLabel(next),
+        icon: "walk",
+        href: `/s/${next.slug}`,
+      };
+    }
+    return {
+      label: nextPlaceCtaLabel(next),
+      icon: "walk",
+      onClick: () => openMap("next"),
+    };
+  }
+
   if (!journeyReady) {
     return (
       <StickyActionBar
@@ -128,6 +170,18 @@ export function StopDock({
         Solve the quest first
       </PrimaryButton>
     );
+  } else if (unlockPhase === "animating" || unlockPhase === "done") {
+    const target = unlockedTarget();
+    action = (
+      <QuestUnlockCta
+        phase={unlockPhase === "done" ? "live" : "animating"}
+        toLabel={target.label}
+        toIcon={target.icon}
+        href={target.href}
+        onClick={target.onClick}
+        onUnlocked={() => setUnlockPhase("done")}
+      />
+    );
   } else if (complete || !next) {
     action = (
       <PrimaryButton href="/finish" icon="check">
@@ -141,7 +195,6 @@ export function StopDock({
       </PrimaryButton>
     );
   } else if (next.order === 1) {
-    // Left the entrance mid-quest: go back to the story, not the map.
     action = (
       <PrimaryButton href={`/s/${next.slug}`} icon="walk">
         {nextPlaceCtaLabel(next)}

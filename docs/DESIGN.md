@@ -14,7 +14,7 @@ This document is the source of truth for color tokens, chrome, and per-screen el
 
 Warm welcome for an outdoor QR walk through Naga Metropolitan Cathedral. Color should feel like standing in front of the cream facade at noon: grounded, inviting, readable in sun. Not a cool museum app, not a dark liturgy app, not a transit map.
 
-**Inspiration:** cathedral facade (cream stone, wood doors, terracotta pavement, gold crest). Values are inspired for UI readability, not eyedropped from a photo.
+**Inspiration:** cathedral facade (cream stone, wood doors, terracotta pavement). Values are inspired for UI readability, not eyedropped from a photo.
 
 ---
 
@@ -34,7 +34,6 @@ Plain words around real names. Visitor-facing copy is about Grade 3 level ("plac
 | Neutrals | Soft cream canvas. Kill cool blue-gray backgrounds. |
 | Primary CTA | Mid-brick terracotta. |
 | Secondary | Wood brown (nav weight, secondary actions, visited tone). |
-| Gold | Ceremonial only (completed journey moments, crest-like highlights). Never primary buttons. |
 | Success | Muted green only (arrived / done). |
 | Danger | Clear red (errors). Must not look like a CTA. |
 | Sky blue | Banned from chrome. Do not reintroduce teal or cool blue accents. |
@@ -55,7 +54,6 @@ Implement in `src/app/globals.css` (`:root`). Keep `manifest.ts` / viewport `the
 | On CTA | `--accent-fg` | `#fffaf5` | Text on terracotta |
 | Wood | `--stone` | `#6b4a35` | Secondary actions, nav weight |
 | Wood soft | `--stone-light` | `#e8d8c8` | Soft chips, progress track |
-| Gold | `--ceremonial` | `#c4a35a` | Completed / crest moments only |
 | Success | `--success` | `#4f6b4a` | Arrived / done |
 | Danger | `--danger` | `#b33b2e` | Errors only |
 
@@ -121,7 +119,7 @@ Not a required step on site (the entrance QR goes straight to stop 1). Used by p
 - Brand: Lakaw Katedral as hero-level signal, over a full-bleed photo from the top edge of the screen (no card, no rounded corners)
 - Hook: "Welcome, dear pilgrim and visitor."
 - Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
-- Invite: "Discover the heritage. Encounter the saints. Meet Christ." (no question stack)
+- Invite: "Discover the heritage. Encounter the saints. Meet Christ. Finish for a small surprise prize." (no question stack)
 - No cathedral-name headline, no QR mention
 - Dock: map chat-head + **Start the walk** (opens place 1). Tap the map to see where place 1 is.
 - No stop list, schedule, stats, or address block in the first viewport
@@ -151,7 +149,7 @@ Top to bottom:
 2. Optional one-line note (journey complete)
 3. Stop title
 4. About (short; descriptive only, no instructions) with optional **Read more** / **Show less** for `aboutMore` history so the quest stays near the first screen
-5. Quest block, editorial style (no box; terracotta left rule; no visible "Your quest" label, only `sr-only` for the form region; action and clue in regular body weight, only the question semibold, cream `--surface` answer field): **Something to do** (instruction / call to action: pray, look, pause)
+5. Quest block, editorial style (no box; terracotta left rule; no visible "Your quest" label, only `sr-only` for the form region; action and clue in regular body weight, only the question semibold, cream `--surface` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: "You are right", then the reveal. Progress advances on the map chat-head ring.
 6. Interesting fact
 7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited
 
@@ -173,9 +171,9 @@ MVP: no audio, share, or save.
 
 One page for next ideas and the gift. Congratulations is a big Success modal on first arrival (not competing in the scroll).
 
-1. **Success modal (first visit):** large check, green "You finished the walk", thank-you line, **Continue** dismisses. Shown once per session until Start over.
-2. **Gift:** heading "If you wish to give"; soft surface treatment. Amount presets + custom; submit stub opens thank-you modal. First content after the modal.
-3. **While you are here:** next ideas (candle, sit, pray) with place cues.
+1. **Success modal (first visit):** waits about 1 s after `/finish` loads so the page transition can finish, then large check, green "You finished the walk", thank-you line that mentions a small surprise prize from the church, full-screen confetti, **Continue** dismisses. Shown once per session until Start over.
+2. **Prize hero, then gift:** edge-to-edge hero, then the page’s first job: "Your surprise prize" (ask at the parish). Soft rule, then "Help the parish" gift form (amount presets + custom, starts at 20 pesos; submit stub opens thank-you modal). Modal can still celebrate the prize; the page keeps it for validation.
+3. **While you are here:** clear air and a soft rule after the gift, then next ideas (candle, sit, pray) as editorial entries: small place photo beside title and body. No left rule, no rounded photo cards.
 4. **Start over** as muted utility text (confirm, then back to Home; danger color only on the confirm action)
 
 No stop checklist. No "Not now" button: leaving is simply leaving. If the walk is not finished, the page says so and links back instead of showing the ending.
@@ -193,7 +191,7 @@ No stop checklist. No "Not now" button: leaving is simply leaving. If the walk i
 
 - Place first: short cropped hero (finish-style 2:1 window over a 4:3 image), title, `about`.
 - Sans editorial caption (terracotta left rule): "This is place N of M", then a short intro.
-- **Unstarted:** Lakaw Katedral intro + "Did you know" teaser (more than 400 years; earthquakes, typhoons, and fire) then "Do you want to know why… Ready to walk from the door and learn more about this Cathedral and its story?"; dock **Start the walk** → Home. No map chat-head.
+- **Unstarted:** Lakaw Katedral intro + "Did you know" teaser (more than 400 years; earthquakes, typhoons, and fire) then "Do you want to know why… Ready to walk… Finish every place and the church has a small surprise prize waiting for you."; dock **Start the walk** → Home. No map chat-head.
 - **Mid-walk too early:** say they found this place early, finish the expected place first; dock **Continue at the …** → expected place. No map chat-head.
 - No observation quest. Progress unchanged.
 
@@ -231,10 +229,11 @@ Motion gives presence and hierarchy, never decoration. Premium feel comes from c
 | Page to page (in-app links) | Slide + fade + slight blur. Forward rises from below; back drops in from above. React `<ViewTransition>` with `transitionTypes` (`nav-forward` / `nav-back`). QR scans and browser back just load normally. | 420 to 480 ms |
 | Wayfinding chat bubble | Bubble scales up from the map chat-head; backdrop fades; contents rise in one by one; map markers pop in; the "next" marker soft-rings. Closing is faster. Focus moves into the bubble and back to the chat-head. | 480 ms open, 300 ms close |
 | Bottom dock | Slides up into place after the visit is recorded | 560 ms |
-| Map button | Progress ring sweeps from empty to current; the count pops when it changes | 900 ms |
+| Map button | Mid-walk: map → percent → count (~2 s) → hold (~2 s) → map. Last place: map → percent → count to 100% (~2 s) → hold 100% (~1 s) → check (~2 s) → map. | ~4.4–5.4 s |
+| Quest CTA unlock | Starts with the map celebrate on a correct answer: terracotta ink fills left → right while "Solve the quest first" rewrites to Next / Finish; then the button is tappable | ~0.8 s |
 | Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |
 | Home | Hero settles; name overlay, intro and status lines rise in order | 350 ms start |
-| Finish | Success modal pops on arrival; Continue reveals gift then next ideas | about 1.1 s total |
+| Finish | Page lands first; success modal + canvas-confetti (side-to-center) after 1 s; Continue reveals gift then next ideas | 1 s delay, then modal |
 | Thank you | Gold rule draws in, then heading, text, button | 300 to 750 ms |
 | Buttons | Lift 1 px on hover (pointer devices only), press down to 97% | 200 ms |
 | Inputs | Focus ring fades in | 200 ms |
@@ -275,6 +274,5 @@ Update `SPEC.md` donate and screen notes to match when editing product docs.
 - [x] Whole tour precached at service-worker install
 - [x] Finish: success modal then soft gift + next ideas; "Not now" removed; Start over on finish
 - [x] Motion system: page slides, animated map sheet, dock, ring, staggered reveals, reduced-motion fallback
-- [x] Finish ceremonial treatment using `--ceremonial`
 - [x] Edge copy/layout pass for ahead, midroute, offline, completed banner
 - [x] Spot-check outdoor contrast on terracotta CTA and cream text (tokens + build verified)

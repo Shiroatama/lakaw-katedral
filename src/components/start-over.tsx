@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { RepeatIcon } from "@/components/icons";
+import { PrimaryButton } from "@/components/ui";
 import { useJourneyStore } from "@/lib/tour";
 import { useHydrated } from "@/lib/use-hydrated";
 
@@ -18,7 +19,6 @@ export function StartOver({ className = "" }: { className?: string }) {
   const descriptionId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
 
   // Home is the next screen. Have it ready so the swap does not wait on a fetch.
@@ -41,7 +41,9 @@ export function StartOver({ className = "" }: { className?: string }) {
   useEffect(() => {
     if (open) {
       wasOpen.current = true;
-      cancelRef.current?.focus({ preventScroll: true });
+      panelRef.current
+        ?.querySelector<HTMLElement>('button:not([aria-label="Close"])')
+        ?.focus({ preventScroll: true });
       const previous = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
@@ -68,8 +70,8 @@ export function StartOver({ className = "" }: { className?: string }) {
   const dialog = (
     <div
       className="confirm-root fixed inset-0 z-50 flex items-center justify-center px-5"
-      data-open={open}
-      inert={!open}
+      data-open={open ? "true" : "false"}
+      inert={!open ? true : undefined}
       aria-hidden={!open}
     >
       <button
@@ -86,8 +88,16 @@ export function StartOver({ className = "" }: { className?: string }) {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative w-full max-w-sm rounded-xl bg-[var(--surface)] px-5 py-5 shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative w-full max-w-sm rounded-xl bg-[var(--surface)] px-5 pb-5 pt-10 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
       >
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-3xl leading-none text-[var(--foreground)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
+          aria-label="Close"
+        >
+          ×
+        </button>
         <h2
           id={titleId}
           className="font-display text-2xl leading-tight text-[var(--foreground)]"
@@ -100,22 +110,17 @@ export function StartOver({ className = "" }: { className?: string }) {
         >
           Your steps so far will be erased.
         </p>
-        <div className="mt-5 flex flex-col gap-2">
+        <div className="mt-5 flex flex-col gap-3">
+          <PrimaryButton onClick={() => setOpen(false)} icon="none">
+            Go back
+          </PrimaryButton>
           <button
             type="button"
             onClick={confirmStartOver}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-[var(--danger)] px-5 text-base font-semibold text-white transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97] active:brightness-90"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md px-5 text-base font-medium text-[var(--danger)] transition-[transform,background-color,color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--background)] active:scale-[0.97]"
           >
             <RepeatIcon className="h-[1.1em] w-[1.1em]" />
             Start over
-          </button>
-          <button
-            ref={cancelRef}
-            type="button"
-            onClick={() => setOpen(false)}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-[var(--border)] bg-transparent px-5 text-base font-medium text-[var(--foreground)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--background)] active:scale-[0.97]"
-          >
-            Go back
           </button>
         </div>
       </div>

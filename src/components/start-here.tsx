@@ -75,7 +75,8 @@ export function StartHere({ poi, expected, unstarted }: StartHereProps) {
               <p>
                 Do you want to know why it is called a cathedral, and not just
                 a big church? Ready to walk from the door and learn more about
-                this Cathedral and its story?
+                this Cathedral and its story? Finish every place and the church
+                has a small surprise prize waiting for you.
               </p>
               <p className="text-[var(--muted-fg)]">
                 Tap Start the walk below.

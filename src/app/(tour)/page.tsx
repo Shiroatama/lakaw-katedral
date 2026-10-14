@@ -177,7 +177,8 @@ export default function HomePage() {
           className="fade-up mx-auto mt-4 max-w-sm text-base leading-relaxed text-white/80"
           style={delay(350)}
         >
-          Thank you for walking with us. You can help the parish if you like.
+          Thank you for walking with us. Ask at the parish for your small
+          surprise prize, and help the parish if you like.
         </p>
         <div className="fade-up mt-5" style={delay(450)}>
           <StartOver className="text-white/70 hover:text-white" />

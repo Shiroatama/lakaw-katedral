@@ -80,28 +80,49 @@ export default function FinishPage() {
   return (
     <>
       <PageTransition>
-        <main className="flex flex-1 flex-col gap-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2">
-          <div className="fade-up">
-            <aside className="overflow-hidden rounded-xl bg-[var(--surface)]">
-              <div className="relative aspect-[5/2] bg-[var(--stone-light)]">
+        <main className="flex flex-1 flex-col pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <div className="flex flex-col gap-6">
+            {/* Shorter window: image stays full scale, top/bottom are clipped. */}
+            <div className="relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">
+              <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
                 <Image
-                  src="/img/give-people.webp"
-                  alt="People in the cathedral raising their hands in prayer"
+                  src="/img/finish-prize-side-pilgrim.jpg"
+                  alt="A pilgrim at the parish side office under a covered walk, holding a small prize"
                   fill
                   unoptimized
-                  className="object-cover object-center"
-                  sizes="(max-width: 512px) 100vw, 512px"
                   priority
+                  className="hero-settle object-cover object-[center_35%]"
+                  sizes="(max-width: 512px) 100vw, 512px"
                 />
               </div>
-              <div className="px-5 py-4">
-                <ParishGift />
-              </div>
-            </aside>
+            </div>
+            <section
+              className="fade-up space-y-2"
+              aria-labelledby="surprise-prize-heading"
+            >
+              <h1
+                id="surprise-prize-heading"
+                className="font-display text-3xl leading-tight text-[var(--foreground)]"
+              >
+                Your surprise prize
+              </h1>
+              <p className="max-w-sm text-base leading-relaxed text-[var(--muted-fg)]">
+                You finished the walk. Ask someone at the parish for the small
+                surprise prize the church has for you.
+              </p>
+            </section>
+            {/* Same gap-6 above and below so the rule sits midway. */}
+            <div className="border-t border-[var(--border)]" aria-hidden />
+            <section
+              className="fade-up"
+              aria-labelledby="parish-gift-heading"
+            >
+              <ParishGift />
+            </section>
           </div>
 
           <section
-            className="fade-up space-y-3"
+            className="fade-up mt-16 space-y-5 border-t border-[var(--border)] pt-10"
             aria-labelledby="next-ideas-heading"
           >
             <div className="space-y-1">
@@ -116,35 +137,35 @@ export default function FinishPage() {
               </p>
             </div>
 
-            <ul className="space-y-3">
+            <ul className="space-y-6">
               {NEXT_IDEAS.map((idea) => (
                 <li key={idea.title}>
-                  <aside className="overflow-hidden rounded-xl bg-[var(--surface)]">
-                    <div className="relative aspect-[5/2] bg-[var(--stone-light)]">
+                  <div className="flex gap-3">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[var(--stone-light)]">
                       <Image
                         src={idea.image}
                         alt={idea.alt}
                         fill
                         unoptimized
                         className={`object-cover ${idea.objectPosition}`}
-                        sizes="(max-width: 512px) 100vw, 512px"
+                        sizes="80px"
                       />
                     </div>
-                    <div className="space-y-1.5 px-4 py-4">
-                      <h3 className="font-display text-lg leading-snug text-[var(--foreground)]">
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl leading-snug text-[var(--foreground)]">
                         {idea.title}
                       </h3>
-                      <p className="text-sm leading-relaxed text-[var(--muted-fg)]">
+                      <p className="mt-1.5 text-base leading-relaxed text-[var(--foreground)]/90">
                         {idea.body}
                       </p>
                     </div>
-                  </aside>
+                  </div>
                 </li>
               ))}
             </ul>
           </section>
 
-          <div className="fade-up flex justify-center">
+          <div className="fade-up mt-10 flex justify-center">
             <StartOver />
           </div>
         </main>

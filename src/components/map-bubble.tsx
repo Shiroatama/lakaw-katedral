@@ -13,7 +13,7 @@ import {
   useJourneyStore,
 } from "@/lib/tour";
 import { CathedralMap } from "@/components/cathedral-map";
-import { ArrowRightIcon, QrCodeIcon } from "@/components/icons";
+import { ArrowRightIcon, CheckIcon, QrCodeIcon } from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** What the sheet highlights: where you stand, or where to go next. */
@@ -50,6 +50,24 @@ function landmarkSteps(landmark: string): string[] {
     .split(/(?<=\.)\s+/)
     .map((step) => step.trim())
     .filter(Boolean);
+}
+
+/** Wait for map ↔ percent swap to settle before the next step. */
+const HEAD_SWAP_MS = 360;
+/** Count + ring fill after the percent is showing. */
+const RING_ADVANCE_MS = 2000;
+/** Mid-walk: hold the landed percent before swapping back to the map. */
+const HEAD_HOLD_MS = 2000;
+/** Last place: hold 100% before swapping to the check. */
+const FINISH_PERCENT_HOLD_MS = 1000;
+/** Last place: show the check before swapping back to the map. */
+const FINISH_CHECK_HOLD_MS = 2000;
+
+type HeadMode = "map" | "percent" | "check";
+
+/** Gentle ease so the ring reads as steady progress, not a snap. */
+function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
 /**
@@ -95,6 +113,87 @@ export function MapBubble({
     : null;
   const complete = isJourneyComplete(progress, nagaTour);
   const started = isJourneyStarted(progress);
+
+  // Sequenced on completion (nothing starts in parallel).
+  // Mid-walk: map → percent → count (~2s) → hold (~2s) → map.
+  // Last place: map → percent → count to 100% (~2s) → hold 100% (~1s) →
+  // check (~2s) → map.
+  const targetPct = total === 0 ? 0 : done / total;
+  const prevDone = useRef(done);
+  const ringPctRef = useRef(targetPct);
+  const [ringPct, setRingPct] = useState(targetPct);
+  const [headMode, setHeadMode] = useState<HeadMode>("map");
+  useEffect(() => {
+    const to = total === 0 ? 0 : done / total;
+    if (done <= prevDone.current) {
+      prevDone.current = done;
+      ringPctRef.current = to;
+      setRingPct(to);
+      return;
+    }
+    const from = ringPctRef.current;
+    const finishing = done >= total;
+    prevDone.current = done;
+    setRingPct(from);
+    ringPctRef.current = from;
+    setHeadMode("percent");
+
+    let cancelled = false;
+    let frame = 0;
+    const timers: number[] = [];
+
+    const afterCount = () => {
+      if (cancelled) return;
+      if (finishing) {
+        timers.push(
+          window.setTimeout(() => {
+            if (cancelled) return;
+            setHeadMode("check");
+            timers.push(
+              window.setTimeout(() => {
+                if (!cancelled) setHeadMode("map");
+              }, FINISH_CHECK_HOLD_MS),
+            );
+          }, FINISH_PERCENT_HOLD_MS),
+        );
+        return;
+      }
+      timers.push(
+        window.setTimeout(() => {
+          if (!cancelled) setHeadMode("map");
+        }, HEAD_HOLD_MS),
+      );
+    };
+
+    timers.push(
+      window.setTimeout(() => {
+        if (cancelled) return;
+        const start = performance.now();
+        const tick = (now: number) => {
+          if (cancelled) return;
+          const t = Math.min(1, (now - start) / RING_ADVANCE_MS);
+          const value = from + (to - from) * easeInOut(t);
+          ringPctRef.current = value;
+          setRingPct(value);
+          if (t < 1) {
+            frame = window.requestAnimationFrame(tick);
+            return;
+          }
+          afterCount();
+        };
+        frame = window.requestAnimationFrame(tick);
+      }, HEAD_SWAP_MS),
+    );
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+      for (const id of timers) window.clearTimeout(id);
+    };
+  }, [done, total]);
+  const showingPercent = headMode === "percent";
+  const showingCheck = headMode === "check";
+  const displayPercent = Math.round(ringPct * 100);
 
   // Prefer "you are here" when we know the place; otherwise fall back to next.
   const showingHere = focus === "here" && here !== null;
@@ -155,8 +254,7 @@ export function MapBubble({
   const stroke = 4;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  const pct = total === 0 ? 0 : done / total;
-  const dashOffset = circumference * (1 - pct);
+  const dashOffset = circumference * (1 - ringPct);
 
   const sheet = (
     <div
@@ -244,7 +342,7 @@ export function MapBubble({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--background)] text-lg text-[var(--foreground)] ring-1 ring-[var(--border)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-3xl leading-none text-[var(--foreground)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
             aria-label="Close map"
           >
             ×
@@ -376,11 +474,16 @@ export function MapBubble({
           ref={triggerRef}
           type="button"
           onClick={openFromTrigger}
-          className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] shadow-[0_4px_16px_rgba(42,33,28,0.18)] ring-1 ring-[var(--border)] transition-[box-shadow] duration-200 ease-[var(--ease-out)] hover:shadow-[0_8px_22px_rgba(42,33,28,0.22)] active:scale-95"
+          data-head={headMode}
+          className="map-progress-head relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] shadow-[0_4px_16px_rgba(42,33,28,0.18)] ring-1 ring-[var(--border)] transition-[box-shadow] duration-200 ease-[var(--ease-out)] hover:shadow-[0_8px_22px_rgba(42,33,28,0.22)] active:scale-95"
           aria-label={
             open
               ? "Close map"
-              : `Open map. You have seen ${done} of ${total} places.`
+              : showingCheck
+                ? `Walk complete. You have seen all ${total} places.`
+                : showingPercent
+                  ? `Progress ${displayPercent} percent. You have seen ${done} of ${total} places.`
+                  : `Open map. You have seen ${done} of ${total} places.`
           }
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -409,26 +512,35 @@ export function MapBubble({
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={dashOffset}
-              className="ring-fill transition-[stroke-dashoffset] duration-700 ease-[var(--ease-out)]"
-              style={{ "--ring-circ": circumference } as React.CSSProperties}
             />
           </svg>
-          <svg
-            width={22}
-            height={22}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.75}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="relative z-10 text-[var(--muted)]"
-            aria-hidden
-          >
-            <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />
-            <path d="M9 4v14" />
-            <path d="M15 6v14" />
-          </svg>
+          {showingPercent ? (
+            <span
+              className="map-progress-pct relative z-10 font-semibold tabular-nums text-[var(--muted)]"
+              aria-hidden
+            >
+              {displayPercent}%
+            </span>
+          ) : showingCheck ? (
+            <CheckIcon className="map-progress-icon relative z-10 h-[1.35rem] w-[1.35rem] text-[var(--success)]" />
+          ) : (
+            <svg
+              width={22}
+              height={22}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="map-progress-icon relative z-10 text-[var(--muted)]"
+              aria-hidden
+            >
+              <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />
+              <path d="M9 4v14" />
+              <path d="M15 6v14" />
+            </svg>
+          )}
         </button>
       )}
 

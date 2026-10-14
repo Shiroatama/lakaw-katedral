@@ -2,16 +2,23 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { FinishConfetti } from "@/components/finish-confetti";
 import { PrimaryButton } from "@/components/ui";
+
 import {
   readFinishSuccessSeen,
   writeFinishSuccessSeen,
 } from "@/lib/tour/finish-success";
 import { useHydrated } from "@/lib/use-hydrated";
 
+/** Wait so the finish page can settle before the celebrate dialog covers it. */
+const OPEN_DELAY_MS = 1000;
+
 /**
  * Big celebrate dialog on /finish. Opens on first arrival after the walk is
- * done; Continue dismisses it so next ideas and the gift sit underneath.
+ * done, after a short delay so it does not overlap the page transition.
+ * Continue dismisses it so next ideas and the gift sit underneath.
+ * Full-screen confetti runs while the dialog is open.
  */
 export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
   const hydrated = useHydrated();
@@ -19,13 +26,24 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const [dismissed, setDismissed] = useState<boolean | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!hydrated || !allowed) return;
-    setDismissed(readFinishSuccessSeen());
+    if (!hydrated || !allowed) {
+      setReady(false);
+      return;
+    }
+    const seen = readFinishSuccessSeen();
+    setDismissed(seen);
+    if (seen) {
+      setReady(false);
+      return;
+    }
+    const id = window.setTimeout(() => setReady(true), OPEN_DELAY_MS);
+    return () => window.clearTimeout(id);
   }, [hydrated, allowed]);
 
-  const open = hydrated && allowed && dismissed === false;
+  const open = hydrated && allowed && dismissed === false && ready;
 
   function dismiss() {
     writeFinishSuccessSeen();
@@ -47,7 +65,7 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
   useEffect(() => {
     if (!open) return;
     panelRef.current
-      ?.querySelector<HTMLElement>("a, button")
+      ?.querySelector<HTMLElement>('a, button:not([aria-label="Close"])')
       ?.focus({ preventScroll: true });
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -70,6 +88,7 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
         aria-hidden
         onClick={dismiss}
       />
+      <FinishConfetti active={open} burstKey={ready ? 1 : 0} />
       <div
         ref={panelRef}
         role="dialog"
@@ -77,8 +96,16 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative flex w-full max-w-md flex-col items-center rounded-2xl bg-[var(--surface)] px-6 pb-7 pt-10 text-center shadow-[0_20px_56px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative z-10 flex w-full max-w-md flex-col items-center rounded-2xl bg-[var(--surface)] px-6 pb-7 pt-10 text-center shadow-[0_20px_56px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none"
       >
+        <button
+          type="button"
+          onClick={dismiss}
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-3xl leading-none text-[var(--foreground)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
+          aria-label="Close"
+        >
+          ×
+        </button>
         <div
           className="pop-in mb-6 flex h-28 w-28 items-center justify-center rounded-full bg-[var(--success)] text-white shadow-[0_10px_28px_rgba(79,107,74,0.35)]"
           style={{ "--delay": "60ms" } as React.CSSProperties}
@@ -106,7 +133,8 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
           id={descriptionId}
           className="mt-3 max-w-sm text-lg leading-snug text-[var(--muted-fg)]"
         >
-          Thank you for walking with us through every place.
+          Thank you for walking with us through every place. A small surprise
+          prize from the church is waiting for you.
         </p>
         <div className="mt-7 w-full">
           <PrimaryButton onClick={dismiss}>Continue</PrimaryButton>
