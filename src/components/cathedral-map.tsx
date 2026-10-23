@@ -4,16 +4,19 @@ import { getOrderedPois, useJourneyStore } from "@/lib/tour";
 
 type CathedralMapProps = {
   highlightNext?: boolean;
-  variant?: "vector" | "interior";
+  variant?: "interior" | "compound";
 };
 
-/** Squared twin-tower footprint from the aerial top view. */
-const FOOTPRINT =
-  "M105 42 H175 L187 56 V84 H204 V122 H192 V270 H214 V326 H176 V338 H104 V326 H66 V270 H88 V122 H76 V84 H93 V56 Z";
+/** Compound view coordinates (mapped onto the upper-right Cathedral in the aerial compound plan). */
+const COMPOUND_POSITIONS: Record<string, { x: number; y: number }> = {
+  saints: { x: 199, y: 170 },
+  mural: { x: 184, y: 148 },
+  cathedra: { x: 199, y: 66 },
+};
 
 export function CathedralMap({
   highlightNext = true,
-  variant = "vector",
+  variant = "interior",
 }: CathedralMapProps) {
   const completed = useJourneyStore((s) => s.completed);
   const lastScannedPoiId = useJourneyStore((s) => s.lastScannedPoiId);
@@ -21,6 +24,11 @@ export function CathedralMap({
   const nextPoi = pois.find((poi) => !completed.includes(poi.id)) ?? null;
   const currentPoi = pois.find((p) => p.id === lastScannedPoiId) ?? null;
   const featuredPoi = highlightNext ? nextPoi : currentPoi;
+
+  const getCoords = (poi: (typeof pois)[number]) =>
+    variant === "compound"
+      ? (COMPOUND_POSITIONS[poi.id] ?? poi.map)
+      : poi.map;
 
   return (
     <div className="w-full">
@@ -52,63 +60,33 @@ export function CathedralMap({
         {/* Courtyard / outside */}
         <rect width="280" height="360" fill="var(--background)" rx="16" />
 
-        {variant === "interior" ? (
-          <image
-            href="/img/cathedral-painted-interior.jpg"
-            width="280"
-            height="360"
-            preserveAspectRatio="xMidYMid slice"
-            clipPath="url(#mapFrame)"
-          />
-        ) : (
-          <>
-            <g filter="url(#softShadow)">
-              <path
-                d={FOOTPRINT}
-                fill="#E8D8C8"
-                stroke="var(--stone)"
-                strokeWidth="3"
-                strokeLinejoin="round"
-              />
-            </g>
-          </>
-        )}
-
-        <text
-          x="140"
-          y="352"
-          textAnchor="middle"
-          fill="var(--muted-fg)"
-          fontSize="10"
-          fontFamily="var(--font-body), sans-serif"
-        >
-          Entrance
-        </text>
-
-        {/* Walking route */}
-        {variant === "interior" ? (
-          <polyline
-            points={pois.map((p) => `${p.map.x},${p.map.y}`).join(" ")}
-            fill="none"
-            stroke="var(--surface)"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.82"
-          />
-        ) : null}
-        <polyline
-          points={pois.map((p) => `${p.map.x},${p.map.y}`).join(" ")}
-          fill="none"
-          stroke="var(--accent)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="5 7"
-          opacity="0.62"
+        <image
+          href={
+            variant === "compound"
+              ? "/img/cathedral-compound.webp"
+              : "/img/cathedral-interior.webp"
+          }
+          width="280"
+          height="360"
+          preserveAspectRatio="xMidYMid slice"
+          clipPath="url(#mapFrame)"
         />
 
+        {variant === "interior" ? (
+          <text
+            x="140"
+            y="357"
+            textAnchor="middle"
+            fill="var(--muted-fg)"
+            fontSize="10"
+            fontFamily="var(--font-body), sans-serif"
+          >
+            Entrance
+          </text>
+        ) : null}
+
         {pois.map((poi) => {
+          const coords = getCoords(poi);
           const isDone = completed.includes(poi.id);
           const isCurrent = lastScannedPoiId === poi.id;
           const isNext = nextPoi?.id === poi.id;
@@ -126,8 +104,8 @@ export function CathedralMap({
             <g key={poi.id}>
               {isHighlighted ? (
                 <circle
-                  cx={poi.map.x}
-                  cy={poi.map.y}
+                  cx={coords.x}
+                  cy={coords.y}
                   r="17"
                   fill="none"
                   stroke={fill}
@@ -140,8 +118,8 @@ export function CathedralMap({
                 style={{ "--i": poi.order - 1 } as React.CSSProperties}
               >
                 <circle
-                  cx={poi.map.x}
-                  cy={poi.map.y}
+                  cx={coords.x}
+                  cy={coords.y}
                   r="12"
                   fill={fill}
                   stroke="var(--surface)"
@@ -149,8 +127,8 @@ export function CathedralMap({
                   style={{ transition: "fill 400ms var(--ease-out)" }}
                 />
                 <text
-                  x={poi.map.x}
-                  y={poi.map.y}
+                  x={coords.x}
+                  y={coords.y}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill="var(--accent-fg)"

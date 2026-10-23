@@ -70,7 +70,7 @@ export const nagaTour: Tour = {
         reveal:
           "That bird is a dove, a sign of the Holy Spirit. Above the crown at the door, it welcomes you as you enter the house of God.",
       },
-      map: { x: 140, y: 307 },
+      map: { x: 140, y: 336 },
     },
     {
       id: "mural",
@@ -99,7 +99,7 @@ export const nagaTour: Tour = {
         reveal:
           "Those crosses mark the heart of the story on this wall: Christ crucified, and the faith the missionaries brought to Bicol. Each cross you found is a quiet sign of that Good News.",
       },
-      map: { x: 140, y: 190 },
+      map: { x: 104, y: 298 },
     },
     {
       id: "cathedra",
@@ -119,12 +119,12 @@ export const nagaTour: Tour = {
       action:
         "Find the Archbishop's Chair. Pause. Give thanks for the shepherds who teach and care for God's people.",
       observation: {
-        look: "Look at the Cathedra. Find the cloth or cushion on the seat.",
+        look: "Look at the Cathedra. Find the cloth or cushion on the seat and backrest.",
         question: "What color is it?",
-        answers: ["white", "pure white"],
-        // Confirmed with parish / on-site: seat cloth is white.
+        answers: ["red", "deep red", "crimson", "maroon"],
+        // Confirmed from sanctuary photo: Cathedra upholstery is deep red.
         reveal:
-          "White is a color of light and holiness. On the Cathedra, it marks a chair of teaching and care, not a throne of gold. It reminds us that the Archbishop shepherds God's people with humble strength.",
+          "Red is the color of the Holy Spirit, of love, and of the martyrs who gave their lives for Christ. On the Cathedra, it reminds us that the Archbishop shepherds God's people with courage and love.",
       },
       map: { x: 140, y: 78 },
     },

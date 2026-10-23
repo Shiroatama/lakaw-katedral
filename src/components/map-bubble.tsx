@@ -96,7 +96,9 @@ export function MapBubble({
   const [focusInternal, setFocusInternal] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
   );
-  const [mapVariant, setMapVariant] = useState<"vector" | "interior">("vector");
+  const [mapVariant, setMapVariant] = useState<"interior" | "compound">(
+    "interior",
+  );
   const open = openControlled ?? openInternal;
   const focus = focusControlled ?? focusInternal;
 
@@ -369,7 +371,7 @@ export function MapBubble({
                 role="group"
                 aria-label="Map appearance"
               >
-                {(["vector", "interior"] as const).map((variant) => (
+                {(["interior", "compound"] as const).map((variant) => (
                   <button
                     key={variant}
                     type="button"
