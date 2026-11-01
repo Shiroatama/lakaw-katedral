@@ -13,7 +13,16 @@ import {
   useJourneyStore,
 } from "@/lib/tour";
 import { CathedralMap } from "@/components/cathedral-map";
-import { ArrowRightIcon, CheckIcon, QrCodeIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  QrCodeIcon,
+} from "@/components/icons";
+import {
+  readMapMarkersSeen,
+  writeMapMarkersSeen,
+} from "@/lib/tour/map-markers-seen";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** What the sheet highlights: where you stand, or where to go next. */
@@ -97,14 +106,17 @@ export function MapBubble({
     defaultOpen ? "next" : "here",
   );
   const [mapVariant, setMapVariant] = useState<"interior" | "compound">(
-    "interior",
+    "compound",
   );
+  /** Staggered marker pop-in: only on the first map open. */
+  const [animateMarkers, setAnimateMarkers] = useState(false);
   const open = openControlled ?? openInternal;
   const focus = focusControlled ?? focusInternal;
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const wasOpen = useRef(false);
+  const markersIntroPlayed = useRef(false);
 
   const progress = useJourneyStore();
   const total = nagaTour.pois.length;
@@ -204,7 +216,22 @@ export function MapBubble({
   function setOpen(nextOpen: boolean) {
     if (openControlled === undefined) setOpenInternal(nextOpen);
     onOpenChange?.(nextOpen);
+    if (!nextOpen) {
+      setMapVariant("compound");
+      setAnimateMarkers(false);
+    }
   }
+
+  useEffect(() => {
+    if (!open) return;
+    if (markersIntroPlayed.current || readMapMarkersSeen()) {
+      setAnimateMarkers(false);
+      return;
+    }
+    markersIntroPlayed.current = true;
+    writeMapMarkersSeen();
+    setAnimateMarkers(true);
+  }, [open]);
 
   function setFocus(nextFocus: MapFocus) {
     if (focusControlled === undefined) setFocusInternal(nextFocus);
@@ -227,10 +254,7 @@ export function MapBubble({
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (openControlled === undefined) setOpenInternal(false);
-        onOpenChange?.(false);
-      }
+      if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -262,6 +286,7 @@ export function MapBubble({
     <div
       className="sheet-root pointer-events-none fixed inset-0 z-40"
       data-open={open}
+      data-markers-animate={animateMarkers ? "true" : "false"}
       inert={!open}
       aria-hidden={!open}
     >
@@ -366,30 +391,24 @@ export function MapBubble({
             style={{ "--i": 2 } as React.CSSProperties}
           >
             <div className="relative">
-              <div
-                className="absolute right-2 top-2 z-10 inline-flex rounded-sm bg-[var(--surface)]/70 p-px ring-1 ring-[var(--border)]/60 backdrop-blur-[1px]"
-                role="group"
-                aria-label="Map appearance"
-              >
-                {(["interior", "compound"] as const).map((variant) => (
-                  <button
-                    key={variant}
-                    type="button"
-                    aria-pressed={mapVariant === variant}
-                    onClick={() => setMapVariant(variant)}
-                    className={`min-h-6 rounded-sm px-1.5 text-[9px] font-medium capitalize tracking-wide transition-[background-color,color] duration-200 ${
-                      mapVariant === variant
-                        ? "bg-[var(--stone-light)]/80 text-[var(--muted-fg)]"
-                        : "text-[var(--muted)]"
-                    }`}
-                  >
-                    {variant}
-                  </button>
-                ))}
-              </div>
+              {mapVariant === "interior" ? (
+                <button
+                  type="button"
+                  onClick={() => setMapVariant("compound")}
+                  className="absolute left-2 top-2 z-10 inline-flex min-h-8 items-center gap-1 rounded-sm bg-[var(--surface)]/85 px-2 text-[11px] font-medium text-[var(--foreground)] ring-1 ring-[var(--border)]/60 backdrop-blur-[1px] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] active:scale-95"
+                  aria-label="Back to compound map"
+                >
+                  <ArrowLeftIcon className="h-3.5 w-3.5" />
+                  Back
+                </button>
+              ) : null}
               <CathedralMap
                 highlightNext={!complete && !showingHere && featured !== null}
                 variant={mapVariant}
+                onEnterInterior={() => {
+                  setAnimateMarkers(false);
+                  setMapVariant("interior");
+                }}
               />
             </div>
           </div>

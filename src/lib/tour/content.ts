@@ -8,12 +8,13 @@ import type { Poi, Tour } from "./types";
  * Grade 3). Each hard term is explained the first time it appears.
  * See docs/SPEC.md sections 3.1 and 7.
  *
- * Each stop, in order: about (short, what is here), aboutMore (Read more),
- * action (what to do), observation key (look and answer). About copy never
- * carries instructions.
+ * Each stop, in order: about (short lead), aboutMore + storyImages (editorial
+ * photo beats), action (what to do), observation key (look and answer). About
+ * copy never carries instructions.
  * `landmark` lines are placeholders until the parish confirms where each QR
  * sign will be mounted (SPEC §17). Hero images reuse existing assets until
- * dedicated photos are provided.
+ * dedicated photos are provided. `storyImages` pair with `aboutMore` for the
+ * editorial photo story. Optional `heroVideo` fills the first hero frame.
  *
  * Observation answers below are trial placeholders until confirmed on site
  * with the parish. Wrong answers will frustrate real pilgrims; walk the
@@ -21,7 +22,7 @@ import type { Poi, Tour } from "./types";
  */
 export const nagaTour: Tour = {
   id: "naga-cathedral",
-  version: 11,
+  version: 13,
   name: "Lakaw Katedral",
   siteName: "Naga Metropolitan Cathedral",
   steward: {
@@ -45,6 +46,12 @@ export const nagaTour: Tour = {
       landmark:
         "At the main door of the Cathedral. Stand in front of the doors.",
       heroImage: "/img/entrance.webp",
+      heroVideo: "/video/entrance.mp4",
+      storyImages: [
+        "/img/home-facade.webp",
+        "/img/dome.webp",
+        "/img/prayer.webp",
+      ],
       about:
         "Did you know this Cathedral has stood at the heart of Bicol for more than four centuries, through earthquakes, typhoons, and fire? At this door are two patrons: Saint John the Evangelist, Patron Saint of the Cathedral Parish, and Saint Peter Baptist, Patron Saint of the Archdiocese of Cáceres.",
       aboutMore: [
@@ -83,11 +90,17 @@ export const nagaTour: Tour = {
         // inside the door, not the mural title again.
         "Walk in through the main doors. Find the angels that hold the holy water. The QR is behind those angels.",
       heroImage: "/img/murals.webp",
+      storyImages: [
+        "/img/dome.webp",
+        "/img/prayer.webp",
+        "/img/give-people.webp",
+      ],
       about:
         "You are part of a story that began centuries ago. This mural by Bicolano artist Raul Alcomendas is a visual story of Naga and Bicol: life before the Spanish came, the years of faith and mission, and the life of the people today.",
       aboutMore: [
         "It also tells how the Gospel came to Bicol: the missionaries who came, the communities they served, and the generations who received and passed on the faith.",
-        "Look for scenes of prayer, community, and local life. Sacred and everyday stories sit side by side, so the wall feels both holy and close to home.",
+        "Look for scenes of prayer on the wall. People kneeling, hands raised, and quiet moments of trust.",
+        "Sacred and everyday stories sit side by side here: community, local life, and faith close to home.",
       ],
       action:
         "Stand before the mural. Find one scene of the missionaries or the people of Bicol. Give thanks that you are part of a story that began centuries ago.",
@@ -110,10 +123,16 @@ export const nagaTour: Tour = {
       landmark:
         "Keep walking toward the sanctuary, the area around the altar. Find the Archbishop's Chair.",
       heroImage: "/img/statue.webp",
+      storyImages: [
+        "/img/cathedral-compound.webp",
+        "/img/dome.webp",
+        "/img/prayer.webp",
+      ],
       about:
         "Did you know a cathedral takes its name from the cathedra? This is the Archbishop's Chair. Because this chair is here, this church is a cathedral: the mother church of the Archdiocese of Cáceres.",
       aboutMore: [
-        "It is more than a seat of honor. Here the Archbishop teaches and shepherds the people of Bicol.",
+        "It is more than a seat of honor. From this chair the Archbishop teaches and shepherds the people of Bicol.",
+        "This house of God is the mother church of the Archdiocese of Cáceres, a living center of faith for the region.",
         "When you pause here, remember the shepherds who have guided this Church, and the faithful who gather under their care.",
       ],
       action:

@@ -1,7 +1,7 @@
-import Image from "next/image";
 import type { Poi } from "@/lib/tour";
-import { AboutSection } from "@/components/about-section";
+import { HeroMedia } from "@/components/hero-media";
 import { ObservationKeyForm } from "@/components/observation-key";
+import { StoryFlow } from "@/components/story-flow";
 
 type PoiDetailProps = {
   poi: Poi;
@@ -15,33 +15,36 @@ const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as React.CSSProperties;
 export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
   return (
     <article className="flex flex-1 flex-col">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8 pb-2">
         {/* Edge to edge, from the top of the screen. Page padding is cancelled
             here; the story below stays in the padded column. */}
-        <div className="relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] aspect-[4/3] overflow-hidden bg-[var(--stone-light)]">
-          {/* Served as-is (not via /_next/image) so the service worker can precache it for offline use. */}
-          <Image
-            src={poi.heroImage}
-            alt={poi.title}
-            fill
-            unoptimized
-            className="hero-settle object-cover"
-            sizes="100vw"
-            priority={poi.order === 1}
-          />
-        </div>
+        <HeroMedia
+          poi={poi}
+          aspectClassName="aspect-video"
+          priority={poi.order === 1}
+        />
         {banner}
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-4">
           <header className="fade-up" style={delay(120)}>
-            <h1 className="font-display text-3xl leading-tight text-[var(--foreground)]">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-fg)]">
+              Place {poi.order}
+            </p>
+            <h1 className="font-display text-3xl leading-tight text-[var(--foreground)] sm:text-4xl">
               {poi.title}
             </h1>
           </header>
 
-          <AboutSection about={poi.about} aboutMore={poi.aboutMore} />
+          <p
+            className="fade-up text-lg leading-relaxed text-[var(--foreground)]/90"
+            style={delay(200)}
+          >
+            {poi.about}
+          </p>
         </div>
 
-        <div className="fade-up" style={delay(320)}>
+        <StoryFlow poi={poi} />
+
+        <div className="fade-up" style={delay(360)}>
           <ObservationKeyForm poi={poi} />
         </div>
       </div>

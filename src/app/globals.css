@@ -76,42 +76,6 @@ body {
   }
 }
 
-.about-more-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  align-self: flex-start;
-  padding: 0.15rem 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--accent);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  text-underline-offset: 2px;
-}
-
-.about-more-toggle:hover {
-  text-decoration: underline;
-}
-
-/* Read more / Show less: height opens and closes top to bottom. */
-.about-more {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 600ms var(--ease-out);
-}
-
-.about-more[data-open="true"] {
-  grid-template-rows: 1fr;
-}
-
-.about-more-inner {
-  overflow: hidden;
-  min-height: 0;
-}
-
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -233,6 +197,7 @@ body {
 .instant-arrival .fade-in,
 .instant-arrival .rise-in,
 .instant-arrival .hero-settle,
+.instant-arrival .story-drift,
 .instant-arrival .pop-in {
   animation: none;
 }
@@ -276,6 +241,33 @@ body {
 /* Photo eases from slightly zoomed to rest (clipped by its frame). */
 .hero-settle {
   animation: hero-settle 1100ms var(--ease-out) both;
+}
+
+/* Soft editorial drift on story photos (clipped by the frame). */
+@keyframes story-drift {
+  from {
+    transform: scale(1.08) translate3d(-1.5%, 0, 0);
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes story-drift-alt {
+  from {
+    transform: scale(1.08) translate3d(1.5%, 0, 0);
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.story-drift {
+  animation: story-drift 1400ms var(--ease-out) both;
+}
+
+.story-drift--alt {
+  animation-name: story-drift-alt;
 }
 
 .bar-fill {
@@ -506,6 +498,10 @@ body {
 .sheet-root[data-open="true"] .map-marker {
   opacity: 1;
   transform: none;
+}
+
+/* Staggered intro only the first time the visitor opens the map. */
+.sheet-root[data-open="true"][data-markers-animate="true"] .map-marker {
   animation: pop-in 480ms var(--ease-spring) backwards;
   animation-delay: calc(420ms + var(--i, 0) * 110ms);
 }
@@ -689,19 +685,17 @@ body {
   .rise-in,
   .pop-in,
   .hero-settle,
+  .story-drift,
+  .story-drift--alt,
   .sheet-root[data-open="true"] .sheet-panel,
   .sheet-root[data-open="true"] .sheet-item,
   .sheet-root[data-open="true"] .map-marker,
+  .sheet-root[data-open="true"][data-markers-animate="true"] .map-marker,
   .sheet-root[data-open="true"] .map-label,
   .confirm-root[data-open="true"] .confirm-panel {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
-  }
-
-  .about-more,
-  .about-more[data-open="true"] {
-    transition: none !important;
   }
 
   .marker-ping {

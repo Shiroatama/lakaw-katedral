@@ -25,13 +25,23 @@ export type Poi = {
   /** One word for the floor plan label, e.g. "Statue". */
   shortTitle: string;
   heroImage: string;
+  /**
+   * Optional muted autoplay loop for the hero slot (same frame as `heroImage`).
+   * `heroImage` remains the poster / offline still.
+   */
+  heroVideo?: string;
+  /**
+   * Editorial story images paired with `aboutMore` (same order).
+   * Used for the photo-led story flow under the short lead.
+   */
+  storyImages: string[];
   /** Plain-words directions to this place's sign / QR code. */
   landmark: string;
   /** What is here. Short; always visible. Descriptive only; no instructions. */
   about: string;
   /**
-   * Extra history and meaning behind "Read more". One string per paragraph.
-   * Descriptive only; no instructions.
+   * Extra history and meaning as short story beats (one string per beat).
+   * Shown with `storyImages` in the editorial flow. Descriptive only; no instructions.
    */
   aboutMore: string[];
   /** Imperative quest: pray, look, pause, and so on. */
