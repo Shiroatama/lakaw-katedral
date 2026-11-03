@@ -11,8 +11,10 @@ import {
   showHomeAtOnce,
   useJourneyStore,
 } from "@/lib/tour";
+import { BrandMark } from "@/components/brand-mark";
 import { PageTransition } from "@/components/page-transition";
 import { StartOver } from "@/components/start-over";
+import { StewardCredit } from "@/components/steward-credit";
 import { StopDock } from "@/components/stop-dock";
 import { useHydrated } from "@/lib/use-hydrated";
 
@@ -32,49 +34,10 @@ function FreshStartCopy() {
   );
 }
 
-/** Quiet institutional crest + name. Upper left; not a badge or promo chip. */
-function StewardCredit() {
-  const { steward } = nagaTour;
-  const breakAt = steward.name.lastIndexOf(" ");
-  const line1 = steward.name.slice(0, breakAt);
-  const line2 = steward.name.slice(breakAt + 1);
-
-  return (
-    <div
-      className="fade-up absolute left-0 top-0 z-10 px-5 pt-[max(0.85rem,env(safe-area-inset-top))]"
-      style={delay(80)}
-    >
-      {/*
-        Flex items-center is enough for the boxes. Ruwudu’s em-box is much taller
-        than the painted caps, so without text-box trim the letters sit high and
-        look top-aligned against the crest.
-      */}
-      <div className="flex items-center gap-2">
-        <Image
-          src={steward.logo}
-          alt=""
-          width={503}
-          height={868}
-          unoptimized
-          priority
-          className="h-11 w-auto shrink-0 object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
-        />
-        <span className="flex flex-col gap-[0.15em] font-display text-sm leading-none text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
-          <span className="[text-box-trim:trim-both] [text-box-edge:cap_alphabetic]">
-            {line1}
-          </span>
-          <span className="[text-box-trim:trim-both] [text-box-edge:cap_alphabetic]">
-            {line2}
-          </span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function HomeHero({
   src,
   alt,
+  videoSrc,
   instant = false,
   headline,
   finishLabel,
@@ -83,6 +46,8 @@ function HomeHero({
 }: {
   src: string;
   alt: string;
+  /** Portrait loop for the fresh start. Poster stays on `src`. */
+  videoSrc?: string;
   /** Skip the entrance fade. Used when Start over has already reset the walk. */
   instant?: boolean;
   /** Optional line under the brand (resume / complete headlines). */
@@ -97,15 +62,30 @@ function HomeHero({
         className={`relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] flex min-h-dvh flex-1 flex-col bg-black${instant ? " instant-arrival" : ""}`}
       >
         <div className="absolute inset-0 overflow-hidden">
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            priority
-            unoptimized
-            className="hero-settle object-cover"
-            sizes="100vw"
-          />
+          {videoSrc ? (
+            <video
+              className="hero-settle absolute inset-0 h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={src}
+              aria-label={alt}
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              priority
+              unoptimized
+              className="hero-settle object-cover"
+              sizes="100vw"
+            />
+          )}
           {/* Soft mid fade, then solid black so bottom copy stays readable. */}
           <div
             className="absolute inset-0 bg-gradient-to-t from-black from-[12%] via-black/75 via-[42%] to-transparent to-[72%]"
@@ -121,11 +101,11 @@ function HomeHero({
         <StewardCredit />
 
         <div className="relative z-10 flex flex-1 flex-col justify-end px-7 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))] text-center">
-          <h1
-            className="fade-up font-display text-[2.35rem] leading-[1.1] tracking-tight text-white sm:text-5xl"
-            style={delay(200)}
-          >
-            Lakaw Katedral
+          <h1 className="fade-up" style={delay(200)}>
+            <BrandMark
+              priority
+              className="mx-auto h-auto w-[min(9.5rem,46vw)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] sm:w-[11.5rem]"
+            />
           </h1>
           {headline ? (
             <p
@@ -162,6 +142,7 @@ export default function HomePage() {
 
   let src = "/img/home-facade.webp";
   let alt = nagaTour.siteName;
+  let videoSrc: string | undefined;
   let instant = showHomeAtOnce;
   let headline: string | undefined;
   let finishLabel: string | undefined;
@@ -208,6 +189,8 @@ export default function HomePage() {
       </>
     );
   } else {
+    src = "/img/entrance.webp";
+    videoSrc = "/video/entrance.mp4";
     body = <FreshStartCopy />;
   }
 
@@ -215,6 +198,7 @@ export default function HomePage() {
     <HomeHero
       src={src}
       alt={alt}
+      videoSrc={videoSrc}
       instant={instant}
       headline={headline}
       finishLabel={finishLabel}

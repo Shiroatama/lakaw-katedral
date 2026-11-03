@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   getEntrancePoi,
   getNextExpectedPoi,
@@ -15,8 +15,11 @@ import {
   useJourneyStore,
   type Poi,
 } from "@/lib/tour";
+import { ChevronDownIcon } from "@/components/icons";
 import { MapBubble, type MapFocus } from "@/components/map-bubble";
+import { QUEST_ANCHOR_ID } from "@/components/observation-key";
 import { QuestUnlockCta } from "@/components/quest-unlock-cta";
+import { useRyneIntro } from "@/components/ryne-intro";
 import { PrimaryButton, StickyActionBar } from "@/components/ui";
 
 type StopDockProps = {
@@ -28,7 +31,7 @@ type StopDockProps = {
   defaultOpen?: boolean;
   /**
    * Unstarted gate on place 2+: send them to Home to start, with the map
-   * focused on the entrance. Skips the "Solve the quest first" lock for the
+   * focused on the entrance. Skips the "Solve the quest" scroll for the
    * previewed stop.
    */
   startGate?: boolean;
@@ -53,10 +56,10 @@ type UnlockedTarget = {
 /**
  * Bottom dock shared by every journey screen: map chat-head + one CTA.
  *
- * - walk not begun: Start the walk (goes to place 1); map urges that CTA
+ * - walk not begun: Start the walk (brand handoff, then place 1); map urges that CTA
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
- * - on a stop, quest unsolved: Solve the quest first (locked)
+ * - on a stop, quest unsolved: Solve the quest (quiet scroll down to the card)
  * - after solve:    ink-fill unlock to Next / Finish starts with the map celebrate
  * - next is entrance: Continue at the entrance (link to place 1)
  * - later places:   Next: the mural (opens wayfinding map)
@@ -71,6 +74,8 @@ export function StopDock({
   hideMap = false,
 }: StopDockProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const playIntro = useRyneIntro();
   const onHome = pathname === "/";
   const journeyReady = useJourneyHydrated();
   const [mapOpen, setMapOpen] = useState(defaultOpen);
@@ -114,6 +119,22 @@ export function StopDock({
     wasUnsolved.current = false;
   }, [currentUnsolved, currentStop]);
 
+  useEffect(() => {
+    if (!journeyReady || started || startGate || continueTo) return;
+    router.prefetch(`/s/${entrance.slug}`);
+  }, [journeyReady, started, startGate, continueTo, entrance.slug, router]);
+
+  function scrollToQuest() {
+    const quest = document.getElementById(QUEST_ANCHOR_ID);
+    if (!quest) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    quest.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    });
+    quest.focus({ preventScroll: true });
+  }
+
   function openMap(focus: MapFocus) {
     setMapFocus(focus);
     setMapOpen(true);
@@ -144,7 +165,7 @@ export function StopDock({
         map={hideMap ? undefined : <div className="h-14 w-14" aria-hidden />}
       >
         <div
-          className="min-h-14 w-full rounded-md bg-[var(--accent)] shadow-[0_4px_16px_rgba(184,92,56,0.35)]"
+          className="min-h-14 w-full rounded-md bg-[var(--accent)]"
           aria-hidden
         />
       </StickyActionBar>
@@ -166,9 +187,14 @@ export function StopDock({
     );
   } else if (currentUnsolved) {
     action = (
-      <PrimaryButton disabled icon="none">
-        Solve the quest first
-      </PrimaryButton>
+      <button
+        type="button"
+        onClick={scrollToQuest}
+        className="inline-flex min-h-14 w-full items-center justify-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--background)] px-5 text-base font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--surface)] active:scale-[0.98]"
+      >
+        Solve the quest
+        <ChevronDownIcon className="h-[1.1em] w-[1.1em]" />
+      </button>
     );
   } else if (unlockPhase === "animating" || unlockPhase === "done") {
     const target = unlockedTarget();
@@ -190,7 +216,12 @@ export function StopDock({
     );
   } else if (!started) {
     action = (
-      <PrimaryButton href={`/s/${entrance.slug}`} icon="walk">
+      <PrimaryButton
+        icon="walk"
+        onClick={() => {
+          playIntro(`/s/${entrance.slug}`);
+        }}
+      >
         {startLabel}
       </PrimaryButton>
     );

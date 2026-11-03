@@ -63,7 +63,19 @@ export function CathedralMap({
     poiId: poi.id,
   }));
 
-  const markers = variant === "compound" ? COMPOUND_MARKERS : interiorMarkers;
+  // Interior only: finished places, the one you are in, and the next stop
+  // once the current quest is done. Later places stay hidden.
+  const revealedInteriorMarkers = interiorMarkers.filter((marker) => {
+    const poi = pois.find((p) => p.id === marker.poiId);
+    if (!poi) return false;
+    const isDone = completed.includes(poi.id);
+    const isCurrent = lastScannedPoiId === poi.id;
+    const isNext = nextPoi?.id === poi.id;
+    return isDone || isCurrent || isNext;
+  });
+
+  const markers =
+    variant === "compound" ? COMPOUND_MARKERS : revealedInteriorMarkers;
 
   return (
     <div className="w-full">

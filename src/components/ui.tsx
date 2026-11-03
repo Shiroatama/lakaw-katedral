@@ -169,7 +169,7 @@ export function PrimaryButton({
 }: {
   children: React.ReactNode;
   href?: string;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit";
   className?: string;
   direction?: Direction;

@@ -113,6 +113,183 @@ body {
   }
 }
 
+/* Start-walk handoff: pulse at 100, then Lakaw title, then zoom out. */
+@keyframes ryne-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes ryne-title-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Soft circular mask from the center (echoes the mark). */
+@keyframes ryne-enter {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(150% at 50% 50%);
+  }
+}
+
+/* Title + background leave together; no leftover orange. */
+@keyframes ryne-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ryne-title-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.32);
+  }
+}
+
+.ryne-intro-stage {
+  opacity: 1;
+  transition:
+    opacity 420ms var(--ease-in),
+    transform 420ms var(--ease-in);
+  will-change: transform, opacity;
+}
+
+.ryne-intro-stage--pulse {
+  animation: ryne-pulse 640ms var(--ease-spring) both;
+}
+
+.ryne-intro-stage--out {
+  opacity: 0;
+  transform: scale(0.94);
+  pointer-events: none;
+}
+
+.ryne-intro-title {
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.ryne-intro-title--in {
+  animation: ryne-title-in 520ms var(--ease-out) both;
+}
+
+.ryne-intro-title--exit {
+  animation: ryne-title-exit 480ms var(--ease-in) forwards;
+}
+
+.ryne-intro {
+  overflow: hidden;
+  clip-path: circle(0% at 50% 50%);
+}
+
+.ryne-intro--enter {
+  animation: ryne-enter 3000ms var(--ease-out) both;
+}
+
+.ryne-intro--exit {
+  clip-path: circle(150% at 50% 50%);
+  animation: ryne-exit 480ms var(--ease-in) forwards;
+}
+
+.ryne-intro-mark {
+  position: relative;
+}
+
+/* Leading-edge metal grind on the progress tip. */
+@keyframes ryne-grind-spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(var(--gr)) scaleY(0.25);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--gx), var(--gy)) rotate(var(--gr)) scaleY(0.15);
+  }
+}
+
+@keyframes ryne-loading-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+.ryne-intro-grind {
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  overflow: visible;
+}
+
+.ryne-intro-grind-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: linear-gradient(
+    to top,
+    var(--ceremonial),
+    var(--accent-fg)
+  );
+  /* Center on the bar tip so sparks don't sit under the track. */
+  transform-origin: center center;
+  margin-left: -1px;
+  margin-top: -5px;
+  animation: ryne-grind-spark 320ms var(--ease-out) infinite;
+  animation-delay: var(--gd, 0ms);
+}
+
+.ryne-intro-grind--hot .ryne-intro-grind-bit {
+  height: 13px;
+  margin-top: -6.5px;
+  animation-duration: 220ms;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--ceremonial) 70%, transparent);
+}
+
+.ryne-intro-loading {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent-fg) 40%, transparent) 0%,
+    color-mix(in srgb, var(--accent-fg) 40%, transparent) 35%,
+    var(--accent-fg) 50%,
+    color-mix(in srgb, var(--accent-fg) 40%, transparent) 65%,
+    color-mix(in srgb, var(--accent-fg) 40%, transparent) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: ryne-loading-shimmer 1.5s linear infinite;
+}
+
 @keyframes observation-shake {
   0%,
   100% {
@@ -383,7 +560,6 @@ body {
 .quest-unlock.is-live,
 .quest-unlock[data-phase="live"] {
   color: var(--accent-fg);
-  box-shadow: 0 4px 16px rgba(184, 92, 56, 0.35);
   transition: filter 200ms var(--ease-out), transform 200ms var(--ease-out);
 }
 
@@ -696,6 +872,37 @@ body {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .ryne-intro,
+  .ryne-intro--enter,
+  .ryne-intro--exit,
+  .ryne-intro-stage,
+  .ryne-intro-stage--pulse,
+  .ryne-intro-title,
+  .ryne-intro-title--in,
+  .ryne-intro-title--exit,
+  .ryne-intro-grind-bit,
+  .ryne-intro-loading {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+
+  .ryne-intro-stage--out {
+    opacity: 0 !important;
+  }
+
+  .ryne-intro-grind {
+    display: none !important;
+  }
+
+  .ryne-intro-loading {
+    background: none !important;
+    color: var(--accent-fg) !important;
+    -webkit-text-fill-color: var(--accent-fg) !important;
   }
 
   .marker-ping {

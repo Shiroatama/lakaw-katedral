@@ -20,6 +20,9 @@ function asContinuation(text: string) {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
+/** Scroll target for the dock's "Solve the quest" control. */
+export const QUEST_ANCHOR_ID = "your-quest";
+
 /**
  * Fixed flare recipe: few bits, preset directions, palette from design tokens.
  * Kept tiny so low-end phones only paint a short CSS animation once.
@@ -88,19 +91,21 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
 
   return (
     <aside
-      className={`border-l-[3px] border-[var(--accent)] py-1 pl-4${shake ? " observation-shake" : ""}`}
+      id={QUEST_ANCHOR_ID}
+      tabIndex={-1}
+      className={`scroll-mt-4 rounded-xl bg-[var(--foreground)] px-5 py-5 outline-none${shake ? " observation-shake" : ""}`}
     >
-      <h2 className="sr-only">Your quest</h2>
+      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--stone-light)]">
+        Your quest
+      </h2>
 
-      <div className="space-y-3">
-        <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+      <div className="mt-3 space-y-3">
+        <p className="text-base leading-relaxed text-[var(--accent-fg)]">
           {poi.action}
         </p>
-        <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+        <p className="text-base leading-relaxed text-[var(--accent-fg)]">
           Then {asContinuation(poi.observation.look)}{" "}
-          <span className="font-semibold text-[var(--foreground)]">
-            {poi.observation.question}
-          </span>
+          <span className="font-semibold">{poi.observation.question}</span>
         </p>
       </div>
 
@@ -125,13 +130,13 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
               ))}
             </div>
           ) : null}
-          <p className="text-sm font-semibold text-[var(--success)]">
+          <p className="text-sm font-semibold text-[var(--success-on-dark)]">
             You are right.
           </p>
-          <p className="text-base leading-relaxed text-[var(--foreground)]/90">
+          <p className="text-base leading-relaxed text-[var(--accent-fg)]">
             {poi.observation.reveal}
           </p>
-          <p className="text-sm leading-relaxed text-[var(--muted-fg)]">
+          <p className="text-sm leading-relaxed text-[var(--stone-light)]">
             {proceedHint}
           </p>
         </div>
@@ -157,14 +162,14 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
               if (error) setError(null);
             }}
             placeholder="Type your answer"
-            className="min-h-12 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-base text-[var(--foreground)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted-fg)]/60 focus:ring-2"
+            className="min-h-12 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-base text-[var(--foreground)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted-fg)]/60 focus:ring-2"
             aria-invalid={error ? true : undefined}
           />
 
           {error ? (
             <p
               id={`${inputId}-error`}
-              className="text-sm text-[var(--accent)]"
+              className="text-sm text-[var(--accent-fg)]"
               role="alert"
             >
               {error}
@@ -173,7 +178,7 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
 
           <button
             type="submit"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] shadow-[0_4px_16px_rgba(184,92,56,0.35)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
           >
             Submit answer
           </button>

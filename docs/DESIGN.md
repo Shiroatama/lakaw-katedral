@@ -64,6 +64,7 @@ Legacy teal (`#0f5c5c`) and cool gray neutrals are retired.
 - Default world is flat cream (`--background`).
 - Use lighter ivory sheets (`--surface`) only when an interactive panel needs a container.
 - No white card grids. No card treatment in heroes.
+- Primary buttons are flat terracotta. No drop shadow and no glow.
 
 ### 2.4 Contrast
 
@@ -116,12 +117,12 @@ Not a required step on site (the entrance QR goes straight to stop 1). Used by p
 **Fresh visit**
 
 - Quiet steward credit, upper left: Archdiocese of Cáceres crest beside the name. No floating badge, no pill chip.
-- Brand: Lakaw Katedral as hero-level signal, over a full-bleed photo from the top edge of the screen (no card, no rounded corners)
+- Brand: Lakaw Katedral as hero-level signal, over a full-bleed portrait video (`/video/entrance.mp4`, muted loop) from the top edge of the screen (no card, no rounded corners). Resume and complete stills stay as photos.
 - Hook: "Welcome, dear pilgrim and visitor."
 - Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
 - Invite: "Discover the heritage. Encounter the saints. Meet Christ. Finish for a small surprise prize." (no question stack)
 - No cathedral-name headline, no QR mention
-- Dock: map chat-head + **Start the walk** (opens place 1). Tap the map to see where place 1 is.
+- Dock: map chat-head + **Start the walk**. A terracotta screen fades in, with the Ryne Media mark and a count from 0 to 100 that speeds up. At 100 the brand pulses, then **Lakaw Katedral** takes over, holds, and zooms out into place 1. Tap the map to see where place 1 is. Scanning the entrance QR still opens place 1 with no handoff.
 - No stop list, schedule, stats, or address block in the first viewport
 
 **In progress**
@@ -149,9 +150,9 @@ Top to bottom:
 2. Optional one-line note (journey complete)
 3. Stop title
 4. About (short; descriptive only, no instructions) with optional **Read more** / **Show less** for `aboutMore` history so the quest stays near the first screen
-5. Quest block, editorial style (no box; terracotta left rule; no visible "Your quest" label, only `sr-only` for the form region; action and clue in regular body weight, only the question semibold, cream `--surface` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: "You are right", then the reveal. Progress advances on the map chat-head ring.
+5. Quest card (rounded dark brown panel using ink `--foreground` `#2a211c`; visible uppercase "Your quest" label in `--stone-light`; action and clue in `--accent-fg`, only the question semibold; "You are right" uses `--success-on-dark`; cream `--background` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: "You are right", then the reveal. Progress advances on the map chat-head ring.
 6. Interesting fact
-7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited
+7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited. While the quest is unsolved, the dock shows a quiet **Solve the quest** control (cream fill, hairline, wood text, down chevron, no shadow) that scrolls to the quest card. **Submit answer** is the only terracotta action on that screen.
 
 MVP: no audio, share, or save.
 
@@ -230,9 +231,10 @@ Motion gives presence and hierarchy, never decoration. Premium feel comes from c
 | Wayfinding chat bubble | Bubble scales up from the map chat-head; backdrop fades; contents rise in one by one; map markers pop in; the "next" marker soft-rings. Closing is faster. Focus moves into the bubble and back to the chat-head. | 480 ms open, 300 ms close |
 | Bottom dock | Slides up into place after the visit is recorded | 560 ms |
 | Map button | Mid-walk: map → percent → count (~2 s) → hold (~2 s) → map. Last place: map → percent → count to 100% (~2 s) → hold 100% (~1 s) → check (~2 s) → map. | ~4.4–5.4 s |
-| Quest CTA unlock | Starts with the map celebrate on a correct answer: terracotta ink fills left → right while "Solve the quest first" rewrites to Next / Finish; then the button is tappable | ~0.8 s |
+| Quest CTA unlock | Starts with the map celebrate on a correct answer: terracotta ink fills left → right while "Solve the quest" rewrites to Next / Finish; then the button is tappable | ~0.8 s |
 | Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |
 | Home | Hero settles; name overlay, intro and status lines rise in order | 350 ms start |
+| Start the walk | Terracotta screen opens with a soft circular mask from the center. Progress starts at 0.5 s (while the mask is still opening) and counts 0 to 100 (slow then fast). At 100 the brand pulses, clears fully, then Lakaw Katedral (with gold rules and sparks) holds and zooms out with the background into place 1. Reduced motion skips the handoff. | 3 s mask, count from 0.5 s, 2.8 s count, pulse, clear, title hold, zoom out |
 | Finish | Page lands first; success modal + canvas-confetti (side-to-center) after 1 s; Continue reveals gift then next ideas | 1 s delay, then modal |
 | Thank you | Gold rule draws in, then heading, text, button | 300 to 750 ms |
 | Buttons | Lift 1 px on hover (pointer devices only), press down to 97% | 200 ms |

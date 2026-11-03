@@ -14,7 +14,9 @@ import type { Poi, Tour } from "./types";
  * `landmark` lines are placeholders until the parish confirms where each QR
  * sign will be mounted (SPEC §17). Hero images reuse existing assets until
  * dedicated photos are provided. `storyImages` pair with `aboutMore` for the
- * editorial photo story. Optional `heroVideo` fills the first hero frame.
+ * editorial photo story. Optional `heroVideo` fills the hero. `heroVideoFrame`
+ * is landscape (16:9) or portrait (3:4 on the page). Place 1 plays the landscape
+ * cathedral clip. Place 2 plays the portrait entrance clip.
  *
  * Observation answers below are trial placeholders until confirmed on site
  * with the parish. Wrong answers will frustrate real pilgrims; walk the
@@ -29,12 +31,11 @@ export const nagaTour: Tour = {
     name: "The Naga Metropolitan Cathedral",
     logo: "/img/naga-metropolitan-cathedral.png",
   },
-  // Home landing copy. Drawn from the pilgrim guide welcome and tagline.
+  // Home landing copy: short welcome, walk invite, prize.
   intro: {
-    hook: "Welcome, dear pilgrim and visitor.",
-    fact: "You are entering a living story of faith. This Cathedral has stood at the heart of Bicol for more than four centuries.",
-    teasers:
-      "Discover the heritage. Encounter the saints. Meet Christ. Finish for a small surprise prize.",
+    hook: "Welcome.",
+    fact: "Take a walk and learn more about the cathedral.",
+    teasers: "Finish for a surprise prize.",
   },
   pois: [
     {
@@ -46,7 +47,8 @@ export const nagaTour: Tour = {
       landmark:
         "At the main door of the Cathedral. Stand in front of the doors.",
       heroImage: "/img/entrance.webp",
-      heroVideo: "/video/entrance.mp4",
+      heroVideo: "/video/cathedral.mp4",
+      heroVideoFrame: "landscape",
       storyImages: [
         "/img/home-facade.webp",
         "/img/dome.webp",
@@ -90,6 +92,9 @@ export const nagaTour: Tour = {
         // inside the door, not the mural title again.
         "Walk in through the main doors. Find the angels that hold the holy water. The QR is behind those angels.",
       heroImage: "/img/murals.webp",
+      heroVideo: "/video/entrance.mp4",
+      heroVideoFrame: "portrait",
+      heroVideoPoster: "/img/entrance.webp",
       storyImages: [
         "/img/dome.webp",
         "/img/prayer.webp",

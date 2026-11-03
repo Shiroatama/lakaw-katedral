@@ -26,10 +26,20 @@ export type Poi = {
   shortTitle: string;
   heroImage: string;
   /**
-   * Optional muted autoplay loop for the hero slot (same frame as `heroImage`).
-   * `heroImage` remains the poster / offline still.
+   * Optional muted autoplay loop for the hero slot.
+   * `heroImage` remains the offline still (and the poster, unless
+   * `heroVideoPoster` is set).
    */
   heroVideo?: string;
+  /**
+   * How this place frames `heroVideo`. Landscape is 16:9. Portrait is 3:4
+   * on the page.
+   * The frame can differ from the file: place 2 shows the portrait entrance
+   * clip tall, while place 1 plays a real 16:9 cathedral clip.
+   */
+  heroVideoFrame?: "landscape" | "portrait";
+  /** Poster for `heroVideo` when it should not use `heroImage`. */
+  heroVideoPoster?: string;
   /**
    * Editorial story images paired with `aboutMore` (same order).
    * Used for the photo-led story flow under the short lead.
@@ -52,14 +62,14 @@ export type Poi = {
 };
 
 /**
- * Fresh-visit home copy (Layout C: welcome, fact first, then invite).
- * `fact` may use `\n` for two short impact lines.
+ * Fresh-visit home copy: welcome, walk invite, then prize line.
+ * `fact` may use `\n` for two short lines.
  */
 export type TourIntro = {
   hook: string;
-  /** Drawn from the parish pilgrim guide welcome; keep claims aligned with docs/PILGRIM-GUIDE.md. */
+  /** Short invite to walk and learn about the cathedral. */
   fact: string;
-  /** Soft "Find out…" invite under the fact. */
+  /** Closing invite (prize / next step). */
   teasers: string;
 };
 

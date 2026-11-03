@@ -83,6 +83,79 @@ export function RepeatIcon({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+/** Start playback. */
+export function PlayIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
+      <path d="M8 5.5v13l10-6.5z" />
+    </svg>
+  );
+}
+
+/** Pause playback. */
+export function PauseIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
+/** Expand a video to the full screen. */
+export function FullScreenIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+      <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+      <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+      <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
+/** Speaker off. */
+export function MuteIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M11 5L6 9H3v6h3l5 4V5z" />
+      <path d="M22 9l-6 6" />
+      <path d="M16 9l6 6" />
+    </svg>
+  );
+}
+
+/** Speaker on. */
+export function UnmuteIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M11 5L6 9H3v6h3l5 4V5z" />
+      <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+      <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+    </svg>
+  );
+}
+
+/** Leave the full-screen video. */
+export function CloseIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
 /** QR code mark for in-app scan actions. */
 export function QrCodeIcon({ className = "h-4 w-4" }: IconProps) {
   return (

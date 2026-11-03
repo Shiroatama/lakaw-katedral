@@ -57,7 +57,7 @@ function UnlockLabel({
  */
 export function QuestUnlockCta({
   phase,
-  fromLabel = "Solve the quest first",
+  fromLabel = "Solve the quest",
   toLabel,
   toIcon = "walk",
   href,
