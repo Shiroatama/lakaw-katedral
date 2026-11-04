@@ -150,7 +150,7 @@ Top to bottom:
 2. Optional one-line note (journey complete)
 3. Stop title
 4. About (short; descriptive only, no instructions) with optional **Read more** / **Show less** for `aboutMore` history so the quest stays near the first screen
-5. Quest card (rounded dark brown panel using ink `--foreground` `#2a211c`; visible uppercase "Your quest" label in `--stone-light`; action and clue in `--accent-fg`, only the question semibold; "You are right" uses `--success-on-dark`; cream `--background` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: "You are right", then the reveal. Progress advances on the map chat-head ring.
+5. Quest card (rounded dark brown panel using ink `--foreground` `#2a211c`; visible uppercase "Your quest" label in `--stone-light`; action and clue in `--accent-fg`, only the question semibold; cream `--background` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: large display "You are right" in `--success-on-dark`, full-screen canvas-confetti (same side-to-center burst as the finish modal), then the reveal. Progress advances on the map chat-head ring.
 6. Interesting fact
 7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited. While the quest is unsolved, the dock shows a quiet **Solve the quest** control (cream fill, hairline, wood text, down chevron, no shadow) that scrolls to the quest card. **Submit answer** is the only terracotta action on that screen.
 
@@ -170,10 +170,10 @@ MVP: no audio, share, or save.
 
 ### 5.5 Finish (`/finish`)
 
-One page for next ideas and the gift. Congratulations is a big Success modal on first arrival (not competing in the scroll).
+One page for next ideas and the gift. Congratulations happens on the last place, before this page.
 
-1. **Success modal (first visit):** waits about 1 s after `/finish` loads so the page transition can finish, then large check, green "You finished the walk", thank-you line that mentions a small surprise prize from the church, full-screen confetti, **Continue** dismisses. Shown once per session until Start over.
-2. **Prize hero, then gift:** edge-to-edge hero, then the page’s first job: "Your surprise prize" (ask at the parish). Soft rule, then "Help the parish" gift form (amount presets + custom, starts at 20 pesos; submit stub opens thank-you modal). Modal can still celebrate the prize; the page keeps it for validation.
+1. **Success modal (last place):** after the last quest is solved and the map head celebrate finishes (100% → check), large check, green "You finished the walk", thank-you line that mentions a small surprise prize from the church, full-screen confetti. **Continue** goes to `/finish`. Shown once per session until Start over. Tapping Finish early opens it right away.
+2. **Prize hero, then gift:** edge-to-edge hero, then the page’s first job: "Your surprise prize" (ask at the parish). Soft rule, then "Help the parish" gift form (amount presets + custom, starts at 20 pesos; submit stub opens thank-you modal).
 3. **While you are here:** clear air and a soft rule after the gift, then next ideas (candle, sit, pray) as editorial entries: small place photo beside title and body. No left rule, no rounded photo cards.
 4. **Start over** as muted utility text (confirm, then back to Home; danger color only on the confirm action)
 
@@ -231,6 +231,7 @@ Motion gives presence and hierarchy, never decoration. Premium feel comes from c
 | Wayfinding chat bubble | Bubble scales up from the map chat-head; backdrop fades; contents rise in one by one; map markers pop in; the "next" marker soft-rings. Closing is faster. Focus moves into the bubble and back to the chat-head. | 480 ms open, 300 ms close |
 | Bottom dock | Slides up into place after the visit is recorded | 560 ms |
 | Map button | Mid-walk: map → percent → count (~2 s) → hold (~2 s) → map. Last place: map → percent → count to 100% (~2 s) → hold 100% (~1 s) → check (~2 s) → map. | ~4.4–5.4 s |
+| Quest success | Correct answer: large pop-in "You are right" + full-screen canvas-confetti (same side-to-center burst as finish) | one shot |
 | Quest CTA unlock | Starts with the map celebrate on a correct answer: terracotta ink fills left → right while "Solve the quest" rewrites to Next / Finish; then the button is tappable | ~0.8 s |
 | Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |
 | Home | Hero settles; name overlay, intro and status lines rise in order | 350 ms start |

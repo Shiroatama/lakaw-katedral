@@ -12,7 +12,10 @@ import {
   nagaTour,
   useJourneyStore,
 } from "@/lib/tour";
-import { CathedralMap } from "@/components/cathedral-map";
+import {
+  CathedralMap,
+  isInteriorPlace,
+} from "@/components/cathedral-map";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -82,7 +85,7 @@ function easeInOut(t: number) {
 /**
  * Circular map chat-head with a progress ring. Opens a sheet above the dock:
  * floor plan, either where you are now (chat-head) or directions to the next
- * place (Next: the mural), plus trial-mode Skip.
+ * place (Continue the walk), plus trial-mode Skip.
  *
  * The sheet is always mounted (portaled to <body>) and driven by `data-open`.
  * See `.sheet-*` in globals.css.
@@ -119,9 +122,14 @@ export function MapBubble({
   const markersIntroPlayed = useRef(false);
 
   const progress = useJourneyStore();
+  const earlyScanExpectedId = useJourneyStore((s) => s.earlyScanExpectedId);
+  const setEarlyScanGate = useJourneyStore((s) => s.setEarlyScanGate);
   const total = nagaTour.pois.length;
   const done = Math.min(progress.completed.length, total);
   const next = getNextExpectedPoi(progress, nagaTour);
+  const earlyExpected = earlyScanExpectedId
+    ? (getPoiById(earlyScanExpectedId) ?? null)
+    : null;
   const here = progress.lastScannedPoiId
     ? (getPoiById(progress.lastScannedPoiId) ?? null)
     : null;
@@ -219,8 +227,19 @@ export function MapBubble({
     if (!nextOpen) {
       setMapVariant("compound");
       setAnimateMarkers(false);
+      if (earlyScanExpectedId) setEarlyScanGate(null);
     }
   }
+
+  const featuredId = featured?.id ?? null;
+
+  // Indoor next/here stops open on the floor plan; outdoor stops stay on the compound.
+  useEffect(() => {
+    if (!open) return;
+    setMapVariant(
+      featuredId && isInteriorPlace(featuredId) ? "interior" : "compound",
+    );
+  }, [open, featuredId]);
 
   useEffect(() => {
     if (!open) return;
@@ -377,6 +396,22 @@ export function MapBubble({
         </div>
 
         <div className="min-h-0 flex-auto space-y-4 overflow-y-auto overscroll-contain pb-2">
+          {earlyExpected ? (
+            <aside
+              className="sheet-item rounded-md border-l-[3px] border-[var(--accent)] bg-[var(--background)] px-3 py-2.5"
+              style={{ "--i": 0 } as React.CSSProperties}
+              role="status"
+            >
+              <p className="text-sm leading-relaxed text-[var(--foreground)]/90">
+                You are a little early. Finish the quest at{" "}
+                <span className="font-semibold text-[var(--foreground)]">
+                  {earlyExpected.title}
+                </span>{" "}
+                first, then scan the next QR.
+              </p>
+            </aside>
+          ) : null}
+
           {complete || !featured ? (
             <p
               className="sheet-item text-base text-[var(--muted-fg)]"
@@ -405,6 +440,7 @@ export function MapBubble({
               <CathedralMap
                 highlightNext={!complete && !showingHere && featured !== null}
                 variant={mapVariant}
+                onBeforeNavigate={() => setOpen(false)}
                 onEnterInterior={() => {
                   setAnimateMarkers(false);
                   setMapVariant("interior");
@@ -458,7 +494,7 @@ export function MapBubble({
                 className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
               >
                 <QrCodeIcon className="h-[1.1em] w-[1.1em] shrink-0" />
-                Scan with this phone
+                Scan the next QR
               </button>
               {ALLOW_SKIP && next ? (
                 <button

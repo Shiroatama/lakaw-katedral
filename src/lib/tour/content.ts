@@ -1,7 +1,9 @@
 import type { Poi, Tour } from "./types";
 
 /**
- * Visitor-facing copy for the MVP walk (guide items 1–3).
+ * Visitor-facing copy for the walk (guide items 1–3; 9 as places 4–5;
+ * outdoor bell pavilion as place 6; guide 14 Quadricentennial Dome as place 7;
+ * guide 13 Porta Mariae as place 8).
  *
  * Source of truth: docs/PILGRIM-GUIDE.md (parish pilgrim guide).
  * Real names and key terms stay exact; words around them are plain (about
@@ -24,7 +26,7 @@ import type { Poi, Tour } from "./types";
  */
 export const nagaTour: Tour = {
   id: "naga-cathedral",
-  version: 13,
+  version: 18,
   name: "Lakaw Katedral",
   siteName: "Naga Metropolitan Cathedral",
   steward: {
@@ -152,6 +154,181 @@ export const nagaTour: Tour = {
       },
       map: { x: 140, y: 78 },
     },
+    {
+      id: "bells",
+      slug: "bells",
+      order: 4,
+      title: "The Heritage Bells",
+      shortTitle: "Bells",
+      landmark:
+        // Placeholder until parish confirms QR mount and best exit path.
+        "Leave near the sanctuary by a side door. Walk outside toward the Heritage Bells and Candle Garden. Find the green bells on stone pedestals.",
+      heroImage: "/img/bell-san-juan.webp",
+      storyImages: [
+        "/img/bell-sagrada-familia.webp",
+        "/img/bell-san-juan.webp",
+        "/img/cathedral-compound.webp",
+      ],
+      about:
+        "Did you know the Cathedral keeps old bronze bells outdoors as monuments of faith? These heritage bells once called Bicolanos to prayer, worship, celebration, and service.",
+      aboutMore: [
+        "Four bells belong to this garden story. Centuries of faith. One continuing story.",
+        "One is the Campana de San Juan Evangelista from 1850, named for Saint John the Evangelist, Patron Saint of the Cathedral Parish.",
+        "Another is the Campana de Sagrada Familia from 1894, the Bell of the Holy Family.",
+      ],
+      action:
+        "Stand before the heritage bells on their pedestals. Give thanks for the generations who heard these voices call them to God.",
+      observation: {
+        // Year read from the on-site plaque under Campana de Sagrada Familia.
+        look: "Look at the plaque under the Bell of the Holy Family, the Campana de Sagrada Familia.",
+        question: "What year do you see on the plaque?",
+        answers: ["1894"],
+        reveal:
+          "That year marks when this bell was cast for the Holy Family. Beside the other heritage bells, it joins centuries of Bicolanos who heard church bells call them to prayer.",
+      },
+      // Outdoor stop: shown on the compound map only (see cathedral-map).
+      map: { x: 162, y: 68 },
+    },
+    {
+      id: "candles",
+      slug: "candles",
+      order: 5,
+      title: "The Candle Garden",
+      shortTitle: "Candles",
+      landmark:
+        // Placeholder until parish confirms QR mount.
+        "From the pedestal bells, walk to the alcove under the sign that reads Heritage Bells and Candle Garden. Find the hanging bell and the candle racks.",
+      heroImage: "/img/candle-garden.webp",
+      storyImages: [
+        "/img/candle-garden.webp",
+        "/img/bell-san-juan.webp",
+        "/img/prayer.webp",
+      ],
+      about:
+        "Did you know the Campana de la Paz, the Bell of Peace, is the Cathedral's oldest preserved heritage bell? It dates from 1743 and hangs in this Candle Garden.",
+      aboutMore: [
+        "This alcove is a quiet place to light a candle and offer a prayer.",
+        "When the Campana de la Paz sounds, remember the countless Bicolanos who heard church bells call them to prayer, worship, celebration, and service.",
+        "Four bells. Centuries of faith. One continuing story.",
+      ],
+      action:
+        "Light a candle. Offer a prayer. Then, where permitted, ring the Campana de la Paz.",
+      observation: {
+        // Year from parish pilgrim guide (Campana de la Paz, 1743). Confirm on plaque.
+        look: "Look at the Campana de la Paz plaque on the wall of the alcove.",
+        question: "What year was this bell cast?",
+        answers: ["1743"],
+        reveal:
+          "1743 makes the Campana de la Paz the oldest preserved heritage bell here. Its voice still joins the faith of Bicol across the centuries.",
+      },
+      // Outdoor stop: shown on the compound map only (see cathedral-map).
+      map: { x: 120, y: 52 },
+    },
+    {
+      id: "pavilion",
+      slug: "pavilion",
+      order: 6,
+      title: "The Bell Pavilion",
+      shortTitle: "Pavilion",
+      landmark:
+        // Placeholder until parish confirms QR mount, access rules, and parish name.
+        "From the Candle Garden, walk to the white round pavilion on the lawn. Look for the domed roof with a cross, the hanging bells, and the metal stairs.",
+      heroImage: "/img/quadricentennial-dome.webp",
+      storyImages: [
+        "/img/quadricentennial-dome.webp",
+        "/img/bell-san-juan.webp",
+        "/img/cathedral-compound.webp",
+      ],
+      about:
+        "Did you know this white pavilion holds bells under an open roof? It stands near the heritage bells, another outdoor voice of prayer on the Cathedral grounds.",
+      aboutMore: [
+        "The metal stairs lead to a higher walk when staff allow it. From there you can look across the compound.",
+        "The cross on the roof marks this as a place of faith, not only a landmark on the lawn.",
+        "Together with the heritage bells nearby, it keeps the sound of calling to prayer close to the outdoor garden.",
+      ],
+      action:
+        "Stand at the Bell Pavilion. Give thanks for the bells that call people to God. Ascend carefully only where staff allow it.",
+      observation: {
+        // Visible on site: four round columns under the pavilion roof.
+        look: "Look at the base of the Bell Pavilion. Count the large round columns that hold it up.",
+        question: "How many columns do you see?",
+        answers: ["4", "four"],
+        reveal:
+          "Those four columns lift the roof so the bells can hang in open air. From here the outdoor walk of faith continues across the compound.",
+      },
+      // Outdoor stop: shown on the compound map only (see cathedral-map).
+      map: { x: 78, y: 42 },
+    },
+    {
+      id: "dome",
+      slug: "dome",
+      order: 7,
+      title: "The Quadricentennial Dome",
+      shortTitle: "Dome",
+      landmark:
+        // Placeholder until parish confirms QR mount.
+        "Walk into the open plaza between the Cathedral and the Porta Mariae. Find the white round dome with a golden crown on top.",
+      heroImage: "/img/plaza-dome.webp",
+      storyImages: [
+        "/img/plaza-dome-front.webp",
+        "/img/plaza-dome-cathedral.webp",
+        "/img/porta-mariae.webp",
+      ],
+      about:
+        "Did you know this open rotunda is the Quadricentennial Dome? From the plaza you can see the Cathedral, the seminary, and the Porta Mariae as one living place of faith.",
+      aboutMore: [
+        "Look up. The ceiling holds stained glass that fills the dome with color and light.",
+        "A golden crown sits on the peak. It reminds pilgrims of Ina, Our Lady of Peñafrancia, Queen and Patroness of Bicol.",
+        "Parish gatherings often meet here in the open air, with the Cathedral façade and the Marian Gate nearby.",
+      ],
+      action:
+        "Visit the Quadricentennial Dome. Step onto the platform. Look up, look around, and marvel at the beauty of the Cathedral compound.",
+      observation: {
+        // Visible on site: golden crown on the dome peak.
+        look: "Look at the very top of the Quadricentennial Dome.",
+        question: "What golden shape sits on the peak?",
+        answers: ["crown", "a crown", "the crown", "golden crown", "a golden crown"],
+        reveal:
+          "The golden crown points to Ina's queenship and to the faith of Bicol. From this dome, church, gate, and city meet as one heritage of faith.",
+      },
+      // Outdoor stop: shown on the compound map only (see cathedral-map).
+      map: { x: 48, y: 72 },
+    },
+    {
+      id: "porta",
+      slug: "porta",
+      order: 8,
+      title: "The Porta Mariae",
+      shortTitle: "Porta Mariae",
+      landmark:
+        // Placeholder until parish confirms QR mount.
+        "From the Quadricentennial Dome, walk to the white triumphal arch. Find the name PORTA MARIAE carved above the center arch.",
+      heroImage: "/img/porta-mariae.webp",
+      storyImages: [
+        "/img/porta-mariae-detail.webp",
+        "/img/porta-mariae-museum.webp",
+        "/img/plaza-dome.webp",
+      ],
+      about:
+        "Did you know Porta Mariae means Marian Gate in Latin? This arch is a landmark of Naga and a monument of love for Ina, Our Lady of Peñafrancia.",
+      aboutMore: [
+        "It was built for the tercentenary, the 300th year of devotion to Our Lady of Peñafrancia in Bicol (1710 to 2010). The Archdiocese of Cáceres blessed it on 9 September 2010.",
+        "Its three floors symbolize the centuries of Ina's heavenly protection and the enduring love of the Bicolanos.",
+        "Inside is the Porta Mariae Museum, with rare artifacts of the Peñafrancia devotion. From the upper floor, look up and meet the towering image of Ina watching over Naga.",
+      ],
+      action:
+        "Take your photograph at the Porta Mariae. Visit the museum if it is open. Ascend carefully where allowed. Pause beneath Ina's gaze and entrust yourself to her care.",
+      observation: {
+        // Years from the Latin plaque: MDCCX-MMX (1710-2010).
+        look: "Look at the Latin plaque under the words PORTA MARIAE. Find the years written as MDCCX and MMX.",
+        question: "In what year did this devotion begin?",
+        answers: ["1710"],
+        reveal:
+          "1710 marks the start of the Bicolano devotion to Our Lady of Peñafrancia. This gate was raised in 2010 so pilgrims would remember three centuries of Ina's care.",
+      },
+      // Outdoor stop: shown on the compound map only (see cathedral-map).
+      map: { x: 42, y: 125 },
+    },
   ],
 };
 
@@ -167,23 +344,24 @@ export function getOrderedPois() {
   return [...nagaTour.pois].sort((a, b) => a.order - b.order);
 }
 
-/** Plain place name for CTAs. Cathedra keeps its exact casing. */
+/** Plain place name for CTAs. Proper names keep their exact casing. */
 export function placeCtaName(poi: Poi): string {
-  return poi.shortTitle === "Cathedra"
-    ? "Cathedra"
-    : poi.shortTitle.toLowerCase();
+  if (poi.shortTitle === "Cathedra" || poi.shortTitle === "Porta Mariae") {
+    return poi.shortTitle;
+  }
+  return poi.shortTitle.toLowerCase();
 }
 
 /**
  * Soft dock CTA when moving on after a solved quest.
  * Entrance resume (left mid-quest): "Continue at the entrance".
- * Later places: "Next: the mural" (opens the map).
+ * Later places: "Continue the walk" (opens the map; keeps the destination mysterious).
  */
 export function nextPlaceCtaLabel(poi: Poi): string {
   if (poi.order === 1) {
     return "Continue at the entrance";
   }
-  return `Next: the ${placeCtaName(poi)}`;
+  return "Continue the walk";
 }
 
 /** Gate CTA when this place must be finished before another can open. */

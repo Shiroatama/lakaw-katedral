@@ -6,7 +6,7 @@ import { useJourneyStore } from "./store";
 /**
  * True after the journey store has finished reading localStorage.
  * React's own hydrate can finish earlier; UI that depends on progress
- * (map head, Next: the mural) should wait for this so layout lands once.
+ * (map head, Continue the walk) should wait for this so layout lands once.
  */
 export function useJourneyHydrated(): boolean {
   return useSyncExternalStore(

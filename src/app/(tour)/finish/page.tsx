@@ -7,7 +7,6 @@ import {
   nagaTour,
   useJourneyStore,
 } from "@/lib/tour";
-import { FinishSuccessModal } from "@/components/finish-success-modal";
 import { ParishGift } from "@/components/parish-gift";
 import { StartOver } from "@/components/start-over";
 import { ThankYouModal } from "@/components/thank-you-modal";
@@ -42,7 +41,6 @@ const NEXT_IDEAS = [
 export default function FinishPage() {
   const hydrated = useHydrated();
   const progress = useJourneyStore();
-  const donated = useJourneyStore((s) => s.donated);
   const total = nagaTour.pois.length;
   // Keep the ending on screen after Start over clears progress. Otherwise this
   // page flips to "not done yet" for the moment before Home replaces it.
@@ -170,7 +168,6 @@ export default function FinishPage() {
           </div>
         </main>
       </PageTransition>
-      <FinishSuccessModal open={!donated} />
       <ThankYouModal />
     </>
   );

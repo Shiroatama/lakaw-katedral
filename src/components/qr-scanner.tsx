@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { parseScanPayload } from "@/lib/qr/parse-scan";
+import {
+  evaluateScan,
+  getPoiBySlug,
+  isJourneyStarted,
+  nagaTour,
+  useJourneyStore,
+} from "@/lib/tour";
 
 type ScannerStatus =
   | { kind: "starting" }
@@ -15,8 +22,9 @@ type ScannerStatus =
   | { kind: "found" };
 
 /**
- * Full-bleed camera QR reader. On a valid Lakaw stop code, navigates to that
- * stop. Camera stream is stopped on unmount or after a successful read.
+ * Full-bleed camera QR reader. On a valid Lakaw stop code, routes by journey
+ * rules: allowed place opens its story; unstarted + too early goes Home;
+ * started + too early opens the map with a warm tip.
  */
 export function QrScanner() {
   const router = useRouter();
@@ -64,10 +72,35 @@ export function QrScanner() {
             return;
           }
 
+          const poi = getPoiBySlug(parsed.slug);
+          if (!poi) {
+            setStatus({
+              kind: "rejected",
+              message: "That code is not one of our places.",
+            });
+            return;
+          }
+
           handledRef.current = true;
-          setStatus({ kind: "found" });
           controlsRef.current?.stop();
           controlsRef.current = null;
+
+          const store = useJourneyStore.getState();
+          const outcome = evaluateScan(poi, store, nagaTour);
+
+          if (outcome.kind === "start_here") {
+            if (!isJourneyStarted(store)) {
+              setStatus({ kind: "found" });
+              router.replace("/", { transitionTypes: ["nav-back"] });
+              return;
+            }
+            setStatus({ kind: "found" });
+            store.setEarlyScanGate(outcome.expected.id);
+            router.replace("/map", { transitionTypes: ["nav-forward"] });
+            return;
+          }
+
+          setStatus({ kind: "found" });
           router.replace(parsed.href, { transitionTypes: ["nav-forward"] });
         },
       )

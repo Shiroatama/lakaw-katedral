@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { FinishConfetti } from "@/components/finish-confetti";
 import type { Poi } from "@/lib/tour";
 import {
   getNextExpectedPoi,
@@ -24,25 +25,6 @@ function asContinuation(text: string) {
 export const QUEST_ANCHOR_ID = "your-quest";
 
 /**
- * Fixed flare recipe: few bits, preset directions, palette from design tokens.
- * Kept tiny so low-end phones only paint a short CSS animation once.
- */
-const FLARE_BITS = [
-  { fx: "-28px", fy: "-42px", fr: "-40deg", color: "var(--success)", fd: "0ms" },
-  { fx: "8px", fy: "-48px", fr: "18deg", color: "var(--ceremonial)", fd: "40ms" },
-  { fx: "36px", fy: "-36px", fr: "55deg", color: "var(--accent)", fd: "20ms" },
-  { fx: "-42px", fy: "-18px", fr: "-70deg", color: "var(--ceremonial)", fd: "60ms" },
-  { fx: "48px", fy: "-12px", fr: "80deg", color: "var(--success)", fd: "30ms" },
-  { fx: "-18px", fy: "-56px", fr: "-12deg", color: "var(--accent)", fd: "70ms" },
-  { fx: "22px", fy: "-58px", fr: "28deg", color: "var(--ceremonial)", fd: "10ms" },
-  { fx: "-50px", fy: "-34px", fr: "-95deg", color: "var(--success)", fd: "50ms" },
-  { fx: "54px", fy: "-30px", fr: "100deg", color: "var(--accent)", fd: "80ms" },
-  { fx: "0px", fy: "-62px", fr: "8deg", color: "var(--ceremonial)", fd: "25ms" },
-  { fx: "-34px", fy: "-50px", fr: "-48deg", color: "var(--accent)", fd: "55ms" },
-  { fx: "40px", fy: "-46px", fr: "62deg", color: "var(--success)", fd: "35ms" },
-] as const;
-
-/**
  * One quest card: do the act, then answer the look-closely clue.
  * A correct answer keeps the quest text and adds the meaning reveal below.
  */
@@ -57,14 +39,14 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
-  /** One-shot burst on the moment of success, not on revisit. */
-  const [flare, setFlare] = useState(false);
+  /** One-shot celebrate on the moment of success, not on revisit. */
+  const [celebrate, setCelebrate] = useState(false);
 
   useEffect(() => {
-    if (!flare) return;
-    const timer = window.setTimeout(() => setFlare(false), 1000);
+    if (!celebrate) return;
+    const timer = window.setTimeout(() => setCelebrate(false), 1000);
     return () => window.clearTimeout(timer);
-  }, [flare]);
+  }, [celebrate]);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -74,7 +56,7 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
     if (ok) {
       setError(null);
       setValue("");
-      setFlare(true);
+      setCelebrate(true);
       return;
     }
 
@@ -84,7 +66,7 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
   }
 
   const proceedHint = journeyDone
-    ? "You can finish the walk now. Tap Finish below when you are ready."
+    ? "You finished every place. A short celebration is next."
     : next
       ? `You can go on. Tap "${nextPlaceCtaLabel(next)}" below when you are ready.`
       : "You can go on when you are ready.";
@@ -95,7 +77,9 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
       tabIndex={-1}
       className={`scroll-mt-4 rounded-xl bg-[var(--foreground)] px-5 py-5 outline-none${shake ? " observation-shake" : ""}`}
     >
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--stone-light)]">
+      <FinishConfetti active={celebrate} />
+
+      <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-[var(--ceremonial)]">
         Your quest
       </h2>
 
@@ -110,27 +94,10 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
       </div>
 
       {solved ? (
-        <div className="relative mt-4 space-y-2" role="status">
-          {flare ? (
-            <div className="quest-flare" aria-hidden>
-              {FLARE_BITS.map((bit, index) => (
-                <span
-                  key={index}
-                  className="quest-flare-bit"
-                  style={
-                    {
-                      "--fx": bit.fx,
-                      "--fy": bit.fy,
-                      "--fr": bit.fr,
-                      "--fd": bit.fd,
-                      "--flare-color": bit.color,
-                    } as React.CSSProperties
-                  }
-                />
-              ))}
-            </div>
-          ) : null}
-          <p className="text-sm font-semibold text-[var(--success-on-dark)]">
+        <div className="mt-5 space-y-3" role="status">
+          <p
+            className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${celebrate ? " pop-in" : ""}`}
+          >
             You are right.
           </p>
           <p className="text-base leading-relaxed text-[var(--accent-fg)]">

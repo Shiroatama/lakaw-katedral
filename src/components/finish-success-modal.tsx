@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { FinishConfetti } from "@/components/finish-confetti";
 import { PrimaryButton } from "@/components/ui";
 
@@ -11,17 +12,28 @@ import {
 } from "@/lib/tour/finish-success";
 import { useHydrated } from "@/lib/use-hydrated";
 
-/** Wait so the finish page can settle before the celebrate dialog covers it. */
-const OPEN_DELAY_MS = 1000;
+/**
+ * Wait for the last-place map head celebrate (percent → 100% → check) before
+ * covering the stop with this dialog. Keep in sync with map-bubble timers:
+ * HEAD_SWAP_MS + RING_ADVANCE_MS + FINISH_PERCENT_HOLD_MS + FINISH_CHECK_HOLD_MS.
+ */
+export const FINISH_SUCCESS_OPEN_DELAY_MS = 360 + 2000 + 1000 + 2000;
 
 /**
- * Big celebrate dialog on /finish. Opens on first arrival after the walk is
- * done, after a short delay so it does not overlap the page transition.
- * Continue dismisses it so next ideas and the gift sit underneath.
- * Full-screen confetti runs while the dialog is open.
+ * Big celebrate dialog after the last quest is solved. Opens on the last place
+ * (not on /finish) once the map head celebrate has played. Continue goes to
+ * the finish page. Shown once per session until Start over.
  */
-export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
+export function FinishSuccessModal({
+  open: allowed,
+  openDelayMs = FINISH_SUCCESS_OPEN_DELAY_MS,
+}: {
+  open: boolean;
+  /** Delay before the dialog appears. 0 opens immediately (e.g. Finish tap). */
+  openDelayMs?: number;
+}) {
   const hydrated = useHydrated();
+  const router = useRouter();
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -39,15 +51,25 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
       setReady(false);
       return;
     }
-    const id = window.setTimeout(() => setReady(true), OPEN_DELAY_MS);
+    if (openDelayMs <= 0) {
+      setReady(true);
+      return;
+    }
+    const id = window.setTimeout(() => setReady(true), openDelayMs);
     return () => window.clearTimeout(id);
-  }, [hydrated, allowed]);
+  }, [hydrated, allowed, openDelayMs]);
 
   const open = hydrated && allowed && dismissed === false && ready;
 
   function dismiss() {
     writeFinishSuccessSeen();
     setDismissed(true);
+  }
+
+  function continueToFinish() {
+    writeFinishSuccessSeen();
+    setDismissed(true);
+    router.push("/finish", { transitionTypes: ["nav-forward"] });
   }
 
   useEffect(() => {
@@ -137,7 +159,7 @@ export function FinishSuccessModal({ open: allowed }: { open: boolean }) {
           prize from the church is waiting for you.
         </p>
         <div className="mt-7 w-full">
-          <PrimaryButton onClick={dismiss}>Continue</PrimaryButton>
+          <PrimaryButton onClick={continueToFinish}>Continue</PrimaryButton>
         </div>
       </div>
     </div>,

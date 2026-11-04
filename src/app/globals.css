@@ -11,7 +11,7 @@
   --accent-fg: #fffaf5;
   --stone: #6b4a35;
   --stone-light: #e8d8c8;
-  --ceremonial: #c4a35a;
+  --ceremonial: #ecbe41;
   --success: #4f6b4a;
   /* Lighter success for text on dark quest cards. */
   --success-on-dark: #b8d4b0;
@@ -114,7 +114,7 @@ body {
 }
 
 /* Start-walk handoff: pulse at 100, then Lakaw title, then zoom out. */
-@keyframes ryne-pulse {
+@keyframes walk-intro-pulse {
   0%,
   100% {
     transform: scale(1);
@@ -124,7 +124,7 @@ body {
   }
 }
 
-@keyframes ryne-title-in {
+@keyframes walk-intro-title-in {
   from {
     opacity: 0;
     transform: scale(0.92);
@@ -136,7 +136,7 @@ body {
 }
 
 /* Soft circular mask from the center (echoes the mark). */
-@keyframes ryne-enter {
+@keyframes walk-intro-enter {
   from {
     clip-path: circle(0% at 50% 50%);
   }
@@ -146,7 +146,7 @@ body {
 }
 
 /* Title + background leave together; no leftover orange. */
-@keyframes ryne-exit {
+@keyframes walk-intro-exit {
   from {
     opacity: 1;
   }
@@ -155,7 +155,7 @@ body {
   }
 }
 
-@keyframes ryne-title-exit {
+@keyframes walk-intro-title-exit {
   from {
     opacity: 1;
     transform: scale(1);
@@ -166,7 +166,7 @@ body {
   }
 }
 
-.ryne-intro-stage {
+.walk-intro-stage {
   opacity: 1;
   transition:
     opacity 420ms var(--ease-in),
@@ -174,50 +174,50 @@ body {
   will-change: transform, opacity;
 }
 
-.ryne-intro-stage--pulse {
-  animation: ryne-pulse 640ms var(--ease-spring) both;
+.walk-intro-stage--pulse {
+  animation: walk-intro-pulse 640ms var(--ease-spring) both;
 }
 
-.ryne-intro-stage--out {
+.walk-intro-stage--out {
   opacity: 0;
   transform: scale(0.94);
   pointer-events: none;
 }
 
-.ryne-intro-title {
+.walk-intro-title {
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
 }
 
-.ryne-intro-title--in {
-  animation: ryne-title-in 520ms var(--ease-out) both;
+.walk-intro-title--in {
+  animation: walk-intro-title-in 520ms var(--ease-out) both;
 }
 
-.ryne-intro-title--exit {
-  animation: ryne-title-exit 480ms var(--ease-in) forwards;
+.walk-intro-title--exit {
+  animation: walk-intro-title-exit 480ms var(--ease-in) forwards;
 }
 
-.ryne-intro {
+.walk-intro {
   overflow: hidden;
   clip-path: circle(0% at 50% 50%);
 }
 
-.ryne-intro--enter {
-  animation: ryne-enter 3000ms var(--ease-out) both;
+.walk-intro--enter {
+  animation: walk-intro-enter 3000ms var(--ease-out) both;
 }
 
-.ryne-intro--exit {
+.walk-intro--exit {
   clip-path: circle(150% at 50% 50%);
-  animation: ryne-exit 480ms var(--ease-in) forwards;
+  animation: walk-intro-exit 480ms var(--ease-in) forwards;
 }
 
-.ryne-intro-mark {
+.walk-intro-mark {
   position: relative;
 }
 
 /* Leading-edge metal grind on the progress tip. */
-@keyframes ryne-grind-spark {
+@keyframes walk-intro-grind-spark {
   0% {
     opacity: 0;
     transform: translate(0, 0) rotate(var(--gr)) scaleY(0.25);
@@ -231,7 +231,7 @@ body {
   }
 }
 
-@keyframes ryne-loading-shimmer {
+@keyframes walk-intro-loading-shimmer {
   0% {
     background-position: 120% 0;
   }
@@ -240,14 +240,14 @@ body {
   }
 }
 
-.ryne-intro-grind {
+.walk-intro-grind {
   pointer-events: none;
   height: 0;
   width: 0;
   overflow: visible;
 }
 
-.ryne-intro-grind-bit {
+.walk-intro-grind-bit {
   position: absolute;
   left: 0;
   top: 0;
@@ -263,18 +263,18 @@ body {
   transform-origin: center center;
   margin-left: -1px;
   margin-top: -5px;
-  animation: ryne-grind-spark 320ms var(--ease-out) infinite;
+  animation: walk-intro-grind-spark 320ms var(--ease-out) infinite;
   animation-delay: var(--gd, 0ms);
 }
 
-.ryne-intro-grind--hot .ryne-intro-grind-bit {
+.walk-intro-grind--hot .walk-intro-grind-bit {
   height: 13px;
   margin-top: -6.5px;
   animation-duration: 220ms;
   box-shadow: 0 0 4px color-mix(in srgb, var(--ceremonial) 70%, transparent);
 }
 
-.ryne-intro-loading {
+.walk-intro-loading {
   background-image: linear-gradient(
     90deg,
     color-mix(in srgb, var(--accent-fg) 40%, transparent) 0%,
@@ -287,7 +287,7 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  animation: ryne-loading-shimmer 1.5s linear infinite;
+  animation: walk-intro-loading-shimmer 1.5s linear infinite;
 }
 
 @keyframes observation-shake {
@@ -305,44 +305,6 @@ body {
 
 .observation-shake {
   animation: observation-shake 350ms var(--ease-out);
-}
-
-/*
- * Tiny CSS-only celebration burst. ~12 spans, transform + opacity only,
- * one shot then unmounted. No canvas, no library, no rAF loop.
- */
-@keyframes quest-flare-burst {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(0.4);
-    opacity: 0;
-  }
-}
-
-.quest-flare {
-  pointer-events: none;
-  position: absolute;
-  left: 0.75rem;
-  top: 0;
-  z-index: 1;
-  height: 0;
-  width: 0;
-  overflow: visible;
-}
-
-.quest-flare-bit {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 5px;
-  height: 8px;
-  border-radius: 1px;
-  background: var(--flare-color, var(--ceremonial));
-  animation: quest-flare-burst 900ms var(--ease-out) forwards;
-  animation-delay: var(--fd, 0ms);
 }
 
 @keyframes count-pop {
@@ -463,6 +425,42 @@ body {
   animation: pop-in 360ms var(--ease-spring) both;
 }
 
+/*
+ * Solve the quest: inverse of the walk-intro iris.
+ * Show expands from the center; hide contracts the circle inward.
+ */
+@keyframes solve-quest-in {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(150% at 50% 50%);
+  }
+}
+
+@keyframes solve-quest-out {
+  from {
+    clip-path: circle(150% at 50% 50%);
+  }
+  to {
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+.solve-quest-cta {
+  clip-path: circle(0% at 50% 50%);
+  transition: filter 200ms var(--ease-out);
+  will-change: clip-path;
+}
+
+.solve-quest-cta.is-shown {
+  animation: solve-quest-in 500ms var(--ease-out) both;
+}
+
+.solve-quest-cta.is-leaving {
+  animation: solve-quest-out 500ms var(--ease-in) forwards;
+}
+
 /* Dock CTA: locked → terracotta ink wipe + label rewrite after map celebrate. */
 @keyframes quest-ink-fill {
   from {
@@ -492,8 +490,8 @@ body {
 }
 
 .quest-unlock {
-  background: var(--stone-light);
-  color: var(--muted-fg);
+  background: var(--ceremonial);
+  color: var(--foreground);
   box-shadow: none;
 }
 
@@ -541,7 +539,7 @@ body {
 }
 
 .quest-unlock-from {
-  color: var(--muted-fg);
+  color: var(--foreground);
 }
 
 .quest-unlock-to {
@@ -586,13 +584,19 @@ body {
 }
 
 /* Only runs while the sheet is open (restarts each time it opens). */
-.sheet-root[data-open="true"] .marker-ping {
+.sheet-root[data-open="true"] .marker-ping,
+.map-live .marker-ping {
   animation: marker-ping 2s var(--ease-out) 700ms infinite;
 }
 
 .map-marker {
   transform-box: fill-box;
   transform-origin: center;
+}
+
+/* Onboarding: entrance photo inset on the compound map. */
+.entrance-callout {
+  animation: fade-up 560ms var(--ease-out) 280ms backwards;
 }
 
 /* --------------------------------------------------------------------------
@@ -874,16 +878,26 @@ body {
     transform: none !important;
   }
 
-  .ryne-intro,
-  .ryne-intro--enter,
-  .ryne-intro--exit,
-  .ryne-intro-stage,
-  .ryne-intro-stage--pulse,
-  .ryne-intro-title,
-  .ryne-intro-title--in,
-  .ryne-intro-title--exit,
-  .ryne-intro-grind-bit,
-  .ryne-intro-loading {
+  .solve-quest-cta.is-shown {
+    animation: none !important;
+    clip-path: none !important;
+  }
+
+  .solve-quest-cta.is-leaving {
+    animation: none !important;
+    clip-path: circle(0% at 50% 50%) !important;
+  }
+
+  .walk-intro,
+  .walk-intro--enter,
+  .walk-intro--exit,
+  .walk-intro-stage,
+  .walk-intro-stage--pulse,
+  .walk-intro-title,
+  .walk-intro-title--in,
+  .walk-intro-title--exit,
+  .walk-intro-grind-bit,
+  .walk-intro-loading {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -891,15 +905,15 @@ body {
     filter: none !important;
   }
 
-  .ryne-intro-stage--out {
+  .walk-intro-stage--out {
     opacity: 0 !important;
   }
 
-  .ryne-intro-grind {
+  .walk-intro-grind {
     display: none !important;
   }
 
-  .ryne-intro-loading {
+  .walk-intro-loading {
     background: none !important;
     color: var(--accent-fg) !important;
     -webkit-text-fill-color: var(--accent-fg) !important;
@@ -908,10 +922,6 @@ body {
   .marker-ping {
     animation: none !important;
     opacity: 0;
-  }
-
-  .quest-flare {
-    display: none !important;
   }
 
   .map-progress-pct,

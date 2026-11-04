@@ -17,11 +17,18 @@ import { clearFinishSuccessSeen } from "./finish-success";
 type JourneyStore = JourneyProgress & {
   /** Outcome of the most recent stop visit. In memory only, never persisted. */
   lastOutcome: ScanOutcome | null;
+  /**
+   * After scanning a place too early mid-walk. In memory only.
+   * Map sheet shows warm copy for this expected place id.
+   */
+  earlyScanExpectedId: string | null;
   hydrateTourVersion: () => void;
   scanPoi: (poi: Poi) => ScanOutcome;
   /** Mark a place complete when the observation key is correct. */
   completePoi: (poi: Poi, answer: string) => boolean;
   markDonated: () => void;
+  /** Remember a too-early scan so the map can explain where to go. */
+  setEarlyScanGate: (expectedId: string | null) => void;
   reset: () => void;
 };
 
@@ -37,6 +44,7 @@ export const useJourneyStore = create<JourneyStore>()(
     (set, get) => ({
       ...createInitialProgress(nagaTour),
       lastOutcome: null,
+      earlyScanExpectedId: null,
 
       hydrateTourVersion: () => {
         const state = get();
@@ -44,7 +52,11 @@ export const useJourneyStore = create<JourneyStore>()(
           state.tourId !== nagaTour.id ||
           state.tourVersion !== nagaTour.version
         ) {
-          set({ ...createInitialProgress(nagaTour), lastOutcome: null });
+          set({
+            ...createInitialProgress(nagaTour),
+            lastOutcome: null,
+            earlyScanExpectedId: null,
+          });
         }
       },
 
@@ -69,10 +81,18 @@ export const useJourneyStore = create<JourneyStore>()(
 
       markDonated: () => set({ donated: true }),
 
+      setEarlyScanGate: (expectedId) => {
+        set({ earlyScanExpectedId: expectedId });
+      },
+
       reset: () => {
         showHomeAtOnce = true;
         clearFinishSuccessSeen();
-        set({ ...createInitialProgress(nagaTour), lastOutcome: null });
+        set({
+          ...createInitialProgress(nagaTour),
+          lastOutcome: null,
+          earlyScanExpectedId: null,
+        });
       },
     }),
     {

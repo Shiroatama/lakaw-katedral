@@ -63,6 +63,8 @@ export function PlaceVideo({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const seekingRef = useRef(false);
+  /** Pause from scroll-out; resume on re-entry only for these, not user pauses. */
+  const pausedByViewport = useRef(false);
 
   const close = useCallback(() => {
     requestId.current += 1;
@@ -106,8 +108,34 @@ export function PlaceVideo({
     if (!video) return;
     video.muted = true;
     setMuted(true);
+    pausedByViewport.current = false;
     void video.play().catch(() => {});
   }, [src]);
+
+  useEffect(() => {
+    if (open) return;
+    const shell = shellRef.current;
+    const video = videoRef.current;
+    if (!shell || !video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          if (!pausedByViewport.current) return;
+          pausedByViewport.current = false;
+          void video.play().catch(() => {});
+          return;
+        }
+        if (video.paused) return;
+        pausedByViewport.current = true;
+        video.pause();
+      },
+      { threshold: 0 },
+    );
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, [open, lifted, src]);
 
   useEffect(() => {
     const hide = window.setTimeout(() => {
@@ -205,9 +233,11 @@ export function PlaceVideo({
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
+      pausedByViewport.current = false;
       void video.play().catch(() => setPlaying(false));
       return;
     }
+    pausedByViewport.current = false;
     video.pause();
   }
 

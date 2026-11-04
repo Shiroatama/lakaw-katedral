@@ -8,6 +8,7 @@ import {
   ArrowRightIcon,
   CheckIcon,
   FootstepsIcon,
+  QrCodeIcon,
 } from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
 
@@ -136,7 +137,7 @@ const transitionFor = (direction: Direction) => [`nav-${direction}`];
 const buttonMotion =
   "transition-[transform,filter,background-color] duration-200 ease-[var(--ease-out)] hover:-translate-y-px active:translate-y-0 active:scale-[0.97]";
 
-type ButtonIcon = "next" | "back" | "walk" | "check" | "none";
+type ButtonIcon = "next" | "back" | "walk" | "check" | "qr" | "none";
 
 function ButtonLabel({
   children,
@@ -149,6 +150,7 @@ function ButtonLabel({
   return (
     <span className="inline-flex items-center justify-center gap-2">
       {icon === "back" ? <ArrowLeftIcon className="h-[1.1em] w-[1.1em]" /> : null}
+      {icon === "qr" ? <QrCodeIcon className="h-[1.1em] w-[1.1em]" /> : null}
       <span>{children}</span>
       {icon === "next" ? <ArrowRightIcon className="h-[1.1em] w-[1.1em]" /> : null}
       {icon === "walk" ? <FootstepsIcon className="h-[1.1em] w-[1.1em]" /> : null}

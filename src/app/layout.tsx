@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Ruwudu, Source_Sans_3 } from "next/font/google";
 import { JourneyHydrator } from "@/components/journey-hydrator";
 import { PwaProvider } from "@/components/pwa-provider";
-import { RyneIntroHost } from "@/components/ryne-intro";
+import { WalkIntroHost } from "@/components/walk-intro";
 import "./globals.css";
 
 const display = Ruwudu({
@@ -53,11 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-[var(--background)] text-[var(--foreground)]">
-        <RyneIntroHost>
+        <WalkIntroHost>
           <PwaProvider>
             <JourneyHydrator>{children}</JourneyHydrator>
           </PwaProvider>
-        </RyneIntroHost>
+        </WalkIntroHost>
       </body>
     </html>
   );

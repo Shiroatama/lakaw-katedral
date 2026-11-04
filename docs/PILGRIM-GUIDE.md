@@ -1,7 +1,7 @@
 # A Pilgrim’s Guide through the Naga Metropolitan Cathedral
 
 **Status:** Parish source of truth (provided by the Cathedral)  
-**MVP scope:** Items **1–3** only. Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`SPEC.md`](./SPEC.md) §3.1). Later stops stay here until they are added to the app.
+**App scope:** Guide items **1–3**, **9** (places 4–5), outdoor bell pavilion (place 6), **14** (place 7), and **13** (place 8). Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`SPEC.md`](./SPEC.md) §3.1). Other stops stay here until they are added to the app.
 
 ---
 
@@ -191,14 +191,19 @@ PAUSE. PRAY. GIVE THANKS.
 
 ---
 
-## App mapping (MVP)
+## App mapping
 
-| Guide # | Guide activity title | App headline (place name) | Slug |
-|---------|----------------------|---------------------------|------|
-| 1 | Enter with the Saints | The Cathedral Entrance | `/s/saints` |
-| 2 | See How the Gospel Came to Bicol | The Alcomendas Mural | `/s/mural` |
-| 3 | Discover the Cathedra | The Cathedra | `/s/cathedra` |
+| Guide # | Guide activity title | App order | App headline (place name) | Slug |
+|---------|----------------------|-----------|---------------------------|------|
+| 1 | Enter with the Saints | 1 | The Cathedral Entrance | `/s/saints` |
+| 2 | See How the Gospel Came to Bicol | 2 | The Alcomendas Mural | `/s/mural` |
+| 3 | Discover the Cathedra | 3 | The Cathedra | `/s/cathedra` |
+| 9 | Ring the Campana de la Paz | 4 | The Heritage Bells | `/s/bells` |
+| 9 | Ring the Campana de la Paz | 5 | The Candle Garden | `/s/candles` |
+| — | (outdoor pavilion near the heritage bells) | 6 | The Bell Pavilion | `/s/pavilion` |
+| 14 | Rise to the Quadricentennial Dome | 7 | The Quadricentennial Dome | `/s/dome` |
+| 13 | Meet Ina at the Porta Mariae | 8 | The Porta Mariae | `/s/porta` |
 
-App headlines name the place or object. Guide activity titles stay as written above for the parish document. The guide does not give a separate formal title for the mural; the app uses the artist name until the parish confirms another.
+App headlines name the place or object. Guide activity titles stay as written above for the parish document. The guide does not give a separate formal title for the mural; the app uses the artist name until the parish confirms another. Guide item 9 is split into app places 4–5; the plaza rotunda with the golden crown is guide item 14 (app place 7); Porta Mariae is app place 8. Place 6 is the nearby outdoor bell pavilion (working name until the parish confirms). These outdoor stops are ahead of guide items 4–8 while those indoor stops are still pending.
 
-Items 4–16 are recorded here for a later release. Do not invent stop copy from public web sources when this guide already covers the place.
+Items 4–8, 10–12, and 15–16 are recorded here for a later release. Do not invent stop copy from public web sources when this guide already covers the place.

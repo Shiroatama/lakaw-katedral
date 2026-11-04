@@ -12,7 +12,7 @@
 
 A mobile web app that guides visitors through the cathedral on a fixed route of points of interest (POIs). Each POI has a QR code. Scanning it opens that stop's story, advances the visitor's journey, and shows where to go next on a simple map. The journey ends with an invitation to donate to the parish.
 
-**MVP scope:** 3 POIs, no accounts, progress saved in the browser, works offline after the first scan.
+**MVP scope:** 8 POIs (guide 1–3, 9, 13, 14, plus outdoor bell pavilion), no accounts, progress saved in the browser, works offline after the first scan.
 
 ## 2. Goals and non-goals
 
@@ -67,7 +67,12 @@ Fixed route, in order (from the parish pilgrim guide; see [`PILGRIM-GUIDE.md`](.
 | 1 | The Cathedral Entrance | Main door, starting line | `/s/saints` |
 | 2 | The Alcomendas Mural | Nave, at the Raul Alcomendas mural | `/s/mural` |
 | 3 | The Cathedra | Near the Archbishop's Chair | `/s/cathedra` |
-| End | Finish (success modal + give/next) | After POI 3 | `/finish` |
+| 4 | The Heritage Bells | Outdoor pedestal bells | `/s/bells` |
+| 5 | The Candle Garden | Heritage Bells and Candle Garden alcove | `/s/candles` |
+| 6 | The Bell Pavilion | Outdoor pavilion with hanging bells (working name) | `/s/pavilion` |
+| 7 | The Quadricentennial Dome | Plaza rotunda with golden crown / stained glass | `/s/dome` |
+| 8 | The Porta Mariae | Triumphal arch / Marian Gate at the grounds | `/s/porta` |
+| End | Finish (success modal + give/next) | After POI 8 | `/finish` |
 
 **URL design (consideration).** Stop URLs are short readable words, not random tokens, so a visitor can type one by hand if a code won't scan (glare, dim light, damaged sticker). Trade-offs, accepted for MVP:
 
@@ -141,7 +146,7 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 
 ## 7. Content (hardcoded)
 
-**Source of truth:** [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md), the parish pilgrim guide. MVP ships guide items **1–3** only. Items 4–16 stay in that document until a later release.
+**Source of truth:** [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md), the parish pilgrim guide. The walk ships guide items **1–3**, **9** (places 4–5), the outdoor bell pavilion (place 6), **14** (place 7), and **13** (place 8). Guide items 4–8, 10–12, and 15–16 stay in that document until a later release.
 
 The text visitors read is the Grade 3 rewrite in `src/lib/tour/content.ts` (see 7.3). When the rewrite and the guide differ in tone, the guide wins on facts and names; the rewrite only simplifies the words around them.
 
@@ -154,6 +159,21 @@ The mural by Bicolano artist Raul Alcomendas. Through his work, discover Bicol's
 ### POI 3: The Cathedra
 The Cathedra (the Archbishop's Chair). It is more than a chair of honor. It symbolizes the Archbishop's teaching and pastoral authority and reminds us that the Cathedral is the mother church of the Archdiocese.
 
+### POI 4: The Heritage Bells
+Outdoor pedestal bells (part of guide item 9). Plaques name Campana de San Juan Evangelista (1850) and Campana de Sagrada Familia (1894). Four bells. Centuries of faith. One continuing story.
+
+### POI 5: The Candle Garden
+The Heritage Bells and Candle Garden alcove (part of guide item 9). Light a candle, offer a prayer, and where permitted ring the Campana de la Paz (1743), the oldest preserved heritage bell.
+
+### POI 6: The Bell Pavilion
+Outdoor pavilion with hanging bells and stairs (working name until parish confirms). Near the heritage bells on the compound lawn.
+
+### POI 7: The Quadricentennial Dome
+The Quadricentennial Dome (guide item 14): the plaza rotunda between the Cathedral and Porta Mariae, with a golden crown on the peak and a stained-glass ceiling. Parish gatherings (for example Palm Sunday blessing of palms) meet here. From this vantage, see how the sacred spaces, historic structures, and living community come together as one heritage of faith.
+
+### POI 8: The Porta Mariae
+The Porta Mariae (guide item 13), Latin for Marian Gate. Triumphal arch commemorating 300 years of devotion to Our Lady of Peñafrancia (1710–2010), blessed 9 September 2010. Museum and upper view of Ina.
+
 ### 7.2 Landmarks (wayfinding copy)
 Each stop has a one- or two-sentence `landmark` in plain words, shown in the wayfinding sheet under "Next: the …". It tells the visitor where to look for the sign and QR code, since a map marker alone is not enough in a busy nave. Current lines are **placeholders** until the parish confirms where each QR sign will be mounted.
 
@@ -163,7 +183,7 @@ Each stop has a one- or two-sentence `landmark` in plain words, shown in the way
 type Poi = {
   id: string;            // "saints"
   slug: string;          // readable URL segment, e.g. "mural" -> /s/mural
-  order: number;         // 1..3
+  order: number;         // 1..n
   title: string;
   shortTitle: string;    // one word for the floor plan label
   landmark: string;      // plain-words directions to this stop's sign / QR
@@ -181,7 +201,7 @@ Stored as typed JSON/MDX in the repo. Keep route rules and content in plain Type
 
 ### 7.3 Visitor-facing wording
 
-Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (short; what is here, no instructions), optional **Read more** (`aboutMore` history), then **action** and the observation quest (what to do: pray, look, pause). The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
+Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**, **The Heritage Bells**, **The Candle Garden**, **The Bell Pavilion**, **The Quadricentennial Dome**, **The Porta Mariae**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (short; what is here, no instructions), optional **Read more** (`aboutMore` history), then **action** and the observation quest (what to do: pray, look, pause). The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
 
 ## 8. Progress and state
 

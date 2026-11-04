@@ -13,7 +13,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BRAND_MARK, BrandMark } from "@/components/brand-mark";
 
-const LOGO = "/brand/ryne-media.webp";
+const PARTNER_LOGOS = [
+  {
+    src: "/brand/ryne-media.webp",
+    alt: "Ryne Media",
+    width: 1024,
+    height: 453,
+    className: "h-auto w-[min(9.5rem,42vw)]",
+  },
+  {
+    src: "/brand/bald-puppies.webp",
+    alt: "Bald Puppies Solutions Inc.",
+    width: 559,
+    height: 563,
+    className: "h-auto w-[min(5rem,24vw)]",
+  },
+] as const;
+
 /** Progress starts while the circular reveal is still opening (CSS enter is 3 s). */
 const COUNT_START_MS = 500;
 const COUNT_MS = 2800;
@@ -21,7 +37,7 @@ const COUNT_MS = 2800;
 const COUNT_POWER = 2.5;
 
 const PULSE_MS = 640;
-/** Brand fades fully out before the title appears (match CSS). */
+/** Partners fade fully out before the title appears (match CSS). */
 const STAGE_OUT_MS = 420;
 const TITLE_IN_MS = 520;
 /** Quiet hold with only Lakaw Katedral on screen. */
@@ -44,20 +60,20 @@ const GRIND_SPARKS = [
   { gx: "14px", gy: "-3px", gr: "-42deg", gd: "90ms" },
 ] as const;
 
-const RyneIntroContext = createContext<(href: string | null) => void>(
+const WalkIntroContext = createContext<(href: string | null) => void>(
   () => {},
 );
 
-export function useRyneIntro() {
-  return useContext(RyneIntroContext);
+export function useWalkIntro() {
+  return useContext(WalkIntroContext);
 }
 
 /**
  * Full-screen handoff after Start the walk: a terracotta screen fades in,
- * Ryne Media counts to 100, pulses, then Lakaw Katedral holds and zooms out
- * with the background into the first place.
+ * partner marks count to 100, pulse, then Lakaw Katedral holds and zooms out
+ * with the background into onboarding (then the entrance scan).
  */
-export function RyneIntroHost({ children }: { children: React.ReactNode }) {
+export function WalkIntroHost({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [target, setTarget] = useState<IntroTarget | null>(null);
   const [visible, setVisible] = useState(false);
@@ -67,8 +83,10 @@ export function RyneIntroHost({ children }: { children: React.ReactNode }) {
   const playing = useRef(false);
 
   useEffect(() => {
-    const ryne = new window.Image();
-    ryne.src = LOGO;
+    for (const logo of PARTNER_LOGOS) {
+      const img = new window.Image();
+      img.src = logo.src;
+    }
     const brand = new window.Image();
     brand.src = BRAND_MARK;
   }, []);
@@ -170,11 +188,11 @@ export function RyneIntroHost({ children }: { children: React.ReactNode }) {
   }, [target]);
 
   return (
-    <RyneIntroContext.Provider value={play}>
+    <WalkIntroContext.Provider value={play}>
       {children}
       {target
         ? createPortal(
-            <RyneIntroOverlay
+            <WalkIntroOverlay
               visible={visible}
               progress={progress}
               phase={phase}
@@ -182,11 +200,11 @@ export function RyneIntroHost({ children }: { children: React.ReactNode }) {
             document.body,
           )
         : null}
-    </RyneIntroContext.Provider>
+    </WalkIntroContext.Provider>
   );
 }
 
-function RyneIntroOverlay({
+function WalkIntroOverlay({
   visible,
   progress,
   phase,
@@ -204,9 +222,9 @@ function RyneIntroOverlay({
   // One motion class only. Keeping --in during exit restarted the fade-in.
   const titleMotion =
     phase === "title"
-      ? "ryne-intro-title--in"
+      ? "walk-intro-title--in"
       : phase === "exit"
-        ? "ryne-intro-title--exit"
+        ? "walk-intro-title--exit"
         : "";
 
   useEffect(() => {
@@ -225,30 +243,32 @@ function RyneIntroOverlay({
       ref={panelRef}
       role="status"
       tabIndex={-1}
-      className={`ryne-intro fixed inset-0 z-[60] bg-[var(--accent)] outline-none ${visible && !exiting ? "ryne-intro--enter" : ""} ${exiting ? "ryne-intro--exit pointer-events-none" : ""}`}
+      className={`walk-intro fixed inset-0 z-[60] bg-[var(--accent)] outline-none ${visible && !exiting ? "walk-intro--enter" : ""} ${exiting ? "walk-intro--exit pointer-events-none" : ""}`}
     >
       <p className="sr-only">Loading the walk</p>
 
       <div
         aria-hidden
-        className={`ryne-intro-stage absolute inset-0 flex flex-col items-center justify-center px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] ${phase === "pulse" ? "ryne-intro-stage--pulse" : ""} ${brandOut ? "ryne-intro-stage--out" : ""}`}
+        className={`walk-intro-stage absolute inset-0 flex flex-col items-center justify-center px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] ${phase === "pulse" ? "walk-intro-stage--pulse" : ""} ${brandOut ? "walk-intro-stage--out" : ""}`}
       >
-        <Image
-          src={LOGO}
-          alt=""
-          width={640}
-          height={631}
-          unoptimized
-          priority
-          className="h-auto w-36"
-        />
-        <p className="mt-4 text-sm font-medium tracking-wide text-[var(--accent-fg)]">
-          Ryne Media
-        </p>
+        <div className="flex items-center justify-center gap-5 sm:gap-8">
+          {PARTNER_LOGOS.map((logo) => (
+            <Image
+              key={logo.src}
+              src={logo.src}
+              alt={logo.alt}
+              width={logo.width}
+              height={logo.height}
+              unoptimized
+              priority
+              className={logo.className}
+            />
+          ))}
+        </div>
         <p className="mt-9 min-w-[5ch] text-center text-3xl font-medium tabular-nums leading-none text-[var(--accent-fg)]">
           {progress}%
         </p>
-        <div className="ryne-intro-bar relative mt-4 h-2 w-52">
+        <div className="walk-intro-bar relative mt-4 h-2 w-52">
           <div className="h-full overflow-hidden rounded-full bg-[var(--accent-fg)]/25">
             <div
               className="h-full rounded-full bg-[var(--accent-fg)]"
@@ -257,13 +277,13 @@ function RyneIntroOverlay({
           </div>
           {grinding ? (
             <div
-              className={`ryne-intro-grind absolute top-1/2 -translate-y-1/2 ${progress >= 92 || phase === "pulse" ? "ryne-intro-grind--hot" : ""}`}
+              className={`walk-intro-grind absolute top-1/2 -translate-y-1/2 ${progress >= 92 || phase === "pulse" ? "walk-intro-grind--hot" : ""}`}
               style={{ left: `${Math.min(progress, 100)}%` }}
             >
               {GRIND_SPARKS.map((spark) => (
                 <span
                   key={`${spark.gx}-${spark.gy}-${spark.gd}`}
-                  className="ryne-intro-grind-bit"
+                  className="walk-intro-grind-bit"
                   style={
                     {
                       "--gx": spark.gx,
@@ -277,16 +297,16 @@ function RyneIntroOverlay({
             </div>
           ) : null}
         </div>
-        <p className="ryne-intro-loading mt-3 text-sm font-medium tracking-wide">
+        <p className="walk-intro-loading mt-3 text-sm font-medium tracking-wide">
           Loading...
         </p>
       </div>
 
       <div
         aria-hidden
-        className={`ryne-intro-title absolute inset-0 flex items-center justify-center px-6 ${titleMotion}`}
+        className={`walk-intro-title absolute inset-0 flex items-center justify-center px-6 ${titleMotion}`}
       >
-        <div className="ryne-intro-mark flex flex-col items-center gap-3">
+        <div className="walk-intro-mark flex flex-col items-center gap-3">
           <p className="text-sm font-medium tracking-wide text-[var(--accent-fg)]/85">
             Welcome to
           </p>

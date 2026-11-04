@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  getEntrancePoi,
   getNextExpectedPoi,
   getPoiBySlug,
   isJourneyComplete,
@@ -16,11 +15,16 @@ import {
   type Poi,
 } from "@/lib/tour";
 import { ChevronDownIcon } from "@/components/icons";
+import {
+  FinishSuccessModal,
+  FINISH_SUCCESS_OPEN_DELAY_MS,
+} from "@/components/finish-success-modal";
 import { MapBubble, type MapFocus } from "@/components/map-bubble";
 import { QUEST_ANCHOR_ID } from "@/components/observation-key";
 import { QuestUnlockCta } from "@/components/quest-unlock-cta";
-import { useRyneIntro } from "@/components/ryne-intro";
+import { useWalkIntro } from "@/components/walk-intro";
 import { PrimaryButton, StickyActionBar } from "@/components/ui";
+import { readFinishSuccessSeen } from "@/lib/tour/finish-success";
 
 type StopDockProps = {
   /** Label once every place is visited. */
@@ -56,13 +60,14 @@ type UnlockedTarget = {
 /**
  * Bottom dock shared by every journey screen: map chat-head + one CTA.
  *
- * - walk not begun: Start the walk (brand handoff, then place 1); map urges that CTA
+ * - walk not begun: Start the walk (brand handoff, then onboarding); map urges that CTA
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
- * - on a stop, quest unsolved: Solve the quest (quiet scroll down to the card)
+ * - on a stop, quest unsolved: Solve the quest (ceremonial gold; scrolls to the card);
+ *                   iris-closes while the card is fully in view; unlock CTA returns on solve
  * - after solve:    ink-fill unlock to Next / Finish starts with the map celebrate
  * - next is entrance: Continue at the entrance (link to place 1)
- * - later places:   Next: the mural (opens wayfinding map)
+ * - later places:   Continue the walk (opens wayfinding map)
  * - all solved:     Finish
  */
 export function StopDock({
@@ -75,7 +80,7 @@ export function StopDock({
 }: StopDockProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const playIntro = useRyneIntro();
+  const playIntro = useWalkIntro();
   const onHome = pathname === "/";
   const journeyReady = useJourneyHydrated();
   const [mapOpen, setMapOpen] = useState(defaultOpen);
@@ -86,7 +91,6 @@ export function StopDock({
   const complete = isJourneyComplete(progress, nagaTour);
   const started = isJourneyStarted(progress);
   const next = getNextExpectedPoi(progress, nagaTour);
-  const entrance = getEntrancePoi(nagaTour);
   const mapOrientationOnly = onHome && !started;
 
   const stopSlug = pathname.startsWith("/s/")
@@ -99,6 +103,17 @@ export function StopDock({
   const [unlockPhase, setUnlockPhase] = useState<UnlockPhase>("idle");
   const wasUnsolved = useRef(currentUnsolved);
   const unlockingStopId = useRef<string | null>(null);
+  /** Hide Solve the quest while the Your quest card is fully on screen. */
+  const [questFullyVisible, setQuestFullyVisible] = useState(false);
+  /** Keep the button mounted through the iris close; shown vs leaving drive clip-path. */
+  const [solveQuestMounted, setSolveQuestMounted] = useState(true);
+  const [solveQuestShown, setSolveQuestShown] = useState(true);
+  const [solveQuestLeaving, setSolveQuestLeaving] = useState(false);
+  /** Celebrate dialog after the last quest; Continue leads to /finish. */
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successDelayMs, setSuccessDelayMs] = useState(
+    FINISH_SUCCESS_OPEN_DELAY_MS,
+  );
 
   useEffect(() => {
     if (currentUnsolved) {
@@ -115,14 +130,78 @@ export function StopDock({
       unlockingStopId.current = currentStop.id;
       // Start with the map percent celebrate, not after it.
       setUnlockPhase("animating");
+      if (complete && !readFinishSuccessSeen()) {
+        setSuccessDelayMs(FINISH_SUCCESS_OPEN_DELAY_MS);
+        setSuccessOpen(true);
+      }
     }
     wasUnsolved.current = false;
-  }, [currentUnsolved, currentStop]);
+  }, [currentUnsolved, currentStop, complete]);
+
+  useEffect(() => {
+    if (!currentUnsolved) {
+      setQuestFullyVisible(false);
+      setSolveQuestMounted(false);
+      setSolveQuestShown(false);
+      setSolveQuestLeaving(false);
+      return;
+    }
+
+    const quest = document.getElementById(QUEST_ANCHOR_ID);
+    if (!quest) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        // 0.99: subpixel rounding often keeps ratio just under 1.
+        setQuestFullyVisible(
+          entry.isIntersecting && entry.intersectionRatio >= 0.99,
+        );
+      },
+      { threshold: [0, 0.99, 1] },
+    );
+    observer.observe(quest);
+    return () => observer.disconnect();
+  }, [currentUnsolved, currentStop?.id]);
+
+  useEffect(() => {
+    if (!currentUnsolved) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Match .solve-quest-cta.is-leaving duration in globals.css.
+    const leaveMs = reduce ? 0 : 500;
+
+    if (!questFullyVisible) {
+      setSolveQuestLeaving(false);
+      setSolveQuestMounted(true);
+      let inner = 0;
+      const outer = window.requestAnimationFrame(() => {
+        inner = window.requestAnimationFrame(() => setSolveQuestShown(true));
+      });
+      return () => {
+        window.cancelAnimationFrame(outer);
+        window.cancelAnimationFrame(inner);
+      };
+    }
+
+    setSolveQuestShown(false);
+    setSolveQuestLeaving(true);
+    const id = window.setTimeout(() => {
+      setSolveQuestMounted(false);
+      setSolveQuestLeaving(false);
+    }, leaveMs);
+    return () => window.clearTimeout(id);
+  }, [currentUnsolved, questFullyVisible]);
+
+  function openSuccessNow() {
+    setSuccessDelayMs(0);
+    setSuccessOpen(true);
+  }
 
   useEffect(() => {
     if (!journeyReady || started || startGate || continueTo) return;
-    router.prefetch(`/s/${entrance.slug}`);
-  }, [journeyReady, started, startGate, continueTo, entrance.slug, router]);
+    router.prefetch("/onboarding");
+  }, [journeyReady, started, startGate, continueTo, router]);
 
   function scrollToQuest() {
     const quest = document.getElementById(QUEST_ANCHOR_ID);
@@ -142,6 +221,9 @@ export function StopDock({
 
   function unlockedTarget(): UnlockedTarget {
     if (complete || !next) {
+      if (!readFinishSuccessSeen()) {
+        return { label: finishLabel, icon: "check", onClick: openSuccessNow };
+      }
       return { label: finishLabel, icon: "check", href: "/finish" };
     }
     if (next.order === 1) {
@@ -156,6 +238,21 @@ export function StopDock({
       icon: "walk",
       onClick: () => openMap("next"),
     };
+  }
+
+  function finishAction() {
+    if (!readFinishSuccessSeen()) {
+      return (
+        <PrimaryButton icon="check" onClick={openSuccessNow}>
+          {finishLabel}
+        </PrimaryButton>
+      );
+    }
+    return (
+      <PrimaryButton href="/finish" icon="check">
+        {finishLabel}
+      </PrimaryButton>
+    );
   }
 
   if (!journeyReady) {
@@ -186,16 +283,25 @@ export function StopDock({
       </PrimaryButton>
     );
   } else if (currentUnsolved) {
-    action = (
+    action = solveQuestMounted ? (
       <button
         type="button"
         onClick={scrollToQuest}
-        className="inline-flex min-h-14 w-full items-center justify-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--background)] px-5 text-base font-medium text-[var(--stone)] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--surface)] active:scale-[0.98]"
+        tabIndex={solveQuestShown ? undefined : -1}
+        aria-hidden={!solveQuestShown}
+        disabled={!solveQuestShown}
+        className={`solve-quest-cta inline-flex min-h-14 w-full items-center justify-center gap-1.5 rounded-md bg-[var(--ceremonial)] px-5 text-base font-semibold text-[var(--foreground)] hover:brightness-95 active:scale-[0.98] ${
+          solveQuestLeaving
+            ? "is-leaving pointer-events-none"
+            : solveQuestShown
+              ? "is-shown"
+              : "pointer-events-none"
+        }`}
       >
         Solve the quest
         <ChevronDownIcon className="h-[1.1em] w-[1.1em]" />
       </button>
-    );
+    ) : null;
   } else if (unlockPhase === "animating" || unlockPhase === "done") {
     const target = unlockedTarget();
     action = (
@@ -209,17 +315,13 @@ export function StopDock({
       />
     );
   } else if (complete || !next) {
-    action = (
-      <PrimaryButton href="/finish" icon="check">
-        {finishLabel}
-      </PrimaryButton>
-    );
+    action = finishAction();
   } else if (!started) {
     action = (
       <PrimaryButton
         icon="walk"
         onClick={() => {
-          playIntro(`/s/${entrance.slug}`);
+          playIntro("/onboarding");
         }}
       >
         {startLabel}
@@ -240,31 +342,34 @@ export function StopDock({
   }
 
   return (
-    <StickyActionBar
-      elevated={!hideMap && mapOpen}
-      map={
-        hideMap ? undefined : (
-          <MapBubble
-            open={mapOpen}
-            onOpenChange={setMapOpen}
-            focus={mapFocus}
-            onFocusChange={setMapFocus}
-            hideActions={mapOrientationOnly}
-            beginLabel={startLabel}
-            onTriggerOpen={() =>
-              openMap(
-                startGate ||
-                  continueTo ||
-                  !(started && progress.lastScannedPoiId)
-                  ? "next"
-                  : "here",
-              )
-            }
-          />
-        )
-      }
-    >
-      {action}
-    </StickyActionBar>
+    <>
+      <StickyActionBar
+        elevated={!hideMap && mapOpen}
+        map={
+          hideMap ? undefined : (
+            <MapBubble
+              open={mapOpen}
+              onOpenChange={setMapOpen}
+              focus={mapFocus}
+              onFocusChange={setMapFocus}
+              hideActions={mapOrientationOnly}
+              beginLabel={startLabel}
+              onTriggerOpen={() =>
+                openMap(
+                  startGate ||
+                    continueTo ||
+                    !(started && progress.lastScannedPoiId)
+                    ? "next"
+                    : "here",
+                )
+              }
+            />
+          )
+        }
+      >
+        {action}
+      </StickyActionBar>
+      <FinishSuccessModal open={successOpen} openDelayMs={successDelayMs} />
+    </>
   );
 }
