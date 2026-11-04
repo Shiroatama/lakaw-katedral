@@ -4,7 +4,7 @@ export default function TourLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-0">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-0 md:max-w-4xl">
       {children}
     </div>
   );

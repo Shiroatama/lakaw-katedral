@@ -847,6 +847,127 @@ body {
    Reduced motion: no movement, no waiting. Content simply appears.
    -------------------------------------------------------------------------- */
 
+/* ==========================================================================
+   Correct celebrate: black wash + green die-cut sticker (game beat)
+   ========================================================================== */
+
+@keyframes correct-celebrate-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes correct-celebrate-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes correct-sticker-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(0.35);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(-2deg) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-3deg) scale(1);
+  }
+}
+
+@keyframes correct-spark-in {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(12deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.correct-celebrate {
+  pointer-events: none;
+  animation: correct-celebrate-in 180ms var(--ease-out) both;
+}
+
+.correct-celebrate.is-leaving {
+  animation: correct-celebrate-out 280ms var(--ease-in) both;
+}
+
+.correct-celebrate-backdrop {
+  background: rgb(0 0 0 / 75%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.correct-sticker {
+  margin: 0;
+  padding: 0.28em 0.5em 0.34em;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.17rem, 10.5vw, 4.375rem);
+  line-height: 0.92;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1a4d2e;
+  background: #c8f56e;
+  border-radius: 0.58em 0.78em 0.62em 0.72em / 0.72em 0.58em 0.82em 0.64em;
+  box-shadow:
+    0 0 0 0.14em #c8f56e,
+    0 0 0 0.28em #1a4d2e,
+    0.1em 0.16em 0 rgba(0, 0, 0, 0.4);
+  transform: rotate(-3deg);
+  animation: correct-sticker-in 520ms var(--ease-spring) both;
+  animation-delay: 60ms;
+}
+
+.correct-sticker-spark {
+  position: absolute;
+  width: 0.42em;
+  height: 0.42em;
+  background: #c8f56e;
+  clip-path: polygon(
+    50% 0%,
+    63% 35%,
+    100% 50%,
+    63% 65%,
+    50% 100%,
+    37% 65%,
+    0% 50%,
+    37% 35%
+  );
+  box-shadow: 0 0 0 0.06em #1a4d2e;
+  animation: correct-spark-in 420ms var(--ease-spring) both;
+}
+
+.correct-sticker-spark--a {
+  top: -0.22em;
+  right: -0.18em;
+  animation-delay: 280ms;
+}
+
+.correct-sticker-spark--b {
+  bottom: -0.12em;
+  left: -0.28em;
+  width: 0.28em;
+  height: 0.28em;
+  animation-delay: 360ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -872,10 +993,17 @@ body {
   .sheet-root[data-open="true"] .map-marker,
   .sheet-root[data-open="true"][data-markers-animate="true"] .map-marker,
   .sheet-root[data-open="true"] .map-label,
-  .confirm-root[data-open="true"] .confirm-panel {
+  .confirm-root[data-open="true"] .confirm-panel,
+  .correct-celebrate,
+  .correct-sticker,
+  .correct-sticker-spark {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .correct-sticker {
+    transform: rotate(-3deg) !important;
   }
 
   .solve-quest-cta.is-shown {

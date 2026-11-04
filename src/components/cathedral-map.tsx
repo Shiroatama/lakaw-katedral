@@ -66,6 +66,36 @@ export function isInteriorPlace(poiId: string): boolean {
   return INTERIOR_POI_IDS.has(poiId);
 }
 
+/** Center aisle on the interior floor plan (entrance and Cathedra sit here). */
+const INTERIOR_AISLE_X = 140;
+/** Nave spine on the compound overview (places 1–3 sit along it). */
+const COMPOUND_AISLE_X = 200;
+
+/**
+ * Axis-aligned walk path (90° bends only). Prefers the aisle so the line
+ * does not cut diagonally through walls: up/down the aisle, then across.
+ */
+function navRoutePoints(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  aisleX: number,
+): string {
+  if (from.x === to.x || from.y === to.y) {
+    return `${from.x},${from.y} ${to.x},${to.y}`;
+  }
+
+  // Two possible L corners: vertical-first or horizontal-first.
+  const viaAisleThenAcross = { x: from.x, y: to.y };
+  const viaAcrossThenAisle = { x: to.x, y: from.y };
+  const aisleScore = (p: { x: number }) => Math.abs(p.x - aisleX);
+  const bend =
+    aisleScore(viaAisleThenAcross) <= aisleScore(viaAcrossThenAisle)
+      ? viaAisleThenAcross
+      : viaAcrossThenAisle;
+
+  return `${from.x},${from.y} ${bend.x},${bend.y} ${to.x},${to.y}`;
+}
+
 export function CathedralMap({
   highlightNext = true,
   variant = "compound",
@@ -109,6 +139,28 @@ export function CathedralMap({
       ? baseMarkers.filter((marker) => onlyOrders.includes(marker.order))
       : baseMarkers;
   const tipMarker = tip ? markers[0] : undefined;
+
+  // One dashed hop only: last finished place → next place. Never draw ahead
+  // to place 3 while the walker is still heading to place 2.
+  const fromPoi = nextPoi
+    ? (pois.find((poi) => poi.order === nextPoi.order - 1) ?? null)
+    : null;
+  const fromMarker = fromPoi
+    ? (markers.find((marker) => marker.poiId === fromPoi.id) ?? null)
+    : null;
+  const toMarker = nextPoi
+    ? (markers.find((marker) => marker.poiId === nextPoi.id) ?? null)
+    : null;
+  const showNavLine =
+    !onlyOrders &&
+    Boolean(fromMarker && toMarker) &&
+    Boolean(fromPoi && completed.includes(fromPoi.id));
+  const aisleX =
+    variant === "interior" ? INTERIOR_AISLE_X : COMPOUND_AISLE_X;
+  const navPoints =
+    showNavLine && fromMarker && toMarker
+      ? navRoutePoints(fromMarker, toMarker, aisleX)
+      : null;
 
   return (
     <div className={`w-full${onlyOrders ? " map-live" : ""}`}>
@@ -164,6 +216,30 @@ export function CathedralMap({
           >
             Entrance
           </text>
+        ) : null}
+
+        {navPoints ? (
+          <g aria-hidden>
+            <polyline
+              points={navPoints}
+              fill="none"
+              stroke="var(--surface)"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.82"
+            />
+            <polyline
+              points={navPoints}
+              fill="none"
+              stroke="var(--accent)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="5 7"
+              opacity="0.72"
+            />
+          </g>
         ) : null}
 
         {tipMarker && tip ? (

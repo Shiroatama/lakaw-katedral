@@ -1,6 +1,7 @@
 import type { Poi } from "@/lib/tour";
 import { HeroMedia } from "@/components/hero-media";
 import { ObservationKeyForm } from "@/components/observation-key";
+import { StewardCredit } from "@/components/steward-credit";
 import { StoryFlow } from "@/components/story-flow";
 
 type PoiDetailProps = {
@@ -15,9 +16,10 @@ const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as React.CSSProperties;
 export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
   return (
     <article className="flex flex-1 flex-col">
+      <StewardCredit variant="sticky" />
       <div className="flex flex-col gap-8 pb-2">
-        {/* Edge to edge, from the top of the screen. Page padding is cancelled
-            here; the story below stays in the padded column. */}
+        {/* Edge to edge under the sticky steward bar. The story below stays in
+            the padded column. */}
         <HeroMedia
           poi={poi}
           aspectClassName="aspect-video"

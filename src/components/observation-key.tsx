@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
-import { FinishConfetti } from "@/components/finish-confetti";
+import { useId, useState } from "react";
+import {
+  CORRECT_CELEBRATE_MS,
+  CorrectCelebrate,
+} from "@/components/correct-celebrate";
 import type { Poi } from "@/lib/tour";
 import {
   getNextExpectedPoi,
@@ -24,6 +27,20 @@ function asContinuation(text: string) {
 /** Scroll target for the dock's "Solve the quest" control. */
 export const QUEST_ANCHOR_ID = "your-quest";
 
+/** Wrong submits before the gentle answer reveal. Place stays unsolved. */
+const MISS_LIMIT = 5;
+
+/**
+ * Nudges for misses 1–4. The 5th miss reveals the answer (form stays open;
+ * place does not auto-complete). Last line foreshadows help.
+ */
+const MISS_NUDGES = [
+  "Not quite. Look again.",
+  "Try again. You can do it.",
+  "Still hiding. Check the clue once more.",
+  "One more try, then we'll show you.",
+] as const;
+
 /**
  * One quest card: do the act, then answer the look-closely clue.
  * A correct answer keeps the quest text and adds the meaning reveal below.
@@ -39,30 +56,46 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  /** Wrong submits this visit. Resets when the place remounts. */
+  const [misses, setMisses] = useState(0);
   /** One-shot celebrate on the moment of success, not on revisit. */
   const [celebrate, setCelebrate] = useState(false);
+  /** Keep the reveal pop until the sticker overlay finishes. */
+  const [justSolved, setJustSolved] = useState(false);
 
-  useEffect(() => {
-    if (!celebrate) return;
-    const timer = window.setTimeout(() => setCelebrate(false), 1000);
-    return () => window.clearTimeout(timer);
-  }, [celebrate]);
+  const answerRevealed = misses >= MISS_LIMIT;
+  const canonicalAnswer = poi.observation.answers[0] ?? "";
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (solved) return;
+
+    if (!value.trim()) {
+      setError("Type an answer first.");
+      return;
+    }
 
     const ok = completePoi(poi, value);
     if (ok) {
       setError(null);
       setValue("");
       setCelebrate(true);
+      setJustSolved(true);
       return;
     }
 
-    setError("Not yet. Look again, then try once more.");
+    const nextMisses = Math.min(misses + 1, MISS_LIMIT);
+    setMisses(nextMisses);
+    setValue("");
     setShake(true);
     window.setTimeout(() => setShake(false), 400);
+
+    if (nextMisses >= MISS_LIMIT) {
+      setError(null);
+      return;
+    }
+
+    setError(MISS_NUDGES[nextMisses - 1]);
   }
 
   const proceedHint = journeyDone
@@ -77,9 +110,15 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
       tabIndex={-1}
       className={`scroll-mt-4 rounded-xl bg-[var(--foreground)] px-5 py-5 outline-none${shake ? " observation-shake" : ""}`}
     >
-      <FinishConfetti active={celebrate} />
+      <CorrectCelebrate
+        active={celebrate}
+        onDone={() => {
+          setCelebrate(false);
+          window.setTimeout(() => setJustSolved(false), 500);
+        }}
+      />
 
-      <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-[var(--ceremonial)]">
+      <h2 className="text-lg font-bold uppercase tracking-[0.14em] text-[var(--ceremonial)]">
         Your quest
       </h2>
 
@@ -96,7 +135,12 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
       {solved ? (
         <div className="mt-5 space-y-3" role="status">
           <p
-            className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${celebrate ? " pop-in" : ""}`}
+            className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${justSolved ? " pop-in" : ""}`}
+            style={
+              justSolved
+                ? ({ "--delay": `${CORRECT_CELEBRATE_MS}ms` } as React.CSSProperties)
+                : undefined
+            }
           >
             You are right.
           </p>
@@ -111,8 +155,27 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
         <form
           onSubmit={onSubmit}
           className="mt-4 space-y-2"
-          aria-describedby={error ? `${inputId}-error` : undefined}
+          aria-describedby={
+            error
+              ? `${inputId}-error`
+              : answerRevealed
+                ? `${inputId}-answer`
+                : undefined
+          }
         >
+          {answerRevealed && canonicalAnswer ? (
+            <p
+              id={`${inputId}-answer`}
+              className="text-base leading-relaxed text-[var(--accent-fg)]"
+              role="status"
+            >
+              Answer:{" "}
+              <span className="font-semibold text-[var(--ceremonial)]">
+                {canonicalAnswer}
+              </span>
+            </p>
+          ) : null}
+
           <label htmlFor={inputId} className="sr-only">
             Your answer
           </label>

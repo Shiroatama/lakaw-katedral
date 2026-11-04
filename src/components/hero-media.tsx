@@ -1,7 +1,6 @@
 import Image from "next/image";
 import type { Poi } from "@/lib/tour";
 import { PlaceVideo } from "@/components/place-video";
-import { StewardCredit } from "@/components/steward-credit";
 
 type HeroMediaProps = {
   poi: Poi;
@@ -20,10 +19,11 @@ export function HeroMedia({
   aspectClassName = "aspect-[4/3]",
   priority = false,
 }: HeroMediaProps) {
+  // Portrait clips stay 3:4 on phones; on tablets cap height so the dock stays clear.
   const frameClass = !poi.heroVideo
     ? aspectClassName
     : poi.heroVideoFrame === "portrait"
-      ? "aspect-[3/4]"
+      ? "aspect-[3/4] md:aspect-auto md:h-[min(70dvh,36rem)]"
       : "aspect-video";
 
   return (
@@ -36,18 +36,7 @@ export function HeroMedia({
           poster={poi.heroVideoPoster ?? poi.heroImage}
           label={poi.title}
           frame={poi.heroVideoFrame ?? "landscape"}
-        >
-          {poi.order === 1 ? (
-            <>
-              {/* Soft top wash so the crest stays readable on bright sky. */}
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-black/45 to-transparent"
-                aria-hidden
-              />
-              <StewardCredit />
-            </>
-          ) : null}
-        </PlaceVideo>
+        />
       ) : (
         <Image
           src={poi.heroImage}

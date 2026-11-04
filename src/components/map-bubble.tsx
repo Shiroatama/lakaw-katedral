@@ -322,7 +322,7 @@ export function MapBubble({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`sheet-panel pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] mx-auto flex max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top))-var(--action-bar-space)-0.55rem)] w-[calc(100%-1.5rem)] max-w-lg flex-col rounded-xl bg-[var(--surface)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none${hideTrigger ? " sheet-panel--no-head" : ""}`}
+        className={`sheet-panel pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] mx-auto flex max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top))-var(--action-bar-space)-0.55rem)] w-[calc(100%-1.5rem)] max-w-lg flex-col rounded-xl bg-[var(--surface)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none md:max-w-4xl${hideTrigger ? " sheet-panel--no-head" : ""}`}
       >
         {hideTrigger ? null : (
           <svg

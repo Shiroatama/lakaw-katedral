@@ -104,7 +104,7 @@ export function StickyActionBar({
         shareTransition ? { viewTransitionName: "stop-dock" } : undefined
       }
     >
-      <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+      <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 md:max-w-4xl">
         {hasMap ? (
           <div className="flex h-14 w-14 shrink-0 items-center justify-center">
             {map}

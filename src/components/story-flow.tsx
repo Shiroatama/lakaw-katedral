@@ -57,7 +57,7 @@ export function StoryFlow({ poi }: StoryFlowProps) {
               />
             </div>
             <p
-              className={`fade-up max-w-[34ch] text-base leading-relaxed text-[var(--foreground)]/90 ${
+              className={`fade-up max-w-[34ch] text-base leading-relaxed text-[var(--foreground)]/90 md:max-w-[48ch] ${
                 odd ? "ml-auto text-right" : ""
               }`}
               style={delay(base + 80)}

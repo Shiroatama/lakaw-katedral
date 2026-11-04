@@ -9,6 +9,7 @@ import {
 } from "@/lib/tour";
 import { ParishGift } from "@/components/parish-gift";
 import { StartOver } from "@/components/start-over";
+import { StewardCredit } from "@/components/steward-credit";
 import { ThankYouModal } from "@/components/thank-you-modal";
 import { PageTransition } from "@/components/page-transition";
 import { PrimaryButton } from "@/components/ui";
@@ -79,6 +80,7 @@ export default function FinishPage() {
     <>
       <PageTransition>
         <main className="flex flex-1 flex-col pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <StewardCredit variant="sticky" />
           <div className="flex flex-col gap-6">
             {/* Shorter window: image stays full scale, top/bottom are clipped. */}
             <div className="relative -mx-5 -mt-[max(1rem,env(safe-area-inset-top))] aspect-[2/1] overflow-hidden bg-[var(--stone-light)]">

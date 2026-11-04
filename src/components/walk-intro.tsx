@@ -12,6 +12,13 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BRAND_MARK, BrandMark } from "@/components/brand-mark";
+import { FullscreenButton } from "@/components/fullscreen-button";
+import { requestAppFullscreen } from "@/lib/fullscreen";
+import {
+  playWalkIntroBrandSound,
+  playWalkIntroCompleteSound,
+  playWalkIntroSound,
+} from "@/lib/walk-intro-sound";
 
 const PARTNER_LOGOS = [
   {
@@ -68,21 +75,6 @@ export function useWalkIntro() {
   return useContext(WalkIntroContext);
 }
 
-type FullscreenElement = HTMLElement & {
-  webkitRequestFullscreen?: () => void | Promise<void>;
-};
-
-/** Enter browser fullscreen from a user tap (Start the walk). No-ops if denied. */
-function requestAppFullscreen() {
-  if (document.fullscreenElement) return;
-  const root = document.documentElement as FullscreenElement;
-  const request =
-    root.requestFullscreen?.bind(root) ??
-    root.webkitRequestFullscreen?.bind(root);
-  if (!request) return;
-  void Promise.resolve(request()).catch(() => {});
-}
-
 /**
  * Full-screen handoff after Start the walk: a terracotta screen fades in,
  * partner marks count to 100, pulse, then Lakaw Katedral holds and zooms out
@@ -125,6 +117,7 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
         return;
       }
       playing.current = true;
+      playWalkIntroSound();
       if (href) router.prefetch(href);
       setPhase("count");
       setProgress(0);
@@ -170,6 +163,7 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!target) return;
     if (phase === "pulse") {
+      playWalkIntroCompleteSound();
       const id = window.setTimeout(() => setPhase("clear"), PULSE_MS);
       return () => window.clearTimeout(id);
     }
@@ -178,6 +172,7 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
       return () => window.clearTimeout(id);
     }
     if (phase === "title") {
+      playWalkIntroBrandSound();
       const id = window.setTimeout(() => {
         if (target.href) router.push(target.href);
         setPhase("exit");
@@ -206,6 +201,7 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
   return (
     <WalkIntroContext.Provider value={play}>
       {children}
+      <FullscreenButton />
       {target
         ? createPortal(
             <WalkIntroOverlay
