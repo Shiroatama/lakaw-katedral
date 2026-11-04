@@ -68,6 +68,21 @@ export function useWalkIntro() {
   return useContext(WalkIntroContext);
 }
 
+type FullscreenElement = HTMLElement & {
+  webkitRequestFullscreen?: () => void | Promise<void>;
+};
+
+/** Enter browser fullscreen from a user tap (Start the walk). No-ops if denied. */
+function requestAppFullscreen() {
+  if (document.fullscreenElement) return;
+  const root = document.documentElement as FullscreenElement;
+  const request =
+    root.requestFullscreen?.bind(root) ??
+    root.webkitRequestFullscreen?.bind(root);
+  if (!request) return;
+  void Promise.resolve(request()).catch(() => {});
+}
+
 /**
  * Full-screen handoff after Start the walk: a terracotta screen fades in,
  * partner marks count to 100, pulse, then Lakaw Katedral holds and zooms out
@@ -103,6 +118,7 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
   const play = useCallback(
     (href: string | null) => {
       if (playing.current) return;
+      requestAppFullscreen();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (href && reduce) {
         router.push(href, { transitionTypes: ["nav-forward"] });
