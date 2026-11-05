@@ -49,7 +49,9 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
   const hydrated = useHydrated();
   const titleId = useId();
   const inputId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const wasOpen = useRef(false);
 
   const progress = useJourneyStore();
@@ -82,6 +84,52 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
     if (wasOpen.current) {
       wasOpen.current = false;
     }
+  }, [open]);
+
+  /**
+   * Pin the overlay to the visual viewport so the mobile keyboard (especially
+   * in browser fullscreen) does not cover the answer field. Also drops the
+   * dock-height bottom gap: the CTA is hidden while the sheet is open.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const root = rootRef.current;
+    const vv = window.visualViewport;
+    if (!root) return;
+
+    const clear = () => {
+      root.style.top = "";
+      root.style.left = "";
+      root.style.width = "";
+      root.style.height = "";
+    };
+
+    if (!vv) {
+      clear();
+      return clear;
+    }
+
+    const sync = () => {
+      root.style.top = `${vv.offsetTop}px`;
+      root.style.left = `${vv.offsetLeft}px`;
+      root.style.width = `${vv.width}px`;
+      root.style.height = `${vv.height}px`;
+      const input = inputRef.current;
+      if (input && document.activeElement === input) {
+        input.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    };
+
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      clear();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -134,6 +182,7 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
 
   return createPortal(
     <div
+      ref={rootRef}
       className="quest-sheet-root pointer-events-none fixed inset-0 z-40"
       data-open={open}
       inert={!open}
@@ -147,9 +196,11 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
         onClick={() => onOpenChange(false)}
       />
       {/* Hitbox wrapper: stop backdrop clicks from closing when interacting
-          with the panel (focusing the answer input, scrolling, etc.). */}
+          with the panel (focusing the answer input, scrolling, etc.).
+          Sit on the safe-area bottom (dock CTA is hidden while open); the
+          root is pinned to the visual viewport so the keyboard lifts it. */}
       <div
-        className="pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] top-[var(--top-chrome-space)] z-10 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col justify-end md:max-w-4xl"
+        className="pointer-events-auto absolute inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[var(--top-chrome-space)] z-10 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col justify-end md:max-w-4xl"
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
@@ -231,6 +282,7 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
                 Your answer
               </label>
               <input
+                ref={inputRef}
                 id={inputId}
                 type="text"
                 inputMode="text"

@@ -490,7 +490,9 @@ body {
 }
 
 .quest-sheet-panel {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   opacity: 0;
   transition: opacity 220ms var(--ease-in);
   will-change: opacity;
