@@ -25,6 +25,7 @@ import {
   readMapMarkersSeen,
   writeMapMarkersSeen,
 } from "@/lib/tour/map-markers-seen";
+import { useMapHeadSlot } from "@/components/fullscreen-button";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** What the sheet highlights: where you stand, or where to go next. */
@@ -39,8 +40,13 @@ type MapBubbleProps = {
   onFocusChange?: (focus: MapFocus) => void;
   /** Open on first render (e.g. deep link to /map) */
   defaultOpen?: boolean;
-  /** Sheet only (no chat-head). Used when a parent opens the map without a dock button. */
+  /** Sheet only (no floating head). Used when a parent opens the map without a trigger. */
   hideTrigger?: boolean;
+  /**
+   * Open on the compound overview; skip auto drill-in to the featured place.
+   * Used on Home so visitors see the whole grounds first.
+   */
+  compoundFirst?: boolean;
   /**
    * Home before the walk: orientation only. No Scan / Skip, and the body
    * urges the dock CTA (beginLabel) instead of "go scan" directions.
@@ -82,13 +88,13 @@ function easeInOut(t: number) {
 }
 
 /**
- * Circular map chat-head with a progress ring. Opens a sheet above the dock:
- * compound overview or an area map with 3–5 pins (compound → area → QR),
- * either where you are now (chat-head) or directions to the next place, plus
- * trial-mode Skip.
+ * Floating map head (top-right, beside fullscreen) with a progress ring.
+ * Opens a sheet above the dock: compound overview or an area map with 3–5
+ * pins (compound → area → QR), either where you are now or directions to the
+ * next place, plus trial-mode Skip.
  *
- * The sheet is always mounted (portaled to <body>) and driven by `data-open`.
- * See `.sheet-*` in globals.css.
+ * The head portals into the fullscreen bar slot; the sheet portals to <body>
+ * and is driven by `data-open`. See `.sheet-*` in globals.css.
  */
 export function MapBubble({
   open: openControlled,
@@ -97,6 +103,7 @@ export function MapBubble({
   onFocusChange,
   defaultOpen = false,
   hideTrigger = false,
+  compoundFirst = false,
   hideActions = false,
   beginLabel = "Start the walk",
   onTriggerOpen,
@@ -104,6 +111,7 @@ export function MapBubble({
   const router = useRouter();
   const titleId = useId();
   const hydrated = useHydrated();
+  const mapHeadSlot = useMapHeadSlot();
   const [openInternal, setOpenInternal] = useState(defaultOpen);
   const [focusInternal, setFocusInternal] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
@@ -265,9 +273,13 @@ export function MapBubble({
   }, [featuredId, focus]);
 
   // Wayfinding / here: open the area map that contains that stop.
+  // Home stays on compound first; taps still drill into a place map.
   useEffect(() => {
     if (!open) return;
-    if (stayOnCompound.current) return;
+    if (stayOnCompound.current || compoundFirst) {
+      showCompound();
+      return;
+    }
     if (!featuredId) {
       showCompound();
       return;
@@ -278,7 +290,7 @@ export function MapBubble({
     } else {
       showCompound();
     }
-  }, [open, featuredId, focus]);
+  }, [open, featuredId, focus, compoundFirst]);
 
   useEffect(() => {
     if (!open) return;
@@ -334,8 +346,9 @@ export function MapBubble({
     }
   }, [open, hideTrigger]);
 
-  const size = 56;
-  const stroke = 4;
+  // Match the floating fullscreen control (h-11 / 44px).
+  const size = 44;
+  const stroke = 3.5;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - ringPct);
@@ -361,29 +374,8 @@ export function MapBubble({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`sheet-panel pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] mx-auto flex max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top))-var(--action-bar-space)-0.55rem)] w-[calc(100%-1.5rem)] max-w-lg flex-col rounded-xl bg-[var(--surface)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none md:max-w-4xl${hideTrigger ? " sheet-panel--no-head" : ""}`}
+        className="sheet-panel sheet-panel--no-head pointer-events-auto absolute inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[calc(var(--top-chrome-space)+0.55rem)] mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col rounded-xl bg-[var(--surface)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none md:max-w-4xl"
       >
-        {hideTrigger ? null : (
-          <svg
-            className="sheet-tail"
-            viewBox="0 0 32 20"
-            fill="none"
-            aria-hidden
-          >
-            {/* Soft chat-bubble tail: wide base, rounded tip (not pointy). */}
-            <path
-              d="M1 0H31C25 1.5 21 13.5 16 18C11 13.5 7 1.5 1 0Z"
-              fill="var(--surface)"
-            />
-            <path
-              d="M1 0C7 1.5 11 13.5 16 18C21 13.5 25 1.5 31 0"
-              stroke="var(--border)"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
         <div className="sheet-item mb-3 flex shrink-0 items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
             {complete || !featured ? (
@@ -563,83 +555,88 @@ export function MapBubble({
     </div>
   );
 
-  return (
-    <>
-      {hideTrigger ? null : (
-        <button
-          ref={triggerRef}
-          type="button"
-          onClick={openFromTrigger}
-          data-head={headMode}
-          className="map-progress-head relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] shadow-[0_4px_16px_rgba(42,33,28,0.18)] ring-1 ring-[var(--border)] transition-[box-shadow] duration-200 ease-[var(--ease-out)] hover:shadow-[0_8px_22px_rgba(42,33,28,0.22)] active:scale-95"
-          aria-label={
-            open
-              ? "Close map"
-              : showingCheck
-                ? `Walk complete. You have seen all ${total} places.`
-                : showingPercent
-                  ? `Progress ${displayPercent} percent. You have seen ${done} of ${total} places.`
-                  : `Open map. You have seen ${done} of ${total} places.`
-          }
-          aria-haspopup="dialog"
-          aria-expanded={open}
+  const trigger =
+    hideTrigger || !mapHeadSlot ? null : (
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={openFromTrigger}
+        data-head={headMode}
+        className="map-progress-head pointer-events-auto relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--foreground)]/80 text-[var(--background)] shadow-sm backdrop-blur-md transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+        aria-label={
+          open
+            ? "Close map"
+            : showingCheck
+              ? `Walk complete. You have seen all ${total} places.`
+              : showingPercent
+                ? `Progress ${displayPercent} percent. You have seen ${done} of ${total} places.`
+                : `Open map. You have seen ${done} of ${total} places.`
+        }
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <svg
+          width={size}
+          height={size}
+          className="absolute inset-0 -rotate-90"
+          aria-hidden
         >
-          <svg
-            width={size}
-            height={size}
-            className="absolute inset-0 -rotate-90"
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeOpacity={0.28}
+            strokeWidth={stroke}
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+          />
+        </svg>
+        {showingPercent ? (
+          <span
+            className="map-progress-pct relative z-10 font-semibold tabular-nums"
             aria-hidden
           >
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke="var(--stone-light)"
-              strokeWidth={stroke}
-            />
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke="var(--accent)"
-              strokeWidth={stroke}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={dashOffset}
-            />
+            {displayPercent}%
+          </span>
+        ) : showingCheck ? (
+          <CheckIcon className="map-progress-icon relative z-10 h-5 w-5 text-[var(--success-on-dark)]" />
+        ) : (
+          <svg
+            width={20}
+            height={20}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="map-progress-icon relative z-10"
+            aria-hidden
+          >
+            <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />
+            <path d="M9 4v14" />
+            <path d="M15 6v14" />
           </svg>
-          {showingPercent ? (
-            <span
-              className="map-progress-pct relative z-10 font-semibold tabular-nums text-[var(--muted)]"
-              aria-hidden
-            >
-              {displayPercent}%
-            </span>
-          ) : showingCheck ? (
-            <CheckIcon className="map-progress-icon relative z-10 h-[1.35rem] w-[1.35rem] text-[var(--success)]" />
-          ) : (
-            <svg
-              width={22}
-              height={22}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="map-progress-icon relative z-10 text-[var(--muted)]"
-              aria-hidden
-            >
-              <path d="M9 18l-5 2V6l5-2 6 2 5-2v14l-5 2-6-2z" />
-              <path d="M9 4v14" />
-              <path d="M15 6v14" />
-            </svg>
-          )}
-        </button>
-      )}
+        )}
+      </button>
+    );
 
+  return (
+    <>
+      {trigger && mapHeadSlot
+        ? createPortal(trigger, mapHeadSlot)
+        : null}
       {hydrated ? createPortal(sheet, document.body) : null}
     </>
   );

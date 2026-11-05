@@ -100,7 +100,7 @@ export function FinishSuccessModal({
 
   return createPortal(
     <div
-      className="confirm-root fixed inset-0 z-[60] flex items-center justify-center px-4"
+      className="confirm-root fixed inset-0 z-[60] flex items-center justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[var(--top-chrome-space)]"
       data-open={open ? "true" : "false"}
       inert={!open ? true : undefined}
       aria-hidden={!open}
@@ -118,7 +118,7 @@ export function FinishSuccessModal({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative z-10 flex w-full max-w-md flex-col items-center rounded-2xl bg-[var(--surface)] px-6 pb-7 pt-10 text-center shadow-[0_20px_56px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative z-10 flex max-h-full w-full max-w-md flex-col items-center overflow-y-auto rounded-2xl bg-[var(--surface)] px-6 pb-7 pt-10 text-center shadow-[0_20px_56px_rgba(42,33,28,0.28)] ring-1 ring-[var(--border)] outline-none"
       >
         <button
           type="button"

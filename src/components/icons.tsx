@@ -112,7 +112,7 @@ export function PauseIcon({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
-/** Expand a video to the full screen. */
+/** Enter browser / app fullscreen (sticky control). */
 export function FullScreenIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg {...base} className={className}>
@@ -120,6 +120,18 @@ export function FullScreenIcon({ className = "h-4 w-4" }: IconProps) {
       <path d="M16 3h3a2 2 0 0 1 2 2v3" />
       <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
       <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
+/** Expand a video to the full screen (outward arrows, distinct from sticky). */
+export function VideoFullScreenIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M15 3h6v6" />
+      <path d="M9 21H3v-6" />
+      <path d="M21 3l-7 7" />
+      <path d="M3 21l7-7" />
     </svg>
   );
 }

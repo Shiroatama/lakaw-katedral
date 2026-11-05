@@ -10,8 +10,8 @@ export type ObservationKey = {
   /** Accepted answers after normalization. Keep several spellings. */
   answers: string[];
   /**
-   * What the answer means. Shown under "You are right" after a correct
-   * answer; the quest text above stays visible.
+   * What the answer means. Shown after a correct answer; the quest text
+   * above stays visible.
    */
   reveal: string;
 };

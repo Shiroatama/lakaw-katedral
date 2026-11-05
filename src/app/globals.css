@@ -16,8 +16,12 @@
   /* Lighter success for text on dark quest cards. */
   --success-on-dark: #b8d4b0;
   --danger: #b33b2e;
-  /* Space for map chat-head + Next dock */
+  /* Space for the bottom dock CTA */
   --action-bar-space: 5.5rem;
+  /* Floating fullscreen + map head: top inset + h-11 + gap below */
+  --top-chrome-space: calc(
+    max(0.75rem, env(safe-area-inset-top)) + 2.75rem + 0.5rem
+  );
 
   /* Motion tokens */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* fast start, soft landing */
@@ -413,9 +417,9 @@ body {
   animation: bar-fill 1000ms var(--ease-out) both;
 }
 
-/* Percent / map icon swap in the chat-head (sequenced in JS, not parallel). */
+/* Percent / map icon swap in the floating map head (sequenced in JS, not parallel). */
 .map-progress-pct {
-  font-size: 0.95rem;
+  font-size: 0.7rem;
   line-height: 1;
   letter-spacing: -0.03em;
   animation: pop-in 360ms var(--ease-spring) both;
@@ -462,8 +466,8 @@ body {
 }
 
 /*
- * Quest modal: backdrop fades with Solve the quest; card uses walk-intro
- * radial iris on open (3s). Close is a fast fade for backdrop + card.
+ * Quest modal: backdrop + card fade with Solve the quest.
+ * In: 480ms. Out: 220ms.
  */
 .quest-sheet-root {
   visibility: hidden;
@@ -488,129 +492,18 @@ body {
 .quest-sheet-panel {
   overflow: hidden;
   opacity: 0;
-  clip-path: circle(0% at 50% 50%);
-  transition:
-    opacity 220ms var(--ease-in),
-    clip-path 0s linear 220ms;
-  will-change: clip-path, opacity;
+  transition: opacity 220ms var(--ease-in);
+  will-change: opacity;
 }
 
 .quest-sheet-root[data-open="true"] .quest-sheet-panel {
   opacity: 1;
-  clip-path: circle(150% at 50% 50%);
-  transition:
-    clip-path 3000ms var(--ease-out),
-    opacity 0s linear 0s;
+  transition: opacity 480ms var(--ease-out);
 }
 
-/* Dock CTA: locked → terracotta ink wipe + label rewrite after map celebrate. */
-@keyframes quest-ink-fill {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes quest-label-out {
-  to {
-    opacity: 0;
-    transform: translateY(-0.35rem);
-  }
-}
-
-@keyframes quest-label-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.4rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.quest-unlock {
-  background: var(--ceremonial);
-  color: var(--foreground);
-  box-shadow: none;
-}
-
-.quest-unlock-ink {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  transform: scaleX(0);
-  transform-origin: left center;
-  background: var(--accent);
-}
-
-.quest-unlock[data-phase="animating"] .quest-unlock-ink {
-  animation: quest-ink-fill 720ms var(--ease-out) forwards;
-}
-
-.quest-unlock.is-live .quest-unlock-ink,
-.quest-unlock[data-phase="live"] .quest-unlock-ink {
-  transform: scaleX(1);
-  animation: none;
-}
-
-.quest-unlock.is-live .quest-unlock-from,
-.quest-unlock[data-phase="live"] .quest-unlock-from {
-  opacity: 0;
-}
-
-.quest-unlock.is-live .quest-unlock-to,
-.quest-unlock[data-phase="live"] .quest-unlock-to {
-  opacity: 1;
-  animation: none;
-  transform: none;
-}
-
-.quest-unlock-labels {
-  display: grid;
-  width: 100%;
-  place-items: center;
-}
-
-.quest-unlock-from,
-.quest-unlock-to {
-  grid-area: 1 / 1;
-  text-align: center;
-}
-
-.quest-unlock-from {
-  color: var(--foreground);
-}
-
-.quest-unlock-to {
-  opacity: 0;
-  color: var(--accent-fg);
-}
-
-.quest-unlock-from.is-out {
-  animation: quest-label-out 320ms var(--ease-in) forwards;
-}
-
-.quest-unlock-to.is-in {
-  animation: quest-label-in 420ms var(--ease-out) 220ms forwards;
-}
-
-.quest-unlock.is-live,
-.quest-unlock[data-phase="live"] {
-  color: var(--accent-fg);
-  transition: filter 200ms var(--ease-out), transform 200ms var(--ease-out);
-}
-
-.quest-unlock.is-live:hover,
-.quest-unlock[data-phase="live"]:hover {
-  filter: brightness(0.95);
-}
-
-.quest-unlock.is-live:active,
-.quest-unlock[data-phase="live"]:active {
-  transform: scale(0.97);
+/* Dock CTA after a correct answer: fade in Next / Continue / Finish. */
+.dock-cta-fade-in {
+  animation: solve-quest-in 480ms var(--ease-out) both;
 }
 
 .count-pop {
@@ -1145,17 +1038,9 @@ body {
     opacity: 0 !important;
   }
 
-  .quest-sheet-panel {
-    clip-path: circle(0% at 50% 50%) !important;
-  }
-
   .quest-sheet-root[data-open="true"] .quest-sheet-backdrop,
   .quest-sheet-root[data-open="true"] .quest-sheet-panel {
     opacity: 1 !important;
-  }
-
-  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
-    clip-path: none !important;
   }
 
   .walk-intro,
@@ -1199,29 +1084,9 @@ body {
     animation: none !important;
   }
 
-  .quest-unlock-ink,
-  .quest-unlock-from,
-  .quest-unlock-to {
+  .dock-cta-fade-in {
     animation: none !important;
-  }
-
-  .quest-unlock[data-phase="animating"] .quest-unlock-ink,
-  .quest-unlock.is-live .quest-unlock-ink,
-  .quest-unlock[data-phase="live"] .quest-unlock-ink {
-    transform: scaleX(1) !important;
-  }
-
-  .quest-unlock[data-phase="animating"] .quest-unlock-from,
-  .quest-unlock.is-live .quest-unlock-from,
-  .quest-unlock[data-phase="live"] .quest-unlock-from {
-    opacity: 0 !important;
-  }
-
-  .quest-unlock[data-phase="animating"] .quest-unlock-to,
-  .quest-unlock.is-live .quest-unlock-to,
-  .quest-unlock[data-phase="live"] .quest-unlock-to {
     opacity: 1 !important;
-    transform: none !important;
   }
 
   ::view-transition-old(*),

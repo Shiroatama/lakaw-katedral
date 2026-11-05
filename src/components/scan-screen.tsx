@@ -14,8 +14,8 @@ import { StopDock } from "@/components/stop-dock";
 /**
  * A visit to a stop. Wait for persisted progress before recording the visit,
  * so an unstarted walk does not flash the full quest on place 2+. Progress
- * is recorded in useLayoutEffect so the dock's map head and CTA width settle
- * before the browser paints.
+ * is recorded in useLayoutEffect so the dock CTA settles before the browser
+ * paints.
  *
  * Too-early visits: unstarted → Home; started → map with a warm tip.
  */

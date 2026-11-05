@@ -69,7 +69,7 @@ export function StartOver({ className = "" }: { className?: string }) {
 
   const dialog = (
     <div
-      className="confirm-root fixed inset-0 z-50 flex items-center justify-center px-5"
+      className="confirm-root fixed inset-0 z-50 flex items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[var(--top-chrome-space)]"
       data-open={open ? "true" : "false"}
       inert={!open ? true : undefined}
       aria-hidden={!open}
@@ -88,7 +88,7 @@ export function StartOver({ className = "" }: { className?: string }) {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative w-full max-w-sm rounded-xl bg-[var(--surface)] px-5 pb-5 pt-10 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative max-h-full w-full max-w-sm overflow-y-auto rounded-xl bg-[var(--surface)] px-5 pb-5 pt-10 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
       >
         <button
           type="button"

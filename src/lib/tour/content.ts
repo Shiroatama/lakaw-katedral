@@ -98,7 +98,7 @@ export const nagaTour: Tour = {
       heroVideoFrame: "portrait",
       heroVideoPoster: "/img/entrance.webp",
       storyImages: [
-        "/img/dome.webp",
+        "/img/murals.webp",
         "/img/prayer.webp",
         "/img/give-people.webp",
       ],

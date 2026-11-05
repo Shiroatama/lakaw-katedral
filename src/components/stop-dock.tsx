@@ -20,7 +20,6 @@ import {
 } from "@/components/finish-success-modal";
 import { MapBubble, type MapFocus } from "@/components/map-bubble";
 import { QuestSheet } from "@/components/observation-key";
-import { QuestUnlockCta } from "@/components/quest-unlock-cta";
 import { useWalkIntro } from "@/components/walk-intro";
 import { PrimaryButton, StickyActionBar } from "@/components/ui";
 import { readFinishSuccessSeen } from "@/lib/tour/finish-success";
@@ -46,8 +45,6 @@ type StopDockProps = {
   hideMap?: boolean;
 };
 
-type UnlockPhase = "idle" | "animating" | "done";
-
 type UnlockedTarget = {
   label: string;
   icon: "walk" | "check";
@@ -56,14 +53,15 @@ type UnlockedTarget = {
 };
 
 /**
- * Bottom dock shared by every journey screen: map chat-head + one CTA.
+ * Bottom dock shared by every journey screen: one primary CTA. The map head
+ * floats top-right beside fullscreen (not in the dock).
  *
  * - walk not begun: Start the walk (brand handoff, then onboarding); map urges that CTA
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
  * - on a stop, quest unsolved: Solve the quest (terracotta; opens the quest sheet);
- *                   iris-closes while the sheet is open; unlock CTA returns on solve
- * - after solve:    ink-fill unlock to Next / Finish starts with the map celebrate
+ *                   fades out while the sheet is open; unlock CTA returns on solve
+ * - after solve:    Next / Finish fades in with the map celebrate
  * - next is entrance: Continue at the entrance (link to place 1)
  * - later places:   Continue the walk (opens wayfinding map)
  * - all solved:     Finish
@@ -98,12 +96,13 @@ export function StopDock({
   const currentUnsolved =
     currentStop !== null && !progress.completed.includes(currentStop.id);
 
-  const [unlockPhase, setUnlockPhase] = useState<UnlockPhase>("idle");
+  /** True right after a correct answer on this stop; drives the fade-in CTA. */
+  const [justUnlocked, setJustUnlocked] = useState(false);
   const wasUnsolved = useRef(currentUnsolved);
   const unlockingStopId = useRef<string | null>(null);
   /** Quest bottom sheet open for the current stop. */
   const [questOpen, setQuestOpen] = useState(false);
-  /** Keep the button mounted through the iris close; shown vs leaving drive clip-path. */
+  /** Keep the button mounted through the fade-out; shown vs leaving drive opacity. */
   const [solveQuestMounted, setSolveQuestMounted] = useState(true);
   const [solveQuestShown, setSolveQuestShown] = useState(true);
   const [solveQuestLeaving, setSolveQuestLeaving] = useState(false);
@@ -120,7 +119,7 @@ export function StopDock({
   useEffect(() => {
     if (currentUnsolved) {
       unlockingStopId.current = null;
-      setUnlockPhase("idle");
+      setJustUnlocked(false);
       wasUnsolved.current = true;
       return;
     }
@@ -131,7 +130,7 @@ export function StopDock({
     ) {
       unlockingStopId.current = currentStop.id;
       // Start with the map percent celebrate, not after it.
-      setUnlockPhase("animating");
+      setJustUnlocked(true);
       if (complete && !readFinishSuccessSeen()) {
         setSuccessDelayMs(FINISH_SUCCESS_OPEN_DELAY_MS);
         setSuccessOpen(true);
@@ -228,10 +227,7 @@ export function StopDock({
 
   if (!journeyReady) {
     return (
-      <StickyActionBar
-        shareTransition={false}
-        map={hideMap ? undefined : <div className="h-14 w-14" aria-hidden />}
-      >
+      <StickyActionBar shareTransition={false}>
         <div
           className="min-h-14 w-full rounded-md bg-[var(--accent)]"
           aria-hidden
@@ -280,17 +276,17 @@ export function StopDock({
         />
       </button>
     ) : null;
-  } else if (unlockPhase === "animating" || unlockPhase === "done") {
+  } else if (justUnlocked) {
     const target = unlockedTarget();
     action = (
-      <QuestUnlockCta
-        phase={unlockPhase === "done" ? "live" : "animating"}
-        toLabel={target.label}
-        toIcon={target.icon}
+      <PrimaryButton
+        className="dock-cta-fade-in"
+        icon={target.icon}
         href={target.href}
         onClick={target.onClick}
-        onUnlocked={() => setUnlockPhase("done")}
-      />
+      >
+        {target.label}
+      </PrimaryButton>
     );
   } else if (complete || !next) {
     action = finishAction();
@@ -321,34 +317,32 @@ export function StopDock({
 
   return (
     <>
-      <StickyActionBar
-        elevated={(!hideMap && mapOpen) || questOpen}
-        map={
-          hideMap ? undefined : (
-            <MapBubble
-              open={mapOpen}
-              onOpenChange={(nextOpen) => {
-                if (nextOpen) setQuestOpen(false);
-                setMapOpen(nextOpen);
-              }}
-              focus={mapFocus}
-              onFocusChange={setMapFocus}
-              hideActions={mapOrientationOnly}
-              beginLabel={startLabel}
-              onTriggerOpen={() =>
-                openMap(
-                  startGate ||
-                    continueTo ||
-                    !(started && progress.lastScannedPoiId)
-                    ? "next"
-                    : "here",
-                )
-              }
-            />
-          )
-        }
-      >
-        {action}
+      {hideMap ? null : (
+        <MapBubble
+          open={mapOpen}
+          onOpenChange={(nextOpen) => {
+            if (nextOpen) setQuestOpen(false);
+            setMapOpen(nextOpen);
+          }}
+          focus={mapFocus}
+          onFocusChange={setMapFocus}
+          compoundFirst={onHome}
+          hideActions={mapOrientationOnly}
+          beginLabel={startLabel}
+          onTriggerOpen={() =>
+            openMap(
+              startGate ||
+                continueTo ||
+                !(started && progress.lastScannedPoiId)
+                ? "next"
+                : "here",
+            )
+          }
+        />
+      )}
+      <StickyActionBar>
+        {/* Keep under the map/quest overlay so the CTA does not fight the sheet. */}
+        {mapOpen || questOpen ? null : action}
       </StickyActionBar>
       {currentStop ? (
         <QuestSheet

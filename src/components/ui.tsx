@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
@@ -11,9 +10,6 @@ import {
   QrCodeIcon,
 } from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
-
-/** Match map sheet / quest fade-out so the dock stays above the overlay. */
-const SHEET_CLOSE_MS = 220;
 
 type ProgressBarProps = {
   total: number;
@@ -57,59 +53,31 @@ export function ProgressDots(props: ProgressBarProps) {
 }
 
 /**
- * Fixed bottom dock: optional map chat-head on the left, primary action on the
- * right (Messenger-style). Progress lives on the map circle.
- *
- * When `map` is passed, its column is a fixed h-14 w-14 so the CTA width stays
- * stable (including Home).
+ * Fixed bottom dock for the primary action. The map head floats top-right
+ * beside fullscreen (see FullscreenButton / MapBubble).
  *
  * Dock and map sheet both portal to <body> so z-index competes with the blur
  * backdrop (page ViewTransition wrappers would otherwise trap the dock under it).
  */
 export function StickyActionBar({
-  map,
   children,
   /** When false, dock is omitted from the shared view-transition snapshot. */
   shareTransition = true,
-  /**
-   * Lift above the map sheet backdrop so the map head + primary CTA stay
-   * sharp and tappable while the rest of the screen is blurred. Stays lifted
-   * through the close fade so the dock does not slip under the blur mid-animation.
-   */
-  elevated = false,
 }: {
-  map?: React.ReactNode;
   children?: React.ReactNode;
   shareTransition?: boolean;
-  elevated?: boolean;
 }) {
   const hydrated = useHydrated();
-  const [lifted, setLifted] = useState(elevated);
   const hasActions = Boolean(children);
-  const hasMap = map != null;
-
-  useEffect(() => {
-    if (elevated) {
-      setLifted(true);
-      return;
-    }
-    const id = window.setTimeout(() => setLifted(false), SHEET_CLOSE_MS);
-    return () => window.clearTimeout(id);
-  }, [elevated]);
 
   const dock = (
     <div
-      className={`pointer-events-none fixed inset-x-0 bottom-0 ${lifted ? "z-50" : "z-30"}`}
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
       style={
         shareTransition ? { viewTransitionName: "stop-dock" } : undefined
       }
     >
       <div className="pointer-events-auto mx-auto flex w-full max-w-lg items-center gap-3 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 md:max-w-4xl">
-        {hasMap ? (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center">
-            {map}
-          </div>
-        ) : null}
         {hasActions ? (
           <div className="flex min-w-0 flex-1 flex-col gap-3">{children}</div>
         ) : null}

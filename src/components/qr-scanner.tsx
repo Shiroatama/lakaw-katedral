@@ -33,22 +33,6 @@ export function QrScanner() {
   const controlsRef = useRef<IScannerControls | null>(null);
   const handledRef = useRef(false);
   const [status, setStatus] = useState<ScannerStatus>({ kind: "starting" });
-  /**
-   * Reserve room for the portaled fullscreen control by default so close never
-   * lands under it on first paint; clear the gap if fullscreen is unsupported.
-   */
-  const [fullscreenSlot, setFullscreenSlot] = useState(true);
-
-  useEffect(() => {
-    const root = document.documentElement as HTMLElement & {
-      requestFullscreen?: () => Promise<void>;
-      webkitRequestFullscreen?: () => void | Promise<void>;
-    };
-    setFullscreenSlot(
-      typeof root.requestFullscreen === "function" ||
-        typeof root.webkitRequestFullscreen === "function",
-    );
-  }, []);
 
   useEffect(() => {
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -209,7 +193,7 @@ export function QrScanner() {
             if (window.history.length > 1) router.back();
             else router.push("/", { transitionTypes: ["nav-back"] });
           }}
-          className={`pointer-events-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface)]/95 text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)] backdrop-blur-md transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-105 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]${fullscreenSlot ? " mr-14" : ""}`}
+          className="pointer-events-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
         >
           <CloseIcon className="h-5 w-5" />
         </button>

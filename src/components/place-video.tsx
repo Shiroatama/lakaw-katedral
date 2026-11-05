@@ -11,11 +11,11 @@ import {
 import { createPortal } from "react-dom";
 import {
   CloseIcon,
-  FullScreenIcon,
   MuteIcon,
   PauseIcon,
   PlayIcon,
   UnmuteIcon,
+  VideoFullScreenIcon,
 } from "@/components/icons";
 
 const CONTROLS_HIDE_MS = 3000;
@@ -350,7 +350,7 @@ export function PlaceVideo({
             </MediaButton>
             {open ? null : (
               <MediaButton label="Full screen" onClick={() => void enter()}>
-                <FullScreenIcon className="h-5 w-5" />
+                <VideoFullScreenIcon className="h-5 w-5" />
               </MediaButton>
             )}
           </div>

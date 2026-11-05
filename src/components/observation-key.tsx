@@ -2,10 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  CORRECT_CELEBRATE_MS,
-  CorrectCelebrate,
-} from "@/components/correct-celebrate";
+import { CorrectCelebrate } from "@/components/correct-celebrate";
 import { CloseIcon } from "@/components/icons";
 import type { Poi } from "@/lib/tour";
 import {
@@ -68,8 +65,6 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
   const [misses, setMisses] = useState(0);
   /** One-shot celebrate on the moment of success, not on revisit. */
   const [celebrate, setCelebrate] = useState(false);
-  /** Keep the reveal pop until the sticker overlay finishes. */
-  const [justSolved, setJustSolved] = useState(false);
 
   const answerRevealed = misses >= MISS_LIMIT;
   const canonicalAnswer = poi.observation.answers[0] ?? "";
@@ -112,7 +107,6 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
       setError(null);
       setValue("");
       setCelebrate(true);
-      setJustSolved(true);
       return;
     }
 
@@ -152,10 +146,10 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
         aria-label="Close quest"
         onClick={() => onOpenChange(false)}
       />
-      {/* Unclipped hitbox: clip-path on the face lets clicks fall through to the
-          backdrop, which was closing the modal when focusing the answer input. */}
+      {/* Hitbox wrapper: stop backdrop clicks from closing when interacting
+          with the panel (focusing the answer input, scrolling, etc.). */}
       <div
-        className="pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] z-10 mx-auto w-[calc(100%-1.5rem)] max-w-lg md:max-w-4xl"
+        className="pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] top-[var(--top-chrome-space)] z-10 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col justify-end md:max-w-4xl"
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
@@ -165,20 +159,17 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className={`quest-sheet-panel flex max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top))-var(--action-bar-space)-0.55rem)] flex-col overflow-y-auto rounded-xl bg-[var(--foreground)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.4)] outline-none${shake ? " observation-shake" : ""}`}
+          className={`quest-sheet-panel flex max-h-full w-full flex-col overflow-y-auto rounded-xl bg-[var(--foreground)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.4)] outline-none${shake ? " observation-shake" : ""}`}
         >
           <CorrectCelebrate
             active={celebrate}
-            onDone={() => {
-              setCelebrate(false);
-              window.setTimeout(() => setJustSolved(false), 500);
-            }}
+            onDone={() => setCelebrate(false)}
           />
 
-          <div className="mb-1 flex shrink-0 items-start justify-between gap-3">
+          <div className="flex shrink-0 items-center justify-between gap-3">
             <h2
               id={titleId}
-              className="text-lg font-bold uppercase tracking-[0.14em] text-[var(--ceremonial)]"
+              className="text-lg font-bold leading-none uppercase tracking-[0.14em] text-[var(--ceremonial)]"
             >
               Your quest
             </h2>
@@ -192,7 +183,7 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
             </button>
           </div>
 
-          <div className="mt-2 space-y-3">
+          <div className="mt-1 space-y-3">
             <p className="text-base leading-relaxed text-[var(--accent-fg)]">
               {poi.action}
             </p>
@@ -204,18 +195,6 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
 
           {solved ? (
             <div className="mt-5 space-y-3" role="status">
-              <p
-                className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${justSolved ? " pop-in" : ""}`}
-                style={
-                  justSolved
-                    ? ({
-                        "--delay": `${CORRECT_CELEBRATE_MS}ms`,
-                      } as React.CSSProperties)
-                    : undefined
-                }
-              >
-                You are right.
-              </p>
               <p className="text-base leading-relaxed text-[var(--accent-fg)]">
                 {poi.observation.reveal}
               </p>
