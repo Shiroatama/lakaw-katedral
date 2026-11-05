@@ -147,10 +147,10 @@ export function PlaceVideo({
 
   useEffect(() => {
     if (open) return;
-    const video = videoRef.current;
-    if (!video) return;
 
     function syncModalPause() {
+      const video = videoRef.current;
+      if (!video) return;
       if (anyPlaceModalOpen()) {
         if (!video.paused) {
           pausedByModal.current = true;
