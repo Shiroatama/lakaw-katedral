@@ -60,8 +60,9 @@ type UnlockedTarget = {
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
  * - on a stop, quest unsolved: Solve the quest (terracotta; opens the quest sheet);
- *                   fades out while the sheet is open; unlock CTA returns on solve
- * - after solve:    Next / Finish fades in with the map celebrate
+ *                   fades out while the sheet is open
+ * - after solve:    Next / Finish fades in under the open sheet and pushes the
+ *                   card up; map head celebrate runs in parallel
  * - next is entrance: Continue at the entrance (link to place 1)
  * - later places:   Continue the walk (opens wayfinding map)
  * - all solved:     Finish
@@ -340,9 +341,13 @@ export function StopDock({
           }
         />
       )}
-      <StickyActionBar>
-        {/* Keep under the map/quest overlay so the CTA does not fight the sheet. */}
-        {mapOpen || questOpen ? null : action}
+      <StickyActionBar
+        // After a correct answer, Continue sits under the open sheet and
+        // lifts the card; hide the dock only while the quest is still unsolved
+        // or the map sheet is open.
+        elevated={questOpen && !currentUnsolved}
+      >
+        {mapOpen || (questOpen && currentUnsolved) ? null : action}
       </StickyActionBar>
       {currentStop ? (
         <QuestSheet

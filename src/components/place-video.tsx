@@ -65,6 +65,8 @@ export function PlaceVideo({
   const seekingRef = useRef(false);
   /** Pause from scroll-out; resume on re-entry only for these, not user pauses. */
   const pausedByViewport = useRef(false);
+  /** Pause while a place sheet/dialog is open; resume on close if still in view. */
+  const pausedByModal = useRef(false);
 
   const close = useCallback(() => {
     requestId.current += 1;
@@ -109,6 +111,7 @@ export function PlaceVideo({
     video.muted = true;
     setMuted(true);
     pausedByViewport.current = false;
+    pausedByModal.current = false;
     void video.play().catch(() => {});
   }, [src]);
 
@@ -124,6 +127,11 @@ export function PlaceVideo({
         if (entry.isIntersecting) {
           if (!pausedByViewport.current) return;
           pausedByViewport.current = false;
+          if (anyPlaceModalOpen()) {
+            pausedByModal.current = true;
+            return;
+          }
+          if (pausedByModal.current) return;
           void video.play().catch(() => {});
           return;
         }
@@ -134,6 +142,39 @@ export function PlaceVideo({
       { threshold: 0 },
     );
     observer.observe(shell);
+    return () => observer.disconnect();
+  }, [open, lifted, src]);
+
+  useEffect(() => {
+    if (open) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    function syncModalPause() {
+      if (anyPlaceModalOpen()) {
+        if (!video.paused) {
+          pausedByModal.current = true;
+          video.pause();
+          return;
+        }
+        // Scroll-out already paused it; keep ownership so close can resume in view.
+        if (pausedByViewport.current) pausedByModal.current = true;
+        return;
+      }
+      if (!pausedByModal.current) return;
+      pausedByModal.current = false;
+      if (pausedByViewport.current) return;
+      void video.play().catch(() => {});
+    }
+
+    syncModalPause();
+    const observer = new MutationObserver(syncModalPause);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-open"],
+      childList: true,
+      subtree: true,
+    });
     return () => observer.disconnect();
   }, [open, lifted, src]);
 
@@ -234,10 +275,12 @@ export function PlaceVideo({
     if (!video) return;
     if (video.paused) {
       pausedByViewport.current = false;
+      pausedByModal.current = false;
       void video.play().catch(() => setPlaying(false));
       return;
     }
     pausedByViewport.current = false;
+    pausedByModal.current = false;
     video.pause();
   }
 
@@ -460,6 +503,11 @@ function stageClassName(
     return "relative h-[min(100dvh,calc(100dvw*16/9))] w-[min(100dvw,calc(100dvh*9/16))]";
   }
   return "relative h-[min(100dvh,calc(100dvw*9/16))] w-[min(100dvw,calc(100dvh*16/9))]";
+}
+
+/** Quest, map, start-over, and finish sheets all set data-open on their root. */
+function anyPlaceModalOpen() {
+  return document.querySelector('[data-open="true"]') !== null;
 }
 
 function subscribePortrait(onChange: () => void) {

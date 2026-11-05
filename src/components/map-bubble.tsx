@@ -595,7 +595,7 @@ export function MapBubble({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="var(--accent)"
+            stroke="#29F412"
             strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={circumference}

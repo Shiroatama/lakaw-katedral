@@ -63,16 +63,22 @@ export function StickyActionBar({
   children,
   /** When false, dock is omitted from the shared view-transition snapshot. */
   shareTransition = true,
+  /**
+   * Lift above the quest/map backdrop so Continue stays sharp and tappable
+   * while the sheet is still open after a correct answer.
+   */
+  elevated = false,
 }: {
   children?: React.ReactNode;
   shareTransition?: boolean;
+  elevated?: boolean;
 }) {
   const hydrated = useHydrated();
   const hasActions = Boolean(children);
 
   const dock = (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-30"
+      className={`pointer-events-none fixed inset-x-0 bottom-0 ${elevated ? "z-50" : "z-30"}`}
       style={
         shareTransition ? { viewTransitionName: "stop-dock" } : undefined
       }

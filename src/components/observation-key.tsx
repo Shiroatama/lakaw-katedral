@@ -88,8 +88,7 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
 
   /**
    * Pin the overlay to the visual viewport so the mobile keyboard (especially
-   * in browser fullscreen) does not cover the answer field. Also drops the
-   * dock-height bottom gap: the CTA is hidden while the sheet is open.
+   * in browser fullscreen) does not cover the answer field.
    */
   useEffect(() => {
     if (!open) return;
@@ -197,10 +196,15 @@ export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
       />
       {/* Hitbox wrapper: stop backdrop clicks from closing when interacting
           with the panel (focusing the answer input, scrolling, etc.).
-          Sit on the safe-area bottom (dock CTA is hidden while open); the
-          root is pinned to the visual viewport so the keyboard lifts it. */}
+          Unsolved: sit on the safe-area bottom (dock CTA hidden). Solved:
+          leave room for Continue in the dock so the card is pushed up.
+          Root is pinned to the visual viewport so the keyboard lifts it. */}
       <div
-        className="pointer-events-auto absolute inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] top-[var(--top-chrome-space)] z-10 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col justify-end md:max-w-4xl"
+        className={`pointer-events-auto absolute inset-x-3 top-[var(--top-chrome-space)] z-10 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg flex-col justify-end transition-[bottom] duration-300 ease-[var(--ease-out)] md:max-w-4xl ${
+          solved
+            ? "bottom-[calc(var(--action-bar-space)+0.55rem)]"
+            : "bottom-[max(0.75rem,env(safe-area-inset-bottom))]"
+        }`}
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
