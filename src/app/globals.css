@@ -426,39 +426,81 @@ body {
 }
 
 /*
- * Solve the quest: inverse of the walk-intro iris.
- * Show expands from the center; hide contracts the circle inward.
+ * Solve the quest + quest backdrop share the same fade timing.
+ * In: 480ms. Out: 220ms.
  */
 @keyframes solve-quest-in {
   from {
-    clip-path: circle(0% at 50% 50%);
+    opacity: 0;
   }
   to {
-    clip-path: circle(150% at 50% 50%);
+    opacity: 1;
   }
 }
 
 @keyframes solve-quest-out {
   from {
-    clip-path: circle(150% at 50% 50%);
+    opacity: 1;
   }
   to {
-    clip-path: circle(0% at 50% 50%);
+    opacity: 0;
   }
 }
 
 .solve-quest-cta {
-  clip-path: circle(0% at 50% 50%);
+  opacity: 0;
   transition: filter 200ms var(--ease-out);
-  will-change: clip-path;
+  will-change: opacity;
 }
 
 .solve-quest-cta.is-shown {
-  animation: solve-quest-in 500ms var(--ease-out) both;
+  animation: solve-quest-in 480ms var(--ease-out) both;
 }
 
 .solve-quest-cta.is-leaving {
-  animation: solve-quest-out 500ms var(--ease-in) forwards;
+  animation: solve-quest-out 220ms var(--ease-in) forwards;
+}
+
+/*
+ * Quest modal: backdrop fades with Solve the quest; card uses walk-intro
+ * radial iris on open (3s). Close is a fast fade for backdrop + card.
+ */
+.quest-sheet-root {
+  visibility: hidden;
+  transition: visibility 0s linear 220ms;
+}
+
+.quest-sheet-root[data-open="true"] {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.quest-sheet-backdrop {
+  opacity: 0;
+  transition: opacity 220ms var(--ease-in);
+}
+
+.quest-sheet-root[data-open="true"] .quest-sheet-backdrop {
+  opacity: 1;
+  transition: opacity 480ms var(--ease-out);
+}
+
+.quest-sheet-panel {
+  overflow: hidden;
+  opacity: 0;
+  clip-path: circle(0% at 50% 50%);
+  transition:
+    opacity 220ms var(--ease-in),
+    clip-path 0s linear 220ms;
+  will-change: clip-path, opacity;
+}
+
+.quest-sheet-root[data-open="true"] .quest-sheet-panel {
+  opacity: 1;
+  clip-path: circle(150% at 50% 50%);
+  transition:
+    clip-path 3000ms var(--ease-out),
+    opacity 0s linear 0s;
 }
 
 /* Dock CTA: locked → terracotta ink wipe + label rewrite after map celebrate. */
@@ -581,6 +623,7 @@ body {
   transform-box: fill-box;
   transform-origin: center;
   opacity: 0;
+  pointer-events: none;
 }
 
 /* Only runs while the sheet is open (restarts each time it opens). */
@@ -592,6 +635,17 @@ body {
 .map-marker {
   transform-box: fill-box;
   transform-origin: center;
+}
+
+/* Kill the default blue focus / tap highlight on map pins (SVG + WebKit). */
+.map-marker-hit {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-marker-hit:focus,
+.map-marker-hit:focus-visible {
+  outline: none;
 }
 
 /* Onboarding: entrance photo inset on the compound map. */
@@ -848,6 +902,66 @@ body {
    -------------------------------------------------------------------------- */
 
 /* ==========================================================================
+   Scan viewfinder: ceremonial corner brackets (QR camera chrome)
+   ========================================================================== */
+
+@keyframes scan-corner-breathe {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.scan-viewfinder {
+  filter: drop-shadow(0 0 12px rgba(236, 190, 65, 0.28));
+}
+
+.scan-corner {
+  position: absolute;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-color: var(--ceremonial);
+  border-style: solid;
+  border-width: 0;
+  animation: scan-corner-breathe 2.4s var(--ease-out) infinite;
+}
+
+.scan-corner--tl {
+  top: 0;
+  left: 0;
+  border-top-width: 3px;
+  border-left-width: 3px;
+  border-top-left-radius: 0.35rem;
+}
+
+.scan-corner--tr {
+  top: 0;
+  right: 0;
+  border-top-width: 3px;
+  border-right-width: 3px;
+  border-top-right-radius: 0.35rem;
+}
+
+.scan-corner--bl {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 3px;
+  border-left-width: 3px;
+  border-bottom-left-radius: 0.35rem;
+}
+
+.scan-corner--br {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 3px;
+  border-right-width: 3px;
+  border-bottom-right-radius: 0.35rem;
+}
+
+/* ==========================================================================
    Correct celebrate: black wash + green die-cut sticker (game beat)
    ========================================================================== */
 
@@ -996,7 +1110,8 @@ body {
   .confirm-root[data-open="true"] .confirm-panel,
   .correct-celebrate,
   .correct-sticker,
-  .correct-sticker-spark {
+  .correct-sticker-spark,
+  .scan-corner {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -1008,12 +1123,39 @@ body {
 
   .solve-quest-cta.is-shown {
     animation: none !important;
-    clip-path: none !important;
+    opacity: 1 !important;
   }
 
   .solve-quest-cta.is-leaving {
     animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .quest-sheet-root,
+  .quest-sheet-root[data-open="true"],
+  .quest-sheet-backdrop,
+  .quest-sheet-panel,
+  .quest-sheet-root[data-open="true"] .quest-sheet-backdrop,
+  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
+    transition: none !important;
+  }
+
+  .quest-sheet-backdrop,
+  .quest-sheet-panel {
+    opacity: 0 !important;
+  }
+
+  .quest-sheet-panel {
     clip-path: circle(0% at 50% 50%) !important;
+  }
+
+  .quest-sheet-root[data-open="true"] .quest-sheet-backdrop,
+  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
+    opacity: 1 !important;
+  }
+
+  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
+    clip-path: none !important;
   }
 
   .walk-intro,

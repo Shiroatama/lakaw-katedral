@@ -1,10 +1,12 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CORRECT_CELEBRATE_MS,
   CorrectCelebrate,
 } from "@/components/correct-celebrate";
+import { CloseIcon } from "@/components/icons";
 import type { Poi } from "@/lib/tour";
 import {
   getNextExpectedPoi,
@@ -13,9 +15,12 @@ import {
   nextPlaceCtaLabel,
   useJourneyStore,
 } from "@/lib/tour";
+import { useHydrated } from "@/lib/use-hydrated";
 
-type ObservationKeyFormProps = {
+type QuestSheetProps = {
   poi: Poi;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
 /** Lowercase the first letter so the line reads as one sentence after "Then". */
@@ -23,9 +28,6 @@ function asContinuation(text: string) {
   if (!text) return text;
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
-
-/** Scroll target for the dock's "Solve the quest" control. */
-export const QUEST_ANCHOR_ID = "your-quest";
 
 /** Wrong submits before the gentle answer reveal. Place stays unsolved. */
 const MISS_LIMIT = 5;
@@ -42,11 +44,17 @@ const MISS_NUDGES = [
 ] as const;
 
 /**
- * One quest card: do the act, then answer the look-closely clue.
- * A correct answer keeps the quest text and adds the meaning reveal below.
+ * Bottom sheet for the place quest: do the act, then answer the look-closely
+ * clue. Opens from Solve the quest; a correct answer keeps the sheet open with
+ * the meaning reveal until the visitor dismisses it.
  */
-export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
+export function QuestSheet({ poi, open, onOpenChange }: QuestSheetProps) {
+  const hydrated = useHydrated();
+  const titleId = useId();
   const inputId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+
   const progress = useJourneyStore();
   const completePoi = useJourneyStore((s) => s.completePoi);
   const solved = progress.completed.includes(poi.id);
@@ -65,6 +73,30 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
 
   const answerRevealed = misses >= MISS_LIMIT;
   const canonicalAnswer = poi.observation.answers[0] ?? "";
+
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      panelRef.current?.focus({ preventScroll: true });
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onOpenChange(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onOpenChange]);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -104,116 +136,159 @@ export function ObservationKeyForm({ poi }: ObservationKeyFormProps) {
       ? `You can go on. Tap "${nextPlaceCtaLabel(next)}" below when you are ready.`
       : "You can go on when you are ready.";
 
-  return (
-    <aside
-      id={QUEST_ANCHOR_ID}
-      tabIndex={-1}
-      className={`scroll-mt-4 rounded-xl bg-[var(--foreground)] px-5 py-5 outline-none${shake ? " observation-shake" : ""}`}
+  if (!hydrated) return null;
+
+  return createPortal(
+    <div
+      className="quest-sheet-root pointer-events-none fixed inset-0 z-40"
+      data-open={open}
+      inert={!open}
+      aria-hidden={!open}
     >
-      <CorrectCelebrate
-        active={celebrate}
-        onDone={() => {
-          setCelebrate(false);
-          window.setTimeout(() => setJustSolved(false), 500);
-        }}
+      <button
+        type="button"
+        tabIndex={-1}
+        className="quest-sheet-backdrop pointer-events-auto absolute inset-0 z-0 bg-[var(--foreground)]/60 backdrop-blur-[3px]"
+        aria-label="Close quest"
+        onClick={() => onOpenChange(false)}
       />
-
-      <h2 className="text-lg font-bold uppercase tracking-[0.14em] text-[var(--ceremonial)]">
-        Your quest
-      </h2>
-
-      <div className="mt-3 space-y-3">
-        <p className="text-base leading-relaxed text-[var(--accent-fg)]">
-          {poi.action}
-        </p>
-        <p className="text-base leading-relaxed text-[var(--accent-fg)]">
-          Then {asContinuation(poi.observation.look)}{" "}
-          <span className="font-semibold">{poi.observation.question}</span>
-        </p>
-      </div>
-
-      {solved ? (
-        <div className="mt-5 space-y-3" role="status">
-          <p
-            className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${justSolved ? " pop-in" : ""}`}
-            style={
-              justSolved
-                ? ({ "--delay": `${CORRECT_CELEBRATE_MS}ms` } as React.CSSProperties)
-                : undefined
-            }
-          >
-            You are right.
-          </p>
-          <p className="text-base leading-relaxed text-[var(--accent-fg)]">
-            {poi.observation.reveal}
-          </p>
-          <p className="text-sm leading-relaxed text-[var(--stone-light)]">
-            {proceedHint}
-          </p>
-        </div>
-      ) : (
-        <form
-          onSubmit={onSubmit}
-          className="mt-4 space-y-2"
-          aria-describedby={
-            error
-              ? `${inputId}-error`
-              : answerRevealed
-                ? `${inputId}-answer`
-                : undefined
-          }
+      {/* Unclipped hitbox: clip-path on the face lets clicks fall through to the
+          backdrop, which was closing the modal when focusing the answer input. */}
+      <div
+        className="pointer-events-auto absolute inset-x-3 bottom-[calc(var(--action-bar-space)+0.55rem)] z-10 mx-auto w-[calc(100%-1.5rem)] max-w-lg md:max-w-4xl"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          tabIndex={-1}
+          className={`quest-sheet-panel flex max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top))-var(--action-bar-space)-0.55rem)] flex-col overflow-y-auto rounded-xl bg-[var(--foreground)] px-5 pb-5 pt-4 shadow-[0_12px_40px_rgba(42,33,28,0.4)] outline-none${shake ? " observation-shake" : ""}`}
         >
-          {answerRevealed && canonicalAnswer ? (
-            <p
-              id={`${inputId}-answer`}
-              className="text-base leading-relaxed text-[var(--accent-fg)]"
-              role="status"
-            >
-              Answer:{" "}
-              <span className="font-semibold text-[var(--ceremonial)]">
-                {canonicalAnswer}
-              </span>
-            </p>
-          ) : null}
-
-          <label htmlFor={inputId} className="sr-only">
-            Your answer
-          </label>
-          <input
-            id={inputId}
-            type="text"
-            inputMode="text"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            value={value}
-            onChange={(event) => {
-              setValue(event.target.value);
-              if (error) setError(null);
+          <CorrectCelebrate
+            active={celebrate}
+            onDone={() => {
+              setCelebrate(false);
+              window.setTimeout(() => setJustSolved(false), 500);
             }}
-            placeholder="Type your answer"
-            className="min-h-12 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-base text-[var(--foreground)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted-fg)]/60 focus:ring-2"
-            aria-invalid={error ? true : undefined}
           />
 
-          {error ? (
-            <p
-              id={`${inputId}-error`}
-              className="text-sm text-[var(--accent-fg)]"
-              role="alert"
+          <div className="mb-1 flex shrink-0 items-start justify-between gap-3">
+            <h2
+              id={titleId}
+              className="text-lg font-bold uppercase tracking-[0.14em] text-[var(--ceremonial)]"
             >
-              {error}
-            </p>
-          ) : null}
+              Your quest
+            </h2>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-110 active:scale-90"
+              aria-label="Close"
+            >
+              <CloseIcon className="h-5 w-5" />
+            </button>
+          </div>
 
-          <button
-            type="submit"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
-          >
-            Submit answer
-          </button>
-        </form>
-      )}
-    </aside>
+          <div className="mt-2 space-y-3">
+            <p className="text-base leading-relaxed text-[var(--accent-fg)]">
+              {poi.action}
+            </p>
+            <p className="text-base leading-relaxed text-[var(--accent-fg)]">
+              Then {asContinuation(poi.observation.look)}{" "}
+              <span className="font-semibold">{poi.observation.question}</span>
+            </p>
+          </div>
+
+          {solved ? (
+            <div className="mt-5 space-y-3" role="status">
+              <p
+                className={`font-display text-3xl leading-tight text-[var(--success-on-dark)] sm:text-4xl${justSolved ? " pop-in" : ""}`}
+                style={
+                  justSolved
+                    ? ({
+                        "--delay": `${CORRECT_CELEBRATE_MS}ms`,
+                      } as React.CSSProperties)
+                    : undefined
+                }
+              >
+                You are right.
+              </p>
+              <p className="text-base leading-relaxed text-[var(--accent-fg)]">
+                {poi.observation.reveal}
+              </p>
+              <p className="text-sm leading-relaxed text-[var(--stone-light)]">
+                {proceedHint}
+              </p>
+            </div>
+          ) : (
+            <form
+              onSubmit={onSubmit}
+              className="mt-4 space-y-2"
+              aria-describedby={
+                error
+                  ? `${inputId}-error`
+                  : answerRevealed
+                    ? `${inputId}-answer`
+                    : undefined
+              }
+            >
+              {answerRevealed && canonicalAnswer ? (
+                <p
+                  id={`${inputId}-answer`}
+                  className="text-base leading-relaxed text-[var(--accent-fg)]"
+                  role="status"
+                >
+                  Answer:{" "}
+                  <span className="font-semibold text-[var(--ceremonial)]">
+                    {canonicalAnswer}
+                  </span>
+                </p>
+              ) : null}
+
+              <label htmlFor={inputId} className="sr-only">
+                Your answer
+              </label>
+              <input
+                id={inputId}
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                value={value}
+                onChange={(event) => {
+                  setValue(event.target.value);
+                  if (error) setError(null);
+                }}
+                placeholder="Type your answer"
+                className="min-h-12 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-base text-[var(--foreground)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted-fg)]/60 focus:ring-2"
+                aria-invalid={error ? true : undefined}
+              />
+
+              {error ? (
+                <p
+                  id={`${inputId}-error`}
+                  className="text-sm text-[var(--accent-fg)]"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-base font-semibold text-[var(--accent-fg)] transition-[transform,filter] duration-200 ease-[var(--ease-out)] hover:brightness-95 active:scale-[0.97]"
+              >
+                Submit answer
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }

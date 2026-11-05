@@ -14,13 +14,12 @@ import {
   useJourneyStore,
   type Poi,
 } from "@/lib/tour";
-import { ChevronDownIcon } from "@/components/icons";
 import {
   FinishSuccessModal,
   FINISH_SUCCESS_OPEN_DELAY_MS,
 } from "@/components/finish-success-modal";
 import { MapBubble, type MapFocus } from "@/components/map-bubble";
-import { QUEST_ANCHOR_ID } from "@/components/observation-key";
+import { QuestSheet } from "@/components/observation-key";
 import { QuestUnlockCta } from "@/components/quest-unlock-cta";
 import { useWalkIntro } from "@/components/walk-intro";
 import { PrimaryButton, StickyActionBar } from "@/components/ui";
@@ -35,8 +34,7 @@ type StopDockProps = {
   defaultOpen?: boolean;
   /**
    * Unstarted gate on place 2+: send them to Home to start, with the map
-   * focused on the entrance. Skips the "Solve the quest" scroll for the
-   * previewed stop.
+   * focused on the entrance. Skips the quest sheet for the previewed stop.
    */
   startGate?: boolean;
   /**
@@ -63,8 +61,8 @@ type UnlockedTarget = {
  * - walk not begun: Start the walk (brand handoff, then onboarding); map urges that CTA
  * - startGate:      Start the walk (Home); map hidden on preview
  * - continueTo:     Continue at the expected place (direct link); map hidden
- * - on a stop, quest unsolved: Solve the quest (ceremonial gold; scrolls to the card);
- *                   iris-closes while the card is fully in view; unlock CTA returns on solve
+ * - on a stop, quest unsolved: Solve the quest (terracotta; opens the quest sheet);
+ *                   iris-closes while the sheet is open; unlock CTA returns on solve
  * - after solve:    ink-fill unlock to Next / Finish starts with the map celebrate
  * - next is entrance: Continue at the entrance (link to place 1)
  * - later places:   Continue the walk (opens wayfinding map)
@@ -103,8 +101,8 @@ export function StopDock({
   const [unlockPhase, setUnlockPhase] = useState<UnlockPhase>("idle");
   const wasUnsolved = useRef(currentUnsolved);
   const unlockingStopId = useRef<string | null>(null);
-  /** Hide Solve the quest while the Your quest card is fully on screen. */
-  const [questFullyVisible, setQuestFullyVisible] = useState(false);
+  /** Quest bottom sheet open for the current stop. */
+  const [questOpen, setQuestOpen] = useState(false);
   /** Keep the button mounted through the iris close; shown vs leaving drive clip-path. */
   const [solveQuestMounted, setSolveQuestMounted] = useState(true);
   const [solveQuestShown, setSolveQuestShown] = useState(true);
@@ -114,6 +112,10 @@ export function StopDock({
   const [successDelayMs, setSuccessDelayMs] = useState(
     FINISH_SUCCESS_OPEN_DELAY_MS,
   );
+
+  useEffect(() => {
+    setQuestOpen(false);
+  }, [currentStop?.id]);
 
   useEffect(() => {
     if (currentUnsolved) {
@@ -140,38 +142,17 @@ export function StopDock({
 
   useEffect(() => {
     if (!currentUnsolved) {
-      setQuestFullyVisible(false);
       setSolveQuestMounted(false);
       setSolveQuestShown(false);
       setSolveQuestLeaving(false);
       return;
     }
 
-    const quest = document.getElementById(QUEST_ANCHOR_ID);
-    if (!quest) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        // 0.99: subpixel rounding often keeps ratio just under 1.
-        setQuestFullyVisible(
-          entry.isIntersecting && entry.intersectionRatio >= 0.99,
-        );
-      },
-      { threshold: [0, 0.99, 1] },
-    );
-    observer.observe(quest);
-    return () => observer.disconnect();
-  }, [currentUnsolved, currentStop?.id]);
-
-  useEffect(() => {
-    if (!currentUnsolved) return;
-
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Match .solve-quest-cta.is-leaving duration in globals.css.
-    const leaveMs = reduce ? 0 : 500;
+    // Match .solve-quest-cta.is-leaving / quest backdrop fade-out in globals.css.
+    const leaveMs = reduce ? 0 : 220;
 
-    if (!questFullyVisible) {
+    if (!questOpen) {
       setSolveQuestLeaving(false);
       setSolveQuestMounted(true);
       let inner = 0;
@@ -191,7 +172,7 @@ export function StopDock({
       setSolveQuestLeaving(false);
     }, leaveMs);
     return () => window.clearTimeout(id);
-  }, [currentUnsolved, questFullyVisible]);
+  }, [currentUnsolved, questOpen]);
 
   function openSuccessNow() {
     setSuccessDelayMs(0);
@@ -203,18 +184,8 @@ export function StopDock({
     router.prefetch("/onboarding");
   }, [journeyReady, started, startGate, continueTo, router]);
 
-  function scrollToQuest() {
-    const quest = document.getElementById(QUEST_ANCHOR_ID);
-    if (!quest) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    quest.scrollIntoView({
-      behavior: reduce ? "auto" : "smooth",
-      block: "start",
-    });
-    quest.focus({ preventScroll: true });
-  }
-
   function openMap(focus: MapFocus) {
+    setQuestOpen(false);
     setMapFocus(focus);
     setMapOpen(true);
   }
@@ -286,11 +257,11 @@ export function StopDock({
     action = solveQuestMounted ? (
       <button
         type="button"
-        onClick={scrollToQuest}
+        onClick={() => setQuestOpen(true)}
         tabIndex={solveQuestShown ? undefined : -1}
         aria-hidden={!solveQuestShown}
         disabled={!solveQuestShown}
-        className={`solve-quest-cta inline-flex min-h-14 w-full items-center justify-center gap-1.5 rounded-md bg-[var(--ceremonial)] px-5 text-base font-semibold text-[var(--foreground)] hover:brightness-95 active:scale-[0.98] ${
+        className={`solve-quest-cta inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-md bg-[var(--accent)] px-5 text-base font-semibold text-[var(--accent-fg)] hover:brightness-95 active:scale-[0.98] ${
           solveQuestLeaving
             ? "is-leaving pointer-events-none"
             : solveQuestShown
@@ -299,7 +270,14 @@ export function StopDock({
         }`}
       >
         Solve the quest
-        <ChevronDownIcon className="h-[1.1em] w-[1.1em]" />
+        <img
+          src="/icons/quest-scroll.webp"
+          alt=""
+          width={28}
+          height={28}
+          className="h-[1.45em] w-[1.45em] object-contain drop-shadow-[0_1px_1px_rgba(42,33,28,0.25)]"
+          draggable={false}
+        />
       </button>
     ) : null;
   } else if (unlockPhase === "animating" || unlockPhase === "done") {
@@ -344,12 +322,15 @@ export function StopDock({
   return (
     <>
       <StickyActionBar
-        elevated={!hideMap && mapOpen}
+        elevated={(!hideMap && mapOpen) || questOpen}
         map={
           hideMap ? undefined : (
             <MapBubble
               open={mapOpen}
-              onOpenChange={setMapOpen}
+              onOpenChange={(nextOpen) => {
+                if (nextOpen) setQuestOpen(false);
+                setMapOpen(nextOpen);
+              }}
               focus={mapFocus}
               onFocusChange={setMapFocus}
               hideActions={mapOrientationOnly}
@@ -369,6 +350,17 @@ export function StopDock({
       >
         {action}
       </StickyActionBar>
+      {currentStop ? (
+        <QuestSheet
+          key={currentStop.id}
+          poi={currentStop}
+          open={questOpen}
+          onOpenChange={(nextOpen) => {
+            if (nextOpen) setMapOpen(false);
+            setQuestOpen(nextOpen);
+          }}
+        />
+      ) : null}
       <FinishSuccessModal open={successOpen} openDelayMs={successDelayMs} />
     </>
   );

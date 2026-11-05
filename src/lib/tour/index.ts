@@ -29,5 +29,18 @@ export {
   normalizeObservationAnswer,
 } from "./route-rules";
 export { ALLOW_SKIP } from "./config";
+export {
+  AREA_MAPS,
+  PLACE_MAPS,
+  getAreaMap,
+  getAreaMapForOrder,
+  getAreaMapByPoiId,
+  getAreaMarkerTitle,
+  getPlaceMap,
+  getPlaceMapByPoiId,
+  type AreaMapDef,
+  type AreaMapMarker,
+  type PlaceMapDef,
+} from "./place-maps";
 export { showHomeAtOnce, useJourneyStore } from "./store";
 export { useJourneyHydrated } from "./use-journey-hydrated";

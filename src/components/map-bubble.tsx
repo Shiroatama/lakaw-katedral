@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   ALLOW_SKIP,
+  getAreaMapByPoiId,
+  getAreaMapForOrder,
   getNextExpectedPoi,
   getPoiById,
   isJourneyComplete,
@@ -12,10 +14,7 @@ import {
   nagaTour,
   useJourneyStore,
 } from "@/lib/tour";
-import {
-  CathedralMap,
-  isInteriorPlace,
-} from "@/components/cathedral-map";
+import { CathedralMap } from "@/components/cathedral-map";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -84,8 +83,9 @@ function easeInOut(t: number) {
 
 /**
  * Circular map chat-head with a progress ring. Opens a sheet above the dock:
- * floor plan, either where you are now (chat-head) or directions to the next
- * place (Continue the walk), plus trial-mode Skip.
+ * compound overview or an area map with 3–5 pins (compound → area → QR),
+ * either where you are now (chat-head) or directions to the next place, plus
+ * trial-mode Skip.
  *
  * The sheet is always mounted (portaled to <body>) and driven by `data-open`.
  * See `.sheet-*` in globals.css.
@@ -108,9 +108,10 @@ export function MapBubble({
   const [focusInternal, setFocusInternal] = useState<MapFocus>(
     defaultOpen ? "next" : "here",
   );
-  const [mapVariant, setMapVariant] = useState<"interior" | "compound">(
+  const [mapVariant, setMapVariant] = useState<"compound" | "place">(
     "compound",
   );
+  const [activeAreaId, setActiveAreaId] = useState<string | null>(null);
   /** Staggered marker pop-in: only on the first map open. */
   const [animateMarkers, setAnimateMarkers] = useState(false);
   const open = openControlled ?? openInternal;
@@ -120,6 +121,8 @@ export function MapBubble({
   const panelRef = useRef<HTMLDivElement>(null);
   const wasOpen = useRef(false);
   const markersIntroPlayed = useRef(false);
+  /** Back to compound: keep overview until focus/featured changes. */
+  const stayOnCompound = useRef(false);
 
   const progress = useJourneyStore();
   const earlyScanExpectedId = useJourneyStore((s) => s.earlyScanExpectedId);
@@ -221,11 +224,34 @@ export function MapBubble({
   const showingHere = focus === "here" && here !== null;
   const featured = showingHere ? here : next;
 
+  function showCompound() {
+    setMapVariant("compound");
+    setActiveAreaId(null);
+  }
+
+  function showArea(areaId: string) {
+    stayOnCompound.current = false;
+    setAnimateMarkers(false);
+    setActiveAreaId(areaId);
+    setMapVariant("place");
+  }
+
+  function showAreaForOrder(order: number) {
+    const area = getAreaMapForOrder(order);
+    if (area) showArea(area.id);
+  }
+
+  function backToCompound() {
+    stayOnCompound.current = true;
+    showCompound();
+  }
+
   function setOpen(nextOpen: boolean) {
     if (openControlled === undefined) setOpenInternal(nextOpen);
     onOpenChange?.(nextOpen);
     if (!nextOpen) {
-      setMapVariant("compound");
+      stayOnCompound.current = false;
+      showCompound();
       setAnimateMarkers(false);
       if (earlyScanExpectedId) setEarlyScanGate(null);
     }
@@ -233,13 +259,26 @@ export function MapBubble({
 
   const featuredId = featured?.id ?? null;
 
-  // Indoor next/here stops open on the floor plan; outdoor stops stay on the compound.
+  // New focus target: allow auto drill-in again.
+  useEffect(() => {
+    stayOnCompound.current = false;
+  }, [featuredId, focus]);
+
+  // Wayfinding / here: open the area map that contains that stop.
   useEffect(() => {
     if (!open) return;
-    setMapVariant(
-      featuredId && isInteriorPlace(featuredId) ? "interior" : "compound",
-    );
-  }, [open, featuredId]);
+    if (stayOnCompound.current) return;
+    if (!featuredId) {
+      showCompound();
+      return;
+    }
+    const area = getAreaMapByPoiId(featuredId);
+    if (area) {
+      showArea(area.id);
+    } else {
+      showCompound();
+    }
+  }, [open, featuredId, focus]);
 
   useEffect(() => {
     if (!open) return;
@@ -426,10 +465,10 @@ export function MapBubble({
             style={{ "--i": 2 } as React.CSSProperties}
           >
             <div className="relative">
-              {mapVariant === "interior" ? (
+              {mapVariant === "place" ? (
                 <button
                   type="button"
-                  onClick={() => setMapVariant("compound")}
+                  onClick={backToCompound}
                   className="absolute left-2 top-2 z-10 inline-flex min-h-8 items-center gap-1 rounded-sm bg-[var(--surface)]/85 px-2 text-[11px] font-medium text-[var(--foreground)] ring-1 ring-[var(--border)]/60 backdrop-blur-[1px] transition-[transform,background-color] duration-200 ease-[var(--ease-out)] active:scale-95"
                   aria-label="Back to compound map"
                 >
@@ -440,10 +479,10 @@ export function MapBubble({
               <CathedralMap
                 highlightNext={!complete && !showingHere && featured !== null}
                 variant={mapVariant}
+                areaId={activeAreaId ?? undefined}
                 onBeforeNavigate={() => setOpen(false)}
-                onEnterInterior={() => {
-                  setAnimateMarkers(false);
-                  setMapVariant("interior");
+                onEnterPlace={(order) => {
+                  showAreaForOrder(order);
                 }}
               />
             </div>

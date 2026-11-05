@@ -1,6 +1,5 @@
 import type { Poi } from "@/lib/tour";
 import { HeroMedia } from "@/components/hero-media";
-import { ObservationKeyForm } from "@/components/observation-key";
 import { StewardCredit } from "@/components/steward-credit";
 import { StoryFlow } from "@/components/story-flow";
 
@@ -45,10 +44,6 @@ export function PoiDetail({ poi, banner, dock }: PoiDetailProps) {
         </div>
 
         <StoryFlow poi={poi} />
-
-        <div className="fade-up" style={delay(360)}>
-          <ObservationKeyForm poi={poi} />
-        </div>
       </div>
       {dock}
     </article>

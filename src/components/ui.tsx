@@ -12,8 +12,8 @@ import {
 } from "@/components/icons";
 import { useHydrated } from "@/lib/use-hydrated";
 
-/** Match `.sheet-root` visibility hold so the dock stays above the fading blur. */
-const SHEET_CLOSE_MS = 320;
+/** Match map sheet / quest fade-out so the dock stays above the overlay. */
+const SHEET_CLOSE_MS = 220;
 
 type ProgressBarProps = {
   total: number;

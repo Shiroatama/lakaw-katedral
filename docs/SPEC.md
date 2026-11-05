@@ -138,9 +138,12 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 
 ## 6. Map
 
-- Hand-drawn simplified SVG floor plan of the cathedral (nave, aisles, entrance, altar), not an architectural drawing. **Soon:** replace with a commissioned 2D illustrated map (artist outsourced); see [`CHECKLIST.md`](./CHECKLIST.md).
-- POI markers positioned by coordinates in the SVG's own coordinate space.
-- States: completed, current ("You are here"), next (highlighted/pulsing), locked.
+- Two-level illustrated maps (SVG markers over raster art, viewBox 280×360):
+  1. **Compound overview** (`/img/cathedral-compound.webp`): pins 1–16. Tapping a pin opens the **area** map that contains that stop (never opens scan from the compound).
+  2. **Area maps** (3–5 pins each): nave (`cathedral-interior.webp`, places 1–3), heritage garden (`/img/map/area-garden.webp`, 4–7), Porta lane (`area-porta.webp`, 8–11), south compound (`area-south.webp`, 12–16). On an area map, only finished places, the current place, and the next stop are drawn; later pins in the cluster stay hidden. Tapping a pin opens `/scan` only when that pin is the next live stop; completed live stops reopen `/s/[slug]`; future pins without a `poiId` stay hidden until those stops ship.
+- Catalog: `src/lib/tour/place-maps.ts` (`AREA_MAPS`: image, marker coords, titles, optional `poiId`).
+- Wayfinding (“Continue the walk” / focus next) and chat-head “here” open the matching area map, with Back to the compound.
+- Marker states: completed, current ("You are here"), next (highlighted/pulsing), locked / future.
 - No GPS. Indoor GPS is unreliable; location = last scanned POI.
 - No Mapbox or Google Maps. If zooming is needed later, Leaflet with `CRS.Simple` over the SVG.
 
