@@ -1403,10 +1403,23 @@ button.pin:active { transform: scale(0.96); }
   font-weight: 600;
   line-height: 1.15;
 }
+.you-email {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--muted-fg);
+  text-align: left;
+  word-break: break-word;
+}
 .you-section {
   padding: 18px var(--page-x) 0;
 }
-.you-section h2 {
+.you-progress-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+.you-progress-card h2 {
   margin: 0 0 12px;
   font-family: var(--font-display), Georgia, serif;
   font-size: 22px;
@@ -1491,7 +1504,7 @@ button.pin:active { transform: scale(0.96); }
 .parish-section h2,
 .idea-copy strong,
 .you-name,
-.you-section h2,
+.you-progress-card h2,
 .handoff-title,
 .gate-title,
 .gate-price,
@@ -1507,6 +1520,7 @@ button.pin:active { transform: scale(0.96); }
 .teach-note,
 .parish-section > p,
 .idea-copy span,
+.you-email,
 .you-account-note,
 .handoff-walk,
 .gate-lede,
@@ -1795,9 +1809,11 @@ button.pin:active { transform: scale(0.96); }
 }
 
 .you-quiet {
+  flex: none;
   display: flex;
   justify-content: center;
-  padding: 10px var(--page-x) 0;
+  padding: 8px var(--page-x) 10px;
+  background: var(--background);
 }
 
 .you-quiet .text-btn {

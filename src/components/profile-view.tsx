@@ -10,7 +10,6 @@ import { LOGIN_PATH, PROFILE_PATH } from "@/lib/access/gate";
 import { useAccessStore } from "@/lib/access/store";
 import { useAccessHydrated } from "@/lib/access/use-access-hydrated";
 import {
-  getPoints,
   isJourneyComplete,
   nagaTour,
   useJourneyHydrated,
@@ -35,7 +34,6 @@ export function ProfileView() {
   const done = journeyReady ? progress.completed.length : 0;
   const complete = journeyReady && isJourneyComplete(progress, nagaTour);
   const percent = Math.min(100, Math.round((done / total) * 100));
-  const points = journeyReady ? getPoints(progress) : 0;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -70,104 +68,106 @@ export function ProfileView() {
   }
 
   return (
-    <div className="you-body">
-      <div className="you-banner">
-        <Image
-          src="/img/bernardo-avatar.png"
-          width={600}
-          height={600}
-          alt="Bernardo de la Concepción"
-          unoptimized
-          priority
-        />
-        <div className="you-settings">
-          <button
-            ref={triggerRef}
-            type="button"
-            className="you-settings-btn"
-            aria-label="Settings"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-controls={menuId}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <MoreHorizontalIcon />
-          </button>
-          {menuOpen ? (
-            <div
-              ref={menuRef}
-              id={menuId}
-              className="you-settings-menu"
-              role="menu"
+    <>
+      <div className="you-body">
+        <div className="you-banner">
+          <Image
+            src="/img/bernardo-avatar.png"
+            width={600}
+            height={600}
+            alt="Bernardo de la Concepción"
+            unoptimized
+            priority
+          />
+          <div className="you-settings">
+            <button
+              ref={triggerRef}
+              type="button"
+              className="you-settings-btn"
               aria-label="Settings"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-controls={menuId}
+              onClick={() => setMenuOpen((open) => !open)}
             >
-              <button
-                type="button"
-                role="menuitem"
-                className="you-settings-item"
-                disabled={!accessReady || !account}
-                onClick={onLogout}
+              <MoreHorizontalIcon />
+            </button>
+            {menuOpen ? (
+              <div
+                ref={menuRef}
+                id={menuId}
+                className="you-settings-menu"
+                role="menu"
+                aria-label="Settings"
               >
-                Log out
-              </button>
-            </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="you-settings-item"
+                  disabled={!accessReady || !account}
+                  onClick={onLogout}
+                >
+                  Log out
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="you-identity">
+          <h1 className="you-name">Bernardo de la Concepción</h1>
+          {accessReady && account ? (
+            <p className="you-email">{account.email}</p>
           ) : null}
         </div>
-      </div>
-      <div className="you-identity">
-        <h1 className="you-name">Bernardo de la Concepción</h1>
-      </div>
 
-      <section className="you-section" aria-labelledby="you-progress-heading">
-        <h2 id="you-progress-heading">Your progress</h2>
-        <div className="you-progress-block">
-          <div className="you-progress-thumb">
-            <Image
-              src="/img/entrance.webp"
-              width={144}
-              height={144}
-              alt=""
-              unoptimized
-            />
-          </div>
-          <div className="you-progress-copy">
-            <div className="you-progress-meta">
-              <strong>Naga Cathedral</strong>
-              <span>
-                {done} of {total}
-                {complete ? " · Done" : ""}
-              </span>
+        <section
+          className="you-section"
+          aria-labelledby="you-progress-heading"
+        >
+          <div className="you-progress-card">
+            <h2 id="you-progress-heading">Your progress</h2>
+            <div className="you-progress-block">
+              <div className="you-progress-thumb">
+                <Image
+                  src="/img/entrance.webp"
+                  width={144}
+                  height={144}
+                  alt=""
+                  unoptimized
+                />
+              </div>
+              <div className="you-progress-copy">
+                <div className="you-progress-meta">
+                  <strong>Naga Cathedral</strong>
+                  <span>
+                    {done} of {total}
+                    {complete ? " · Done" : ""}
+                  </span>
+                </div>
+                <div className="you-progress" aria-hidden="true">
+                  <span style={{ width: `${percent}%` }} />
+                </div>
+              </div>
             </div>
-            <div className="you-progress" aria-hidden="true">
-              <span style={{ width: `${percent}%` }} />
-            </div>
           </div>
-        </div>
-        <p className="you-account-note" style={{ textAlign: "left" }}>
-          {points} points so far.
-        </p>
-      </section>
+        </section>
 
-      <section className="you-section you-account">
-        {accessReady && account ? (
-          <p className="you-account-note">
-            Saved on this phone as {account.email}.
-          </p>
-        ) : (
-          <>
+        {accessReady && !account ? (
+          <section className="you-section you-account">
             <Btn onClick={login} disabled={!accessReady}>
               Log in to save
             </Btn>
             <p className="you-account-note">
               Log in to save your progress on your account.
             </p>
-          </>
-        )}
-      </section>
+          </section>
+        ) : null}
+      </div>
 
       <div className="you-quiet">
         <StartOver />
       </div>
-    </div>
+    </>
   );
 }
