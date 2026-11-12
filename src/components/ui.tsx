@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { vibratePattern } from "@/lib/feedback-sound";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -13,6 +14,11 @@ type ButtonProps = {
   className?: string;
   id?: string;
 };
+
+/** Short tap pulse for primary CTAs. No-ops where Vibration API is missing. */
+function tapHaptic() {
+  vibratePattern(12);
+}
 
 /**
  * Primary CTA: full width, chunky solid-offset shadow. Press moves it into
@@ -29,9 +35,15 @@ export function Btn({
   id,
 }: ButtonProps) {
   const classes = `btn ${className}`.trim();
+
+  function handleClick(event: React.MouseEvent<HTMLElement>) {
+    tapHaptic();
+    onClick?.(event);
+  }
+
   if (href && !disabled) {
     return (
-      <Link href={href} onClick={onClick} className={classes} id={id}>
+      <Link href={href} onClick={handleClick} className={classes} id={id}>
         {children}
       </Link>
     );
@@ -41,7 +53,7 @@ export function Btn({
       id={id}
       type={type}
       form={form}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={classes}
     >
