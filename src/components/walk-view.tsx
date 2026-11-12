@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BRAND_MARK } from "@/components/brand-mark";
-import { ChurchSwitcher } from "@/components/church-switcher";
 import { CoinsIcon, PinCheckIcon } from "@/components/icons";
 import { sendThroughGate } from "@/lib/access/route-gate";
 import {
@@ -32,7 +31,6 @@ export function WalkView() {
   const ready = useJourneyHydrated();
   const progress = useJourneyStore();
   const setEarlyScanGate = useJourneyStore((s) => s.setEarlyScanGate);
-  const [switcherOpen, setSwitcherOpen] = useState(false);
   const [tip, setTip] = useState<string | null>(null);
 
   const total = nagaTour.pois.length;
@@ -94,27 +92,15 @@ export function WalkView() {
   return (
     <>
       <div className="map-bar">
-        <button
-          type="button"
-          className="map-logo-btn"
-          aria-haspopup="dialog"
-          aria-expanded={switcherOpen}
-          aria-controls="church-switcher"
-          title="Switch church"
-          onClick={() => setSwitcherOpen((open) => !open)}
-        >
-          <Image
-            className="map-logo"
-            src={BRAND_MARK}
-            width={940}
-            height={516}
-            alt=""
-            unoptimized
-            priority
-          />
-          <span className="map-logo-caret" aria-hidden="true" />
-          <span className="sr-only-label">Switch church</span>
-        </button>
+        <Image
+          className="map-logo"
+          src={BRAND_MARK}
+          width={940}
+          height={516}
+          alt="Lakaw Katedral"
+          unoptimized
+          priority
+        />
         <div className="map-bar-end">
           <div
             className="map-currency"
@@ -179,13 +165,6 @@ export function WalkView() {
           ) : null}
         </div>
       </div>
-
-      <ChurchSwitcher
-        open={switcherOpen}
-        onClose={() => setSwitcherOpen(false)}
-        nagaState={complete ? "Done" : "On"}
-        placeCount={total}
-      />
     </>
   );
 }

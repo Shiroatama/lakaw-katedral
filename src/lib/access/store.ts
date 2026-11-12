@@ -20,6 +20,8 @@ type AccessStore = {
     email: string,
     password: string,
   ) => Promise<"ok" | "other-email" | "wrong-password">;
+  /** Clears the saved account on this phone. Walk payment stays. */
+  logout: () => void;
   confirmPayment: () => void;
   setReturnTo: (path: string | null) => void;
 };
@@ -36,6 +38,7 @@ export const useAccessStore = create<AccessStore>()(
         set({ account: result.account });
         return "ok";
       },
+      logout: () => set({ account: null, returnTo: null }),
       confirmPayment: () => set({ paid: true }),
       setReturnTo: (path) => set({ returnTo: path }),
     }),

@@ -790,131 +790,12 @@ body {
   padding: calc(10px + var(--safe-top)) var(--page-x) 8px;
   flex: none;
 }
-.map-logo-btn {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  padding: 4px 6px 4px 0;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  flex: none;
-  border-radius: 10px;
-}
-.map-logo-btn:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
 .map-logo {
   height: 28px;
   width: auto;
   display: block;
+  flex: none;
 }
-.map-logo-caret {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid var(--stone);
-  opacity: 0.7;
-}
-.church-switcher {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-.church-switcher[hidden] { display: none; }
-.church-switcher-backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: rgba(42, 33, 28, 0.45);
-  cursor: pointer;
-}
-.church-switcher-panel {
-  position: relative;
-  z-index: 1;
-  margin: 56px var(--page-x) 0;
-  padding: 14px 12px 12px;
-  border-radius: 18px;
-  background: var(--foreground);
-  color: var(--accent-fg);
-  box-shadow: 0 16px 40px rgba(42, 33, 28, 0.35);
-  animation: rise 240ms var(--ease-out) both;
-}
-.church-switcher-panel h2 {
-  margin: 0 0 12px;
-  padding: 0 4px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 250, 245, 0.62);
-}
-.church-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.church-row {
-  appearance: none;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 10px;
-  align-items: center;
-  padding: 8px;
-  border: 2px solid transparent;
-  border-radius: 14px;
-  background: rgba(255, 250, 245, 0.06);
-  color: inherit;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-}
-.church-row.is-on {
-  border-color: var(--accent);
-  background: rgba(184, 92, 56, 0.22);
-}
-.church-row:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-.church-row:focus-visible { outline: 2px solid var(--ceremonial); outline-offset: 2px; }
-.church-row img {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  object-fit: cover;
-  display: block;
-}
-.church-row strong {
-  display: block;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.15;
-}
-.church-row span {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
-  line-height: 1.3;
-  color: rgba(255, 250, 245, 0.62);
-}
-.church-row .church-state {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ceremonial);
-}
-.church-row.is-on .church-state { color: var(--accent-fg); }
 .map-bar-end {
   display: flex;
   align-items: center;
@@ -1449,6 +1330,64 @@ button.pin:active { transform: scale(0.96); }
   display: block;
   object-fit: contain;
   object-position: center bottom;
+}
+.you-settings {
+  position: absolute;
+  top: calc(8px + var(--safe-top));
+  right: 8px;
+  z-index: 3;
+}
+.you-settings-btn {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foreground);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.you-settings-btn:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+.you-settings-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 148px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(42, 33, 28, 0.18);
+}
+.you-settings-item {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--foreground);
+  font: 600 15px/1.2 var(--font-ui), system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.you-settings-item:hover,
+.you-settings-item:focus-visible {
+  background: rgba(184, 92, 56, 0.1);
+  outline: none;
+}
+.you-settings-item:disabled {
+  color: var(--muted-fg);
+  cursor: default;
 }
 .you-identity {
   display: flex;

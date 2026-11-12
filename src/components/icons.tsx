@@ -60,6 +60,17 @@ export function CoinsIcon({ className = "h-5 w-[26px]" }: IconProps) {
   );
 }
 
+/** Horizontal three-dot menu trigger. */
+export function MoreHorizontalIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
+      <circle cx="5" cy="12" r="1.8" />
+      <circle cx="12" cy="12" r="1.8" />
+      <circle cx="19" cy="12" r="1.8" />
+    </svg>
+  );
+}
+
 /** Check mark for a done pin. */
 export function PinCheckIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
