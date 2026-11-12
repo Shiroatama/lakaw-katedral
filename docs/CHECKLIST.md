@@ -41,7 +41,7 @@ Until the art lands, keep the current SVG. Do not block MVP launch on this if th
 | [ ] | Real payment gateway behind `PaymentProvider` | Settles to parish or diocese account, not personal |
 | [ ] | Thank-you email receipt | Low priority; needs gateway |
 | [ ] | Umami analytics live and funnel checked | Events listed in SPEC §12 |
-| [ ] | Pilgrim guide stops 4–16 in the app | Content already in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); do not invent copy |
+| [ ] | Pilgrim guide items 15–16 in the app | Places 9–16 now cover guide items 4–8 and 10–12. Items 15 (Mass) and 16 (souvenir shop) are still not places. Do not invent copy. |
 | [ ] | Add Tagalog and Bicol translation support | English only for MVP; translate stop copy, UI chrome, and wayfinding; keep proper names as in the parish guide |
 | [ ] | Shareable resume link (URL hash) if analytics show lost progress | Optional; see SPEC §8 |
 

@@ -1,22 +1,20 @@
 # Lakaw Katedral: Design Spec (Color, UX, Screens)
 
 **Project:** Lakaw Katedral  
-**Companion to:** [`SPEC.md`](./SPEC.md) (product and technical)  
-**Status:** Accepted  
-**Date:** 2026-10-06  
-**Scope:** Mobile PWA visual system and screen UX for the MVP walk flow
+**Companion to:** [`SPEC.md`](./SPEC.md) (product and technical), [`GAME-FLOW.md`](./GAME-FLOW.md) (game shape), [`HANDOVER-PRODUCTION.md`](./HANDOVER-PRODUCTION.md) (build plan)  
+**Status:** Accepted (place-loop shell shipped)  
+**Date:** 2026-11-12  
+**Scope:** Mobile PWA visual system and screen UX for the walk
 
-This document is the source of truth for color tokens, chrome, and per-screen element inventory. Where it conflicts with older UI notes in `SPEC.md`, this document wins.
+This document is the source of truth for tokens, type, chrome, and the per-screen inventory. The reference for look and feel is [`/prototypes/place-loop.html`](../public/prototypes/place-loop.html). Where it conflicts with older UI notes in `SPEC.md`, this document wins.
 
 ---
 
 ## 1. Design intent
 
-Warm welcome for an outdoor QR walk through Naga Metropolitan Cathedral. Color should feel like standing in front of the cream facade at noon: grounded, inviting, readable in sun. Not a cool museum app, not a dark liturgy app, not a transit map.
+Warm welcome for an outdoor QR walk through Naga Metropolitan Cathedral. Color should feel like standing in front of the cream facade at noon: grounded, inviting, readable in sun. Not a cool museum app, not a dark liturgy app, not a transit map. The structure borrows from a language-learning game: three tabs, a map board, one short lesson per place, and a quest that rewards looking.
 
 **Inspiration:** cathedral facade (cream stone, wood doors, terracotta pavement). Values are inspired for UI readability, not eyedropped from a photo.
-
----
 
 ## 1.1 Language
 
@@ -31,40 +29,44 @@ Plain words around real names. Visitor-facing copy is about Grade 3 level ("plac
 | Decision | Choice |
 |----------|--------|
 | Appearance | Light only. No dark mode. |
-| Neutrals | Soft cream canvas. Kill cool blue-gray backgrounds. |
-| Primary CTA | Mid-brick terracotta. |
-| Secondary | Wood brown (nav weight, secondary actions, visited tone). |
-| Success | Muted green only (arrived / done). |
-| Danger | Clear red (errors). Must not look like a CTA. |
-| Sky blue | Banned from chrome. Do not reintroduce teal or cool blue accents. |
+| Neutrals | Soft cream canvas. No cool blue-gray backgrounds. |
+| Primary CTA | Mid-brick terracotta with a solid darker lip. |
+| Secondary | Wood brown (nav weight, quiet text buttons). |
+| Success | Muted green only (done, right answer). |
+| Danger | Clear red (errors, wrong answer). Must not look like a CTA. |
+| Ceremonial | Gold, used sparingly: hints, rules, scan corners. |
+| Sky blue | Banned from chrome. |
 
 ### 2.2 Token table
 
-Implement in `src/app/globals.css` (`:root`). Keep `manifest.ts` / viewport `themeColor` in sync (terracotta or cream, not teal).
+Implemented in `src/app/globals.css` (`:root`). Keep `manifest.ts` and viewport `themeColor` in sync.
 
 | Role | Token | Hex | Use |
 |------|-------|-----|-----|
-| Canvas | `--background` | `#f4eee4` | App background |
-| Sheet | `--surface` | `#faf6ef` | Interactive panels only |
-| Ink | `--foreground` | `#2a211c` | Primary text |
+| Canvas | `--background` | `#f4eee4` | App background, quest sheet |
+| Sheet | `--surface` | `#faf6ef` | Choices, chips, fields, map chip |
+| Ink | `--foreground` | `#2a211c` | Primary text, switcher panel |
 | Quiet ink | `--muted-fg` | `#6b5e54` | Secondary text |
-| Line | `--border` | `#e0d4c4` | Dividers |
+| Line | `--border` | `#e0d4c4` | Dividers, tab bar top border, control outlines |
 | Muted | `--muted` | `#9a8b7c` | Disabled / placeholder tone |
-| CTA | `--accent` | `#b85c38` | Primary buttons, key actions |
+| CTA | `--accent` | `#b85c38` | Primary buttons, next pin, "Your quest" |
+| CTA lip | `--accent-depth` | `#7a3f28` | Solid offset shadow under CTAs |
 | On CTA | `--accent-fg` | `#fffaf5` | Text on terracotta |
-| Wood | `--stone` | `#6b4a35` | Secondary actions, nav weight |
+| Wood | `--stone` | `#6b4a35` | Quiet actions, back chevron |
 | Wood soft | `--stone-light` | `#e8d8c8` | Soft chips, progress track |
-| Success | `--success` | `#4f6b4a` | Arrived / done |
+| Gold | `--ceremonial` | `#ecbe41` | Hint ring, gate rule |
+| Success | `--success` | `#4f6b4a` | Done pin, right answer |
+| Success lip | `--success-depth` | `#314832` | Lip under a right answer |
 | Danger | `--danger` | `#b33b2e` | Errors only |
 
-Legacy teal (`#0f5c5c`) and cool gray neutrals are retired.
+Controls (choice, chip, order card, stepper) use a neutral lip, `#d3c4b2`.
 
 ### 2.3 Surfaces
 
 - Default world is flat cream (`--background`).
-- Use lighter ivory sheets (`--surface`) only when an interactive panel needs a container.
-- No white card grids. No card treatment in heroes.
-- Primary buttons are flat terracotta. No drop shadow and no glow.
+- Lighter ivory (`--surface`) is for tappable controls and fields.
+- No white card grids, no card treatment in heroes.
+- **Solid offset shadows, no blur.** Primary CTA: `4px 5px 0 var(--accent-depth)`. Choices, chips, order cards, steppers: `3px 4px 0` lip. Press translates the control into its lip and drops the shadow to `0`. No soft multi-layer glows as an affordance.
 
 ### 2.4 Contrast
 
@@ -72,210 +74,209 @@ Aim for WCAG AA on text and CTAs. Prefer mid-brick terracotta over muted clay so
 
 ---
 
-## 3. Chrome and navigation
+## 3. Type and layout
+
+| Role | Font | Notes |
+|------|------|-------|
+| Display | EB Garamond 500/600 (`--font-display`) | Titles, reveal line, page headings. Utility `font-display`. |
+| Story body | Source Serif 4 (`--font-body`) | Prose, ledes, quest question |
+| UI | Source Sans 3 (`--font-ui`, also Tailwind `font-sans`) | Tabs, buttons, chips, forms, notes |
+
+Fonts load in `src/app/layout.tsx` with `next/font/google`.
+
+- **One phone-sized column.** `.app-frame` (max 30rem, `100dvh`, centered on wide screens) wraps every `(tour)` route. Each screen is a `.view`.
+- **Shared inset:** `--page-x: 16px` on shells, docks, sheets, and the tab bar.
+- Styles for the shell live in `src/app/walk.css` (ported from the prototype). `globals.css` keeps tokens, motion keyframes, the start-walk handoff, the confirm dialog, the correct celebrate, and print.
+- Primary CTA: full width, 56px min height, 16px radius. Text button (`.text-btn`) for quiet actions.
+
+---
+
+## 4. Chrome and navigation
 
 | Rule | Choice |
 |------|--------|
-| Tab bar | None |
-| Persistent chrome | Progress ring on the map chat-head beside the main CTA. Finish shows a full progress bar. |
-| Map access | After the walk has begun (not on Home) |
-| Home role | Resume hub (see screens) |
-| Back | In-screen secondary actions only. No universal back chevron required for MVP. |
+| Tab bar | **Walk, Parish, Profile.** Top border, icon plus label, active in terracotta. Only on `/walk`, `/parish`, `/you`. |
+| No tabs on | Home, onboarding, place, handoff, scan, login, pay, finish, terms |
+| Map access | Walk tab. On a place or handoff, the **N of 16** chip goes to Walk. |
+| Church switcher | From the Walk logo. Naga is on. Others are listed as Soon. Not a fourth tab. |
+| Back | A chevron in the top bar on place, handoff, and terms. Place goes to Walk. Handoff climbs area, compound, then the last place. |
+| Points | Stub on Walk: solved × 10, next to the coins icon. |
 
 ---
 
-## 4. Flow principles
+## 5. Flow principles
 
 ```mermaid
 flowchart LR
-  QR1["Scan any stop QR"] --> POI["Stop detail (story at once)"]
-  Home["Home: landing / resume"] -->|Start the walk| POI
-  POI --> Find["Next: the mural: map bubble"]
-  Find --> QR1
-  POI -->|all visited| Fin["/finish: next + gift"]
-  Fin --> Suc["Success modal on arrival"]
-  Suc --> Cont[Continue dismisses modal]
-  Cont --> Fin
-  Fin --> TY["Thank you modal after gift"]
+  Home["Home poster"] -->|Start the walk| Intro["Intro handoff"]
+  Intro --> Onb["Onboarding"]
+  Onb -->|Scan| Place["Place"]
+  Walk["Walk tab"] -->|next pin| Place
+  Place -->|Solve the quest| Sheet["Quest sheet"]
+  Sheet -->|Correct| Reveal["Celebrate, reveal"]
+  Reveal -->|Next place| Handoff["Handoff map"]
+  Handoff -->|Scan QR| Place
+  Reveal -->|place 3 done| Gate["Login, then pay"]
+  Gate --> Handoff
+  Reveal -->|place 16 done| Finish["Finish"]
+  Finish --> Parish["Parish tab"]
 ```
 
-1. **In order:** only the next unsolved place shows its full quest. Opening any other unsolved place shows a teaser interstitial (hero + about + gate). Unstarted: **Start the walk** → Home. Mid-walk early: **Continue at the …** → expected place.
-2. **Scan is the start:** the entrance QR opens stop 1 directly. No Start tap required from Home.
-3. **"Next: the …" is wayfinding, not navigation:** it opens the sheet with a plain-words landmark and the floor plan. It never opens the next story. Label comes from `nextPlaceCtaLabel` (e.g. "Next: the mural"). **Continue at the entrance** links straight back to place 1 if they left mid-quest.
-4. **Celebrate as a modal, then the ask, then what is next:** `/finish` leads with the gift, then next ideas. A big Success modal opens on first arrival; Continue dismisses it. Home complete CTA **Help the parish** also opens `/finish`.
-5. **Offline:** the whole tour is cached when the service worker installs. Donate needs network. No offline payment queue in MVP.
-6. **Start over:** allowed from Home and from `/finish` (below the gift), with confirm before clearing progress. Trigger is muted utility text (not danger-colored); danger stays on the confirm action only.
+1. **In order:** only the next unsolved place can be solved. A solved place reopens as full media, story, and reveal, with no quest. Opening any other unsolved place by link or scan goes to Home if the walk has not started, otherwise to Walk with a "next up" note. The scanner stays on the camera with a warm note instead of leaving.
+2. **Scan opens the place,** never the map first.
+3. **Story first, then the quest.** Media, one lead line, and the prose story are on the page before the quest. A quest is answered by looking or from that story. No typing, no keyboard.
+4. **Free then paid:** places 1 to 3 are free. Place 4 and after need a saved login, then a ₱50 payment. Internal builds can confirm locally (`TEMP_PAY_UNLOCK`).
+5. **Offline:** the whole tour is cached when the service worker installs. Giving needs network.
+6. **Start over:** from Profile and Finish, with a confirm before clearing progress.
 
 ---
 
-## 5. Screen inventory
+## 6. Screen inventory
 
-### 5.1 Home (`/`): landing and resume hub
+### 6.1 Home (`/`): poster
 
-Not a required step on site (the entrance QR goes straight to stop 1). Used by people who arrive from a link, and as the resume point. Shows only the hero until saved progress is read, so a returning visitor never sees "Start the walk" flash.
+- Full-bleed muted loop (`/video/entrance.mp4`), steward crest upper left, brand wordmark, one line ("16 places. Learn each one. Finish for a prize."), terms link, **Start the walk**.
+- Fresh visit only. Once progress is read, a started walk goes to `/walk` and a finished one to `/finish`. Text and dock stay hidden until then, so a returning visitor never sees "Start the walk" flash.
+- **Start the walk** plays the intro handoff (terracotta screen, partner marks, count to 100, brand), then `/onboarding`.
 
-**Fresh visit**
+### 6.2 Onboarding (`/onboarding`)
 
-- Quiet steward credit, upper left: Archdiocese of Cáceres crest beside the name. No floating badge, no pill chip.
-- Brand: Lakaw Katedral as hero-level signal, over a full-bleed portrait video (`/video/entrance.mp4`, muted loop) from the top edge of the screen (no card, no rounded corners). Resume and complete stills stay as photos.
-- Hook: "Welcome, dear pilgrim and visitor."
-- Fact first (interest pull): a living story of faith; more than four centuries at the heart of Bicol
-- Invite: "Discover the heritage. Encounter the saints. Meet Christ. Finish for a small surprise prize." (no question stack)
-- No cathedral-name headline, no QR mention
-- Dock: map chat-head + **Start the walk**. A terracotta screen fades in, with the Ryne Media mark and a count from 0 to 100 that speeds up. At 100 the brand pulses, then **Lakaw Katedral** takes over, holds, and zooms out into place 1. Tap the map to see where place 1 is. Scanning the entrance QR still opens place 1 with no handoff.
-- No stop list, schedule, stats, or address block in the first viewport
+- "Start at the entrance". Compound map with pin 1 and the entrance photo callout. **Scan the entrance QR**. Trial mode adds a quiet **Skip the scan**.
+- Skips itself for anyone already walking.
 
-**In progress**
+### 6.3 Walk (`/walk`): tab
 
-- Brand quieter; "Your next stop is {title}"
-- Dock: map chat-head + **Next: the mural** (or the next place name). Map shows where you last were, or the next place.
-- Quiet destructive: Start over (confirm, then clear journey)
+- Top bar: church logo with a caret (opens the switcher) and the points stub.
+- Compound map with all 16 pins. States: **done** (green check), **next** (terracotta with ring), **locked** (grey).
+- Tap done: reread the place. Tap next: go there (login or pay first when gated). Tap locked: a warm "not yet, next up" note.
+- No scan dock and no explainer at the bottom.
+- The container keeps the map at 280:360 (container query units) so pin percentages land on the map.
 
-**Complete**
-
-- Dock: map chat-head + **Help the parish** (to `/finish`)
-- Quiet destructive: Start over
-
-### 5.2 First-stop QR (`/s/saints`)
-
-- Same as any stop. Scanning it starts the journey. No redirect, no Start tap.
-
-### 5.3 Stop detail (`/s/[slug]`)
-
-The story is static and renders immediately. The banner and dock appear once the visit is recorded.
+### 6.4 Place (`/s/[slug]`)
 
 Top to bottom:
 
-1. Full-bleed photo across the screen, from the top edge (no card, no rounded corners)
-2. Optional one-line note (journey complete)
-3. Stop title
-4. About (short; descriptive only, no instructions) with optional **Read more** / **Show less** for `aboutMore` history so the quest stays near the first screen
-5. Quest card (rounded dark brown panel using ink `--foreground` `#2a211c`; visible uppercase "Your quest" label in `--stone-light`; action and clue in `--accent-fg`, only the question semibold; cream `--background` answer field): **Something to do** (instruction / call to action: pray, look, pause). After a correct answer: large display "You are right" in `--success-on-dark`, full-screen canvas-confetti (same side-to-center burst as the finish modal), then the reveal. Progress advances on the map chat-head ring.
-6. Interesting fact
-7. Dock: map button (progress ring) + **Next: the mural** (or next place name), or **Finish** when all stops are visited. While the quest is unsolved, the dock shows a quiet **Solve the quest** control (cream fill, hairline, wood text, down chevron, no shadow) that scrolls to the quest card. **Submit answer** is the only terracotta action on that screen.
+1. Top bar: back chevron (to Walk), short place title, **N of 16** chip.
+2. Teach media: muted loop with a **Sound** badge, or a still.
+3. The lead line (`about`), then **The story** as prose (`aboutMore`).
+4. After a solve, and on every reopen: media (still), the reveal line (display type), then the full story with the lead line first.
+5. Dock: **Solve the quest** (next place only). After a solve: **Next place**, **Continue the walk** (an older place), or **Finish the walk** (place 16).
 
-MVP: no audio, share, or save.
+**Quest sheet:** rises full width over the place on `--background`, soft dark overlay, top radii only. Header "Your quest" in accent beside a close. Action line, look and **question**, feedback line, answer controls, **Check**. The dock stays in layout under the sheet. The panel is focused with `preventScroll`.
 
-### 5.4 Wayfinding map (chat bubble)
+| Type | Controls |
+|------|----------|
+| `cloze` | Sentence with a blank, tap a chip to fill it |
+| `order` | Three cards, up and down buttons |
+| `count` | Stepper, minus and plus |
+| `select_all` | Tap every true chip |
+| `choice` | Two-column grid (fallback) |
 
-- Circular **Map** chat-head beside the primary CTA (Messenger-style) on every screen, including Home
-- Progress `done/total` and ring fill live on the circle
-- Fresh start (Home): **Start the walk** opens place 1. Map chat-head opens "Ready to begin" with place 1 on the floor plan and a short nudge to tap **Start the walk** (no Scan / Skip, no go-scan directions).
-- Tap the map chat-head **or** **Next: the …** to open a tall map panel (rounded, height from dock up to the top safe area):
-  1. Stop card: "You are here", or next/start number + title, **landmark** in plain words, "Scan the QR code there to read the story."
-  2. Floor plan (completed / here / next)
-- Dock stays visible under the bubble (backdrop stops above the dock)
-- `/map` is a deep-link fallback that opens the same bubble
-- **Trial mode only:** a dashed "Skip the scan: open place N" button at the bottom (also before the walk has begun, for desktop testing). Controlled by `NEXT_PUBLIC_ALLOW_SKIP`; remove for launch.
+A wrong Check shakes the panel, shows the nudge for that miss, and clears the pick. After 3 misses a hint highlights the answer in gold (order and count fill in the answer). A right Check locks the sheet and plays the **Correct** celebrate (dim wash, green sticker, confetti, about 1.8 s). Then the place is marked solved, the sheet closes, and the reveal shows without jumping the scroll.
 
-### 5.5 Finish (`/finish`)
+### 6.5 Handoff (`/handoff`)
 
-One page for next ideas and the gift. Congratulations happens on the last place, before this page.
+- Next place on its **area map**, with the route from the place just finished, a green "from" pin, and a terracotta "next" pin.
+- Top bar label: the area name. **Back** goes to the compound map, then to the last place. Tap the next pin on the compound map to drill into the area. Tap it on the area map to scan.
+- Dock: **Scan QR**. Trial mode adds **Skip the scan**.
+- Places after the free three go through login and pay first.
 
-1. **Success modal (last place):** after the last quest is solved and the map head celebrate finishes (100% → check), large check, green "You finished the walk", thank-you line that mentions a small surprise prize from the church, full-screen confetti. **Continue** goes to `/finish`. Shown once per session until Start over. Tapping Finish early opens it right away.
-2. **Prize hero, then gift:** edge-to-edge hero, then the page’s first job: "Your surprise prize" (ask at the parish). Soft rule, then "Help the parish" gift form (amount presets + custom, starts at 20 pesos; submit stub opens thank-you modal).
-3. **While you are here:** clear air and a soft rule after the gift, then next ideas (candle, sit, pray) as editorial entries: small place photo beside title and body. No left rule, no rounded photo cards.
-4. **Start over** as muted utility text (confirm, then back to Home; danger color only on the confirm action)
+### 6.6 Scan (`/scan`)
 
-No stop checklist. No "Not now" button: leaving is simply leaving. If the walk is not finished, the page says so and links back instead of showing the ending.
+- Full-bleed camera, brand wash, gold finder corners, status label (Scanning, Code found), a note line, close, and a quiet **Skip the scan** in trial mode.
+- Valid next place: opens it (or the gate). Any other valid place: stays on the camera with "That is place N. Your next place is …". Unknown codes: a plain rejection note.
 
-### 5.6 Donate (`/donate`)
+### 6.7 Parish (`/parish`): tab
 
-- Redirects to `/finish`. Kept for old links and analytics paths.
+- Hero photo, then (once the walk is done) **Your surprise prize**.
+- **Help the parish:** amounts ₱20, ₱50, ₱100, ₱500, a custom field (minimum ₱20), **Give**. The stub provider confirms; the button reads **Thank you** for a moment.
+- **While you are here:** Offer a Mass, Holy Family Chapel, Souvenir shop.
 
-### 5.7 Thank you (`/thank-you`)
+### 6.8 Profile (`/you`): tab
 
-- Redirects to `/finish` (acknowledgment is a modal there after a gift)
-- Warm confirmation copy on the modal; Home CTA
+- Bernardo avatar banner, name, **Your progress** (N of 16, bar, points), and **Log in to save** when logged out (or the saved email when logged in). Quiet **Start over**.
 
-### 5.8 Not-yet interstitial (place is not next to solve)
+### 6.9 Login and pay (`/login`, `/pay`)
 
-- Place first: short cropped hero (finish-style 2:1 window over a 4:3 image), title, `about`.
-- Sans editorial caption (terracotta left rule): "This is place N of M", then a short intro.
-- **Unstarted:** Lakaw Katedral intro + "Did you know" teaser (more than 400 years; earthquakes, typhoons, and fire) then "Do you want to know why… Ready to walk… Finish every place and the church has a small surprise prize waiting for you."; dock **Start the walk** → Home. No map chat-head.
-- **Mid-walk too early:** say they found this place early, finish the expected place first; dock **Continue at the …** → expected place. No map chat-head.
-- No observation quest. Progress unchanged.
+- Hero, kicker, title, copy, then the dock (primary action and **Back to the walk**).
+- Login: email and password (8+ characters), "The first three places are free". Logging in from Profile returns there; from a gate it goes on to pay.
+- Pay: ₱50 price and the saved email. A confirmed payment sets `paid` and returns the visitor to where they were headed (a place or the handoff).
 
-### 5.9 Completed re-visit
+### 6.10 Finish (`/finish`)
 
-- Full stop replay
-- Slim banner: "You finished the walk." with link to `/finish`
-- No blocking modal every time
+- Prize hero, "You finished the walk", one line about the prize, **Help the parish** (to Parish), quiet **Start over**. If the walk is not finished it sends the visitor back to Walk.
 
-### 5.10 Offline (`/~offline`)
+### 6.11 Terms and offline
 
-- Shown only if a page was never cached (for example, a very first visit with no signal)
-- Title "No internet". Explain: the walk saves on your phone after the first load; giving to the parish needs internet
-- Go to the start
+- `/terms` and `/~offline` use the same top bar and dock as the rest.
+- Offline: "No internet", the walk saves after the first load, giving needs internet, **Go to the start**.
+
+### 6.12 Redirects
+
+`/map` goes to `/walk`. `/donate` and `/thank-you` go to `/parish`. `/qr` (printable codes) is unchanged and sits outside the app frame.
 
 ---
 
-## 6. Motion
+## 7. Motion
 
-Motion gives presence and hierarchy, never decoration. Premium feel comes from consistent easing, short durations, and things arriving in a sensible order. All of it is off under `prefers-reduced-motion` (content just appears). Tokens and keyframes live at the bottom of `globals.css`.
+Motion gives presence and hierarchy, never decoration. All of it is off under `prefers-reduced-motion` (content just appears).
 
 **Easing tokens**
 
 | Token | Curve | Use |
 |-------|-------|-----|
 | `--ease-out` | `cubic-bezier(0.22, 1, 0.36, 1)` | Anything arriving: fast start, soft landing |
-| `--ease-sheet` | `cubic-bezier(0.32, 0.72, 0, 1)` | Sheet open, page slide |
-| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Small overshoot: pops, counters |
-| `--ease-in` | `cubic-bezier(0.4, 0, 1, 1)` | Anything leaving (faster than it arrived) |
+| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Small overshoot: sticker, sparks |
+| `--ease-in` | `cubic-bezier(0.4, 0, 1, 1)` | Anything leaving |
 
 **Inventory**
 
 | Where | Motion | Timing |
 |-------|--------|--------|
-| Page to page (in-app links) | Slide + fade + slight blur. Forward rises from below; back drops in from above. React `<ViewTransition>` with `transitionTypes` (`nav-forward` / `nav-back`). QR scans and browser back just load normally. | 420 to 480 ms |
-| Wayfinding chat bubble | Bubble scales up from the map chat-head; backdrop fades; contents rise in one by one; map markers pop in; the "next" marker soft-rings. Closing is faster. Focus moves into the bubble and back to the chat-head. | 480 ms open, 300 ms close |
-| Bottom dock | Slides up into place after the visit is recorded | 560 ms |
-| Map button | Mid-walk: map → percent → count (~2 s) → hold (~2 s) → map. Last place: map → percent → count to 100% (~2 s) → hold 100% (~1 s) → check (~2 s) → map. | ~4.4–5.4 s |
-| Quest success | Correct answer: large pop-in "You are right" + full-screen canvas-confetti (same side-to-center burst as finish) | one shot |
-| Quest CTA unlock | Starts with the map celebrate on a correct answer: terracotta ink fills left → right while "Solve the quest" rewrites to Next / Finish; then the button is tappable | ~0.8 s |
-| Stop screen | Photo eases from a slight zoom to rest; title, story and "Did you know?" rise in with 100 ms steps; notes fade up | 600 ms each |
-| Home | Hero settles; name overlay, intro and status lines rise in order | 350 ms start |
-| Start the walk | Terracotta screen opens with a soft circular mask from the center. Progress starts at 0.5 s (while the mask is still opening) and counts 0 to 100 (slow then fast). At 100 the brand pulses, clears fully, then Lakaw Katedral (with gold rules and sparks) holds and zooms out with the background into place 1. Reduced motion skips the handoff. | 3 s mask, count from 0.5 s, 2.8 s count, pulse, clear, title hold, zoom out |
-| Finish | Page lands first; success modal + canvas-confetti (side-to-center) after 1 s; Continue reveals gift then next ideas | 1 s delay, then modal |
-| Thank you | Gold rule draws in, then heading, text, button | 300 to 750 ms |
-| Buttons | Lift 1 px on hover (pointer devices only), press down to 97% | 200 ms |
-| Inputs | Focus ring fades in | 200 ms |
+| Quest sheet | Rises from the bottom, overlay fades in; closing is faster | 420 ms open, 280 ms close |
+| Wrong answer | Panel shakes, wrong marks hold, then reset | 380 ms shake, 420 ms marks |
+| Correct | Dim wash, sticker pops in, confetti, then sticker leaves | 1.8 s |
+| Reveal | Rises in on the place | 420 ms |
+| Switcher | Panel rises in under the logo | 240 ms |
+| Next pin | Soft pulse ring on Onboarding and Handoff | 1.6 s loop |
+| Buttons and controls | Press translates into the lip | 90 ms |
+| Start the walk | Terracotta mask opens, count 0 to 100, brand pulse, title holds, zoom out into onboarding. Reduced motion skips it. | about 8 s |
 
 **Rules**
 
-- Animate `transform` and `opacity` first. The two exceptions are the progress bar width and the ring's stroke offset, both tiny.
-- Never put a transform or animation on an ancestor of a `position: fixed` element. The dock animates its inner row, and the map sheet is portaled to `<body>`.
-- Page content is real HTML first: story text is in the server HTML and animates in with CSS, so a slow phone still shows it.
-- Avoid decorative glow, pill clusters, and floating overlay badges on hero media.
+- Animate `transform` and `opacity` first.
+- Page content is real HTML first, so a slow phone still shows it.
+- Avoid decorative glow, pill clusters, and floating badges on hero media.
+- There are no page-to-page view transitions. Screens swap.
 
 ---
 
-## 7. Overrides to product spec
+## 8. Overrides to product spec
 
-| Topic | Older `SPEC.md` | This design spec |
+| Topic | Older `SPEC.md` / earlier design | This design spec |
 |-------|-----------------|------------------|
-| Donate amounts | Custom only, no presets | Custom amount only (presets removed) |
-| Home | Thinly specified | Resume hub with Start over |
-| Progress chrome | POI-level only | Progress ring on the map button; full bar on Finish |
-| Color | Unspecified (scaffold used teal) | Section 2 token table |
-| Appearance | Not stated | Light only, no dark mode |
+| Chrome | No tab bar, map chat-head | Walk, Parish, Profile tabs |
+| Map | Bubble from the dock | Walk tab board |
+| Quest | Typed answer, dark card | Tap-only light sheet |
+| Place | Hero, article, Read more | Media, prose story, Solve the quest |
+| Finish | Gift page with success modal | Short bridge into Parish |
+| Donate amounts | Custom only | Presets plus custom, minimum ₱20 |
+| Free places | n/a | First 3, then login and ₱50 |
+| Type | One display and one body | EB Garamond, Source Serif 4, Source Sans 3 |
 
-Update `SPEC.md` donate and screen notes to match when editing product docs.
+Update `SPEC.md` screen notes to match when editing product docs.
 
 ---
 
-## 8. Implementation checklist
+## 9. Implementation checklist
 
-- [x] Replace CSS variables and kill teal in `globals.css`
-- [x] Sync `manifest.ts` and layout `themeColor`
-- [x] Retheme shared buttons / progress / map marker colors
-- [x] Home fresh vs resume (+ Start over confirm)
-- [x] Thin progress on journey screens
-- [x] Donate custom amount only (no presets)
-- [x] Wayfinding sheet with landmarks; "Next: the …" never opens the next story
-- [x] Progressive order (full quest only on the next unsolved place); entrance scan starts the journey directly
-- [x] Whole tour precached at service-worker install
-- [x] Finish: success modal then soft gift + next ideas; "Not now" removed; Start over on finish
-- [x] Motion system: page slides, animated map sheet, dock, ring, staggered reveals, reduced-motion fallback
-- [x] Edge copy/layout pass for ahead, midroute, offline, completed banner
-- [x] Spot-check outdoor contrast on terracotta CTA and cream text (tokens + build verified)
+- [x] Tokens, fonts, and solid-offset controls from the prototype
+- [x] Tab shell (Walk, Parish, Profile); no tabs elsewhere
+- [x] Walk board with 16 pins, church switcher, points stub
+- [x] Place: story first, light quest sheet, five tap formats, celebrate, reveal
+- [x] Only the next place can be solved; solved places reopen without a quest
+- [x] Handoff with area and compound maps; real camera scan
+- [x] Login (3 free places), pay (temporary internal unlock), finish, parish, profile
+- [x] Typing, dark quest card, and map bubble removed
+- [ ] Confirm all 16 quest answers on site with the parish
+- [ ] Replace the temporary pay unlock with SukiPay

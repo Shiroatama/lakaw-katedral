@@ -1,0 +1,4419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Lakaw Katedral · Walk / Parish / Profile prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --background: #f4eee4;
+        --foreground: #2a211c;
+        --surface: #faf6ef;
+        --border: #e0d4c4;
+        --muted: #9a8b7c;
+        --muted-fg: #6b5e54;
+        --accent: #b85c38;
+        --accent-fg: #fffaf5;
+        --accent-depth: #7a3f28;
+        --stone: #6b4a35;
+        --stone-light: #e8d8c8;
+        --ceremonial: #ecbe41;
+        --success: #4f6b4a;
+        --success-depth: #314832;
+        --success-on-dark: #b8d4b0;
+        --danger: #b33b2e;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --ease-in: cubic-bezier(0.4, 0, 1, 1);
+        --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        /* Story voice */
+        --font-display: "EB Garamond", Georgia, serif;
+        --font-body: "Source Serif 4", Georgia, serif;
+        /* Shell / UI chrome */
+        --font-ui: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+        /* Shared page inset (places, Walk, Parish, Profile, docks) */
+        --page-x: 16px;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: #e7dfd4;
+        color: var(--foreground);
+        font-family: var(--font-ui), system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 20px 16px 28px;
+      }
+
+      .proto-head {
+        width: 375px;
+        max-width: 100%;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .proto-kicker {
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted-fg);
+      }
+      .proto-kicker strong {
+        color: var(--foreground);
+        font-weight: 700;
+      }
+      .replay {
+        border: 0;
+        background: transparent;
+        color: var(--stone);
+        font: 600 14px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        padding: 6px 0;
+      }
+      .replay:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+
+      .device {
+        width: 375px;
+        max-width: 100%;
+        padding: 12px;
+        background: #1c1612;
+        border-radius: 36px;
+        box-shadow: 0 28px 70px rgba(42, 33, 28, 0.28);
+      }
+      .screen {
+        position: relative;
+        width: 375px;
+        height: 667px;
+        max-width: 100%;
+        overflow: hidden;
+        border-radius: 26px;
+        background: var(--background);
+        display: flex;
+        flex-direction: column;
+        font-family: var(--font-ui), system-ui, sans-serif;
+      }
+
+      .view {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--background);
+      }
+      .view[hidden] { display: none !important; }
+
+      .home {
+        background: #140f0c;
+        color: var(--accent-fg);
+      }
+      .home-media {
+        position: absolute;
+        inset: 0;
+      }
+      .home-media img,
+      .home-media video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .home-media::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(20, 15, 12, 0.92) 12%,
+          rgba(20, 15, 12, 0.55) 42%,
+          rgba(20, 15, 12, 0.15) 72%
+        );
+      }
+      .home-credit {
+        position: absolute;
+        top: 14px;
+        left: 16px;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: calc(100% - 32px);
+      }
+      .home-credit img {
+        height: 44px;
+        width: auto;
+        display: block;
+        object-fit: contain;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+      }
+      .home-credit span {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15em;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 14px;
+        line-height: 1;
+        color: rgba(255, 250, 245, 0.95);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      }
+      .home-body {
+        position: relative;
+        z-index: 1;
+        margin-top: auto;
+        padding: 24px var(--page-x) 12px;
+        text-align: center;
+      }
+      .home-brand {
+        width: min(10.5rem, 48vw);
+        height: auto;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+      }
+      .home-line {
+        margin: 14px auto 0;
+        font-size: 15px;
+        line-height: 1.3;
+        white-space: nowrap;
+        color: rgba(255, 250, 245, 0.82);
+      }
+      .home-terms {
+        margin: 10px 0 0;
+        font-size: 13px;
+        line-height: 1.3;
+        white-space: nowrap;
+        color: rgba(255, 250, 245, 0.62);
+      }
+      .home-terms a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .home-dock {
+        position: relative;
+        z-index: 1;
+        padding: 8px var(--page-x) 16px;
+      }
+
+      .intro {
+        background: var(--accent);
+        color: var(--accent-fg);
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 28px 24px;
+      }
+      .intro-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        width: 100%;
+      }
+      .intro-stage[hidden] { display: none; }
+      .intro-partners {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+      }
+      .intro-partners img {
+        height: auto;
+        display: block;
+      }
+      .intro-partners .partner-ryne {
+        width: min(9rem, 42vw);
+      }
+      .intro-partners .partner-bald {
+        width: min(4.75rem, 22vw);
+      }
+      .intro-load {
+        width: min(14rem, 72%);
+      }
+      .intro-bar {
+        height: 6px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 250, 245, 0.22);
+      }
+      .intro-bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: var(--accent-fg);
+      }
+      .intro-percent {
+        margin: 10px 0 0;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: rgba(255, 250, 245, 0.88);
+      }
+      .intro-welcome-label {
+        margin: 0 0 14px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 250, 245, 0.82);
+      }
+      .intro-brand {
+        width: min(11rem, 52vw);
+        height: auto;
+        display: block;
+      }
+      .intro-stage.is-in {
+        animation: rise 480ms var(--ease-out) both;
+      }
+      .intro-stage.is-out {
+        animation: intro-out 360ms var(--ease-in) both;
+      }
+      .intro-stage.is-pulse {
+        animation: intro-pulse 640ms var(--ease-spring) both;
+      }
+      @keyframes intro-out {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.96); }
+      }
+      @keyframes intro-pulse {
+        0%, 100% { transform: scale(1); }
+        40% { transform: scale(1.04); }
+      }
+
+      .map-back[hidden] { display: none; }
+      .map-copy {
+        flex: none;
+        padding: 2px var(--page-x) 0;
+      }
+      .next-kicker {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .next-kicker.is-here { color: var(--success); }
+      .map-copy h3 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 26px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .map-copy p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+      .map-dock {
+        flex: none;
+        margin-top: auto;
+        padding: 10px var(--page-x) 14px;
+        background: var(--background);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 56px;
+        padding: 10px 118px 6px 8px;
+        flex: none;
+      }
+      .count {
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--foreground);
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .photo {
+        position: relative;
+        flex: none;
+        height: 30%;
+        margin: 0 var(--page-x);
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .photo figcaption {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        margin: 0;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(42, 33, 28, 0.72);
+        color: var(--accent-fg);
+        font-size: 13px;
+        font-weight: 600;
+        width: fit-content;
+      }
+
+      .learn-body {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 4px var(--page-x) 14px;
+        gap: 14px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .learn-body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .beat-kicker {
+        display: none;
+      }
+      .learn-title[hidden] { display: none; }
+      .teach-block.is-solved .teach-media {
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .learn-text {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.45;
+        color: var(--foreground);
+      }
+      .learn-text + .learn-text { margin-top: 8px; }
+      .teach-note {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .teach-media {
+        position: relative;
+        flex: none;
+        width: 100%;
+        margin-top: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1c1612;
+      }
+      .teach-media.landscape { aspect-ratio: 16 / 9; }
+      .teach-media.portrait { aspect-ratio: 3 / 4; max-height: 46%; }
+      .teach-media video,
+      .teach-media img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+      .teach-note {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--muted-fg);
+      }
+      .learn-dock {
+        flex: none;
+        padding: 8px var(--page-x) 14px;
+        background: var(--background);
+      }
+      /* Quest sheet covers the dock; keep dock in flow so the page does not jump. */
+      #view-place.is-quest-open .learn-body {
+        overflow: hidden;
+      }
+
+      .quest-root {
+        position: absolute;
+        inset: 0;
+        z-index: 28;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        visibility: hidden;
+        pointer-events: none;
+        transition: visibility 0s linear 280ms;
+      }
+      .quest-root[data-open="true"] {
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
+      .quest-backdrop {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: rgba(42, 33, 28, 0.42);
+        backdrop-filter: blur(2px);
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 220ms var(--ease-in);
+      }
+      .quest-root[data-open="true"] .quest-backdrop {
+        opacity: 1;
+        transition: opacity 420ms var(--ease-out);
+      }
+      .quest-panel {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-height: min(78%, 38rem);
+        margin: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-radius: 22px 22px 0 0;
+        background: var(--background);
+        color: var(--foreground);
+        box-shadow: 0 -10px 36px rgba(42, 33, 28, 0.18);
+        padding: 12px var(--page-x) 16px;
+        transform: translateY(105%);
+        transition: transform 420ms var(--ease-out);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .quest-panel::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .quest-root[data-open="true"] .quest-panel {
+        transform: translateY(0);
+      }
+      .quest-panel.is-shake { animation: shake 380ms ease-in-out; }
+      .quest-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .quest-panel-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        /* Caps sit high in the em box; nudge text down to the X, leave the button alone. */
+        transform: translateY(3px);
+      }
+      .quest-close {
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--muted-fg);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+      }
+      .quest-close:focus-visible {
+        outline: 2px solid var(--foreground);
+        outline-offset: 2px;
+      }
+      .quest-close:active { transform: scale(0.94); }
+      .quest-close svg {
+        width: 20px;
+        height: 20px;
+        display: block;
+      }
+      .quest-action {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .quest-question {
+        margin: 8px 0 12px;
+        font-size: 18px;
+        line-height: 1.35;
+        color: var(--foreground);
+      }
+      .quest-question strong { font-weight: 700; }
+      .quest-feedback {
+        min-height: 1.2em;
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--danger);
+      }
+      .quest-feedback.is-hint { color: var(--accent); }
+      .quest-feedback:empty { display: none; }
+      .quest-answer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .choices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .choice,
+      .chip,
+      .order-card {
+        border-radius: 14px;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        color: var(--foreground);
+        box-shadow: 3px 4px 0 #d3c4b2;
+        font: 700 17px/1.1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        transition: transform 90ms ease-out, box-shadow 90ms ease-out, background 180ms var(--ease-out);
+      }
+      .choice {
+        min-height: 56px;
+      }
+      .choice:active:not(:disabled),
+      .chip:active:not(:disabled),
+      .order-card:active:not(:disabled) {
+        transform: translate(3px, 4px);
+        box-shadow: 0 0 0 #d3c4b2;
+      }
+      .choice:focus-visible,
+      .chip:focus-visible,
+      .order-card:focus-visible,
+      .stepper-btn:focus-visible {
+        outline: 2px solid var(--foreground);
+        outline-offset: 2px;
+      }
+      .choice.is-selected,
+      .chip.is-selected,
+      .order-card.is-selected {
+        border-color: var(--accent);
+        background: #f6e4d8;
+        box-shadow: 3px 4px 0 var(--accent-depth);
+      }
+      .choice.is-wrong,
+      .chip.is-wrong,
+      .order-card.is-wrong { border-color: var(--danger); }
+      .choice.is-right,
+      .chip.is-right,
+      .order-card.is-right {
+        background: var(--success);
+        border-color: var(--success);
+        color: var(--accent-fg);
+        box-shadow: 3px 4px 0 var(--success-depth);
+      }
+      .choice.is-hinted,
+      .chip.is-hinted,
+      .order-card.is-hinted {
+        border-color: var(--ceremonial);
+        box-shadow: 3px 4px 0 #b8922e;
+      }
+      .choice:disabled,
+      .chip:disabled,
+      .order-card:disabled,
+      .stepper-btn:disabled { cursor: default; }
+
+      .cloze-line {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.4;
+        color: var(--foreground);
+      }
+      .cloze-blank {
+        display: inline-block;
+        min-width: 4.5rem;
+        margin: 0 2px;
+        padding: 2px 8px;
+        border-bottom: 3px solid var(--accent);
+        font-weight: 700;
+        color: var(--accent);
+        text-align: center;
+      }
+      .cloze-blank.is-empty {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .chip {
+        min-height: 48px;
+        padding: 0 14px;
+      }
+
+      .order-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .order-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 56px;
+        padding: 10px 12px;
+        text-align: left;
+      }
+      .order-index {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: var(--stone-light);
+        color: var(--stone);
+        font: 700 13px/1 var(--font-ui), system-ui, sans-serif;
+      }
+      .order-card.is-selected .order-index,
+      .order-card.is-right .order-index {
+        background: rgba(255, 250, 245, 0.25);
+        color: inherit;
+      }
+      .order-text {
+        flex: 1;
+        font: 600 15px/1.3 var(--font-ui), system-ui, sans-serif;
+      }
+      .order-move {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: none;
+      }
+      .order-move button {
+        width: 36px;
+        height: 28px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--stone-light);
+        color: var(--stone);
+        font: 700 14px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+      }
+      .order-move button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 6px 0 2px;
+      }
+      .stepper-btn {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        color: var(--foreground);
+        box-shadow: 3px 4px 0 #d3c4b2;
+        font: 700 28px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        transition: transform 90ms ease-out, box-shadow 90ms ease-out;
+      }
+      .stepper-btn:active:not(:disabled) {
+        transform: translate(3px, 4px);
+        box-shadow: 0 0 0 #d3c4b2;
+      }
+      .stepper-value {
+        min-width: 3.5rem;
+        text-align: center;
+        font: 700 40px/1 var(--font-display), Georgia, serif;
+        color: var(--foreground);
+      }
+      .stepper.is-wrong .stepper-value { color: var(--danger); }
+      .stepper.is-right .stepper-value { color: var(--success); }
+      .stepper.is-hinted .stepper-value { color: var(--accent); }
+
+      .check-btn {
+        margin-top: 10px;
+      }
+      .check-btn[hidden] { display: none; }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: default;
+        transform: none;
+        box-shadow: 4px 5px 0 var(--accent-depth);
+      }
+      .learn-dock[hidden] { display: none; }
+
+      .correct-celebrate {
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        pointer-events: none;
+        animation: correct-celebrate-in 180ms var(--ease-out) both;
+      }
+      .correct-celebrate[hidden] { display: none; }
+      .correct-celebrate.is-leaving {
+        animation: correct-celebrate-out 280ms var(--ease-in) both;
+      }
+      .correct-celebrate-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgb(0 0 0 / 75%);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .correct-confetti {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .correct-sticker {
+        position: relative;
+        z-index: 2;
+        margin: 0;
+        padding: 0.28em 0.5em 0.34em;
+        font-family: var(--font-ui), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: clamp(2.1rem, 11vw, 2.75rem);
+        line-height: 0.92;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #1a4d2e;
+        background: #c8f56e;
+        border-radius: 0.58em 0.78em 0.62em 0.72em / 0.72em 0.58em 0.82em 0.64em;
+        box-shadow:
+          0 0 0 0.14em #c8f56e,
+          0 0 0 0.28em #1a4d2e,
+          0.1em 0.16em 0 rgba(0, 0, 0, 0.4);
+        transform: rotate(-3deg);
+        animation: correct-sticker-in 520ms var(--ease-spring) both;
+        animation-delay: 60ms;
+      }
+      .correct-sticker-spark {
+        position: absolute;
+        width: 0.42em;
+        height: 0.42em;
+        background: #c8f56e;
+        clip-path: polygon(
+          50% 0%,
+          63% 35%,
+          100% 50%,
+          63% 65%,
+          50% 100%,
+          37% 65%,
+          0% 50%,
+          37% 35%
+        );
+        box-shadow: 0 0 0 0.06em #1a4d2e;
+        animation: correct-spark-in 420ms var(--ease-spring) both;
+      }
+      .correct-sticker-spark--a {
+        top: -0.22em;
+        right: -0.18em;
+        animation-delay: 280ms;
+      }
+      .correct-sticker-spark--b {
+        bottom: -0.12em;
+        left: -0.28em;
+        width: 0.28em;
+        height: 0.28em;
+        animation-delay: 360ms;
+      }
+
+      .onboard {
+        padding: 0;
+      }
+      .onboard-title {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+      .onboard-line {
+        margin: 0;
+        font-family: var(--font-body), Georgia, serif;
+        font-size: 16px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .onboard-map {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        background: #d8cfc3;
+        width: 100%;
+        aspect-ratio: 280 / 360;
+        flex: none;
+      }
+      .onboard-map > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      .onboard-pin {
+        position: absolute;
+        left: calc(200 / 280 * 100%);
+        top: calc(178 / 360 * 100%);
+        width: 34px;
+        height: 34px;
+        margin: -17px 0 0 -17px;
+        border-radius: 50%;
+        border: 3px solid var(--surface);
+        background: var(--accent);
+        color: var(--accent-fg);
+        display: grid;
+        place-items: center;
+        font: 700 14px/1 var(--font-ui), system-ui, sans-serif;
+        box-shadow: 0 0 0 6px rgba(184, 92, 56, 0.28);
+        z-index: 2;
+      }
+      .onboard-pin::after {
+        content: "";
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 2px solid var(--accent);
+        animation: ping 1.6s var(--ease-out) infinite;
+      }
+      .onboard-callout {
+        position: absolute;
+        bottom: 3%;
+        left: 2.5%;
+        z-index: 3;
+        width: 40%;
+        max-width: 10.5rem;
+        pointer-events: none;
+      }
+      .onboard-callout-frame {
+        padding: 6px;
+        border-radius: 16px;
+        background: var(--surface);
+        box-shadow: 0 8px 24px rgba(42, 33, 28, 0.22);
+        border: 1px solid var(--border);
+      }
+      .onboard-callout figure {
+        margin: 0;
+        overflow: hidden;
+        border-radius: 12px;
+        aspect-ratio: 4 / 3;
+      }
+      .onboard-callout img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+      }
+      .onboard-dock {
+        flex: none;
+        padding: 10px var(--page-x) 16px;
+      }
+      .onboard-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 16px var(--page-x) 10px;
+        gap: 10px;
+      }
+
+      .map-chip {
+        position: absolute;
+        top: 12px;
+        right: var(--page-x);
+        z-index: 4;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 0 10px 0 8px;
+        border: 2px solid #d9cbb8;
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--stone);
+        box-shadow: 0 3px 0 #d3c4b2;
+        font: 700 13px/1 var(--font-ui), system-ui, sans-serif;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+      }
+      .map-chip[hidden] { display: none; }
+      .map-chip svg { width: 16px; height: 16px; }
+      .map-chip:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .map-chip:active { transform: translateY(2px); box-shadow: 0 1px 0 #d3c4b2; }
+
+      .teach-block[hidden],
+      .reward-block[hidden] { display: none; }
+      .reveal {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.15;
+        animation: rise 420ms var(--ease-out) both;
+      }
+      .reward-block {
+        margin-top: 4px;
+        padding-top: 4px;
+      }
+      .place-story {
+        margin-top: 4px;
+      }
+      .play-badge {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: linear-gradient(to top, rgba(20, 15, 12, 0.45), transparent 55%);
+        cursor: pointer;
+      }
+      .play-badge[hidden] { display: none; }
+      .play-badge span {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        transform: translate(-50%, -50%);
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: var(--foreground);
+        color: var(--accent-fg);
+        font: 700 16px/1 var(--font-ui), system-ui, sans-serif;
+      }
+      .story-kicker {
+        margin: 18px 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted-fg);
+      }
+      .prose {
+        margin: 0 0 12px;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .btn {
+        appearance: none;
+        width: 100%;
+        min-height: 56px;
+        border: 0;
+        border-radius: 16px;
+        background: var(--accent);
+        color: var(--accent-fg);
+        box-shadow: 4px 5px 0 var(--accent-depth);
+        font: 700 18px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        transition: transform 90ms ease-out, box-shadow 90ms ease-out;
+      }
+      .btn:active {
+        transform: translate(4px, 5px);
+        box-shadow: 0 0 0 var(--accent-depth);
+      }
+      .btn:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .text-btn {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        min-height: 44px;
+        color: var(--stone);
+        font: 600 16px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+      }
+      .text-btn:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+
+      .map-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 48px;
+        padding: 10px var(--page-x) 8px;
+        flex: none;
+      }
+      .map-logo-btn {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 4px 6px 4px 0;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        flex: none;
+        border-radius: 10px;
+      }
+      .map-logo-btn:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .map-logo {
+        height: 28px;
+        width: auto;
+        display: block;
+      }
+      .map-logo-caret {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--stone);
+        opacity: 0.7;
+      }
+      .church-switcher {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+      .church-switcher[hidden] { display: none; }
+      .church-switcher-backdrop {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: rgba(42, 33, 28, 0.45);
+        cursor: pointer;
+      }
+      .church-switcher-panel {
+        position: relative;
+        z-index: 1;
+        margin: 56px var(--page-x) 0;
+        padding: 14px 12px 12px;
+        border-radius: 18px;
+        background: var(--foreground);
+        color: var(--accent-fg);
+        box-shadow: 0 16px 40px rgba(42, 33, 28, 0.35);
+        animation: rise 240ms var(--ease-out) both;
+      }
+      .church-switcher-panel h2 {
+        margin: 0 0 12px;
+        padding: 0 4px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 250, 245, 0.62);
+      }
+      .church-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .church-row {
+        appearance: none;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 48px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 8px;
+        border: 2px solid transparent;
+        border-radius: 14px;
+        background: rgba(255, 250, 245, 0.06);
+        color: inherit;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+      }
+      .church-row.is-on {
+        border-color: var(--accent);
+        background: rgba(184, 92, 56, 0.22);
+      }
+      .church-row:disabled {
+        cursor: default;
+        opacity: 0.55;
+      }
+      .church-row:focus-visible { outline: 2px solid var(--ceremonial); outline-offset: 2px; }
+      .church-row img {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        object-fit: cover;
+        display: block;
+      }
+      .church-row strong {
+        display: block;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      .church-row span {
+        display: block;
+        margin-top: 2px;
+        font-size: 12px;
+        line-height: 1.3;
+        color: rgba(255, 250, 245, 0.62);
+      }
+      .church-row .church-state {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ceremonial);
+      }
+      .church-row.is-on .church-state { color: var(--accent-fg); }
+      .map-bar-end {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+      }
+      .map-currency {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 36px;
+        padding: 0 12px 0 8px;
+        border-radius: 999px;
+        background: rgba(184, 92, 56, 0.1);
+        color: var(--stone);
+        font: 700 15px/1 var(--font-ui), system-ui, sans-serif;
+      }
+      .map-currency-coins {
+        width: 26px;
+        height: 20px;
+        flex: none;
+        display: block;
+      }
+      .map-close {
+        appearance: none;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--foreground);
+        font: 500 26px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        flex: none;
+      }
+      .map-close[hidden] { display: none; }
+      .map-close:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .map-stage {
+        flex: 1;
+        min-height: 0;
+        padding: 0 var(--page-x) 16px;
+        display: flex;
+        flex-direction: column;
+      }
+      .plan {
+        position: relative;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        background: #d8cfc3;
+      }
+      .plan img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      .pin {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        margin: -14px 0 0 -14px;
+        padding: 0;
+        border-radius: 50%;
+        border: 2px solid #fffaf5;
+        display: grid;
+        place-items: center;
+        color: var(--foreground);
+        background: #cfc3b4;
+        font: 700 12px/1 var(--font-ui), system-ui, sans-serif;
+        box-shadow: 0 1px 2px rgba(42, 33, 28, 0.18);
+        appearance: none;
+      }
+      button.pin { cursor: pointer; }
+      button.pin:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      button.pin:active { transform: scale(0.96); }
+      .pin-done {
+        background: var(--success);
+        color: var(--accent-fg);
+      }
+      .pin-active {
+        background: var(--accent);
+        color: var(--accent-fg);
+        z-index: 2;
+        box-shadow: 0 0 0 4px rgba(184, 92, 56, 0.28);
+      }
+
+      .handoff {
+        padding: 0;
+      }
+      .handoff-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 4px var(--page-x) 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .handoff-body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .handoff-title[hidden] { display: none; }
+      .handoff-walk {
+        margin: 0;
+        font-family: var(--font-body), Georgia, serif;
+        font-size: 16px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .handoff-map {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 280 / 360;
+        border-radius: 18px;
+        overflow: hidden;
+        background: #d8cfc3;
+        flex: 1;
+        min-height: 220px;
+      }
+      .handoff-map > img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+      }
+      .handoff-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .handoff-pins {
+        position: absolute;
+        inset: 0;
+      }
+      .handoff-pin {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        margin: -15px 0 0 -15px;
+        border-radius: 50%;
+        border: 3px solid var(--surface);
+        display: grid;
+        place-items: center;
+        font: 700 12px/1 var(--font-ui), system-ui, sans-serif;
+        color: var(--accent-fg);
+        z-index: 2;
+        appearance: none;
+        padding: 0;
+        cursor: default;
+      }
+      .handoff-pin.is-from {
+        background: var(--success);
+        pointer-events: none;
+      }
+      .handoff-pin.is-next {
+        background: var(--accent);
+        box-shadow: 0 0 0 6px rgba(184, 92, 56, 0.28);
+        cursor: pointer;
+      }
+      .handoff-pin.is-next::after {
+        content: "";
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 2px solid var(--accent);
+        animation: ping 1.6s var(--ease-out) infinite;
+        pointer-events: none;
+      }
+      .handoff-pin.is-next:focus-visible {
+        outline: 2px solid var(--foreground);
+        outline-offset: 3px;
+      }
+      .handoff-dock {
+        flex: none;
+        padding: 10px var(--page-x) 16px;
+        background: var(--background);
+      }
+
+      .scan {
+        background: #140f0c;
+        color: var(--accent-fg);
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        text-align: center;
+        padding: 28px;
+      }
+      .finder {
+        width: min(240px, 70%);
+        aspect-ratio: 1;
+        position: relative;
+      }
+      .finder span {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        border: 3px solid var(--ceremonial);
+      }
+      .finder span:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+      .finder span:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+      .finder span:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+      .finder span:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+      .scan p {
+        margin: 0;
+        max-width: 18rem;
+        font-size: 18px;
+        line-height: 1.35;
+      }
+      .scan .found {
+        color: var(--ceremonial);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 13px;
+      }
+
+      .gate {
+        padding: 0;
+      }
+      .gate-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0 0 12px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .gate-hero {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .gate-hero img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+      .gate-copy {
+        padding: 16px var(--page-x) 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .gate-kicker {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted-fg);
+      }
+      .gate-title {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+      .gate-lede {
+        margin: 0;
+        font-family: var(--font-body), Georgia, serif;
+        font-size: 16px;
+        line-height: 1.4;
+        color: var(--foreground);
+      }
+      .gate-form {
+        margin-top: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .gate-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .gate-field > span {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted-fg);
+      }
+      .gate-field-box {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+      .gate-field-box:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.25);
+      }
+      .gate-field-box input {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--foreground);
+        font: 600 15px/1.2 var(--font-ui), system-ui, sans-serif;
+        outline: none;
+      }
+      .gate-help {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--muted-fg);
+      }
+      .gate-error {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--danger);
+      }
+      .gate-error[hidden] { display: none; }
+      .gate-price {
+        margin: 4px 0 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 56px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .gate-price-rule {
+        display: block;
+        width: 64px;
+        height: 1px;
+        margin-top: 12px;
+        background: var(--ceremonial);
+      }
+      .gate-dock {
+        flex: none;
+        padding: 10px var(--page-x) 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .gate-back {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        min-height: 44px;
+        color: var(--muted-fg);
+        font: 600 14px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+      }
+      .gate-back:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+
+      .finish {
+        padding: 0;
+      }
+      .finish-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0 0 18px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .finish-hero {
+        width: 100%;
+        aspect-ratio: 2 / 1;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .finish-hero img {
+        width: 100%;
+        height: 140%;
+        margin-top: -20%;
+        display: block;
+        object-fit: cover;
+        object-position: center 35%;
+      }
+      .finish-copy {
+        padding: 18px var(--page-x) 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .finish-copy h1 {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1.12;
+      }
+      .finish-copy p {
+        margin: 0;
+        font-family: var(--font-body), Georgia, serif;
+        font-size: 16px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .finish-actions {
+        padding: 18px var(--page-x) 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Shell: Places / Walk / You (Duolingo structure, cathedral tone) */
+      .shell-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 48px;
+        padding: 12px var(--page-x) 8px;
+        flex: none;
+      }
+      .shell-top[hidden] { display: none; }
+      .shell-brand {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .shell-status {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted-fg);
+        text-align: right;
+      }
+      .shell-status strong {
+        display: block;
+        margin-top: 2px;
+        color: var(--stone);
+        letter-spacing: 0.02em;
+        text-transform: none;
+        font-size: 13px;
+      }
+
+      .places-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 4px var(--page-x) 12px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .places-body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .places-lead {
+        margin: 0 0 14px;
+        font-size: 15px;
+        line-height: 1.35;
+        color: var(--muted-fg);
+      }
+      .walk-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .walk-row {
+        appearance: none;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 10px;
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+      }
+      .walk-row:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .walk-row:disabled {
+        cursor: default;
+        opacity: 0.72;
+      }
+      .walk-row.is-active {
+        border-color: var(--accent);
+      }
+      .walk-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .walk-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .walk-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+      .walk-meta strong {
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      .walk-meta span {
+        font-size: 13px;
+        line-height: 1.3;
+        color: var(--muted-fg);
+      }
+      .walk-meta .walk-cta {
+        margin-top: 2px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .walk-row:disabled .walk-cta { color: var(--muted); }
+
+      .you-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0 0 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .you-body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .you-banner {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+        background: #f3c9b4;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+      .you-banner img {
+        width: auto;
+        height: 88%;
+        max-width: 58%;
+        display: block;
+        object-fit: contain;
+        object-position: center bottom;
+      }
+      .you-identity {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        padding: 14px var(--page-x) 4px;
+      }
+      .you-name {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 26px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      .you-section {
+        padding: 18px var(--page-x) 0;
+      }
+      .you-section h2 {
+        margin: 0 0 12px;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      .you-progress-block {
+        margin-top: 0;
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+      .you-progress-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .you-progress-thumb img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center 40%;
+      }
+      .you-progress-copy {
+        min-width: 0;
+      }
+      .you-progress-meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .you-progress-meta strong {
+        font-family: var(--font-ui), system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--foreground);
+      }
+      .you-progress-meta span {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted-fg);
+      }
+      .you-progress {
+        display: block;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--stone-light);
+        overflow: hidden;
+      }
+      .you-progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+        width: 0%;
+        transition: width 320ms var(--ease-out);
+      }
+      .you-account {
+        margin-top: 8px;
+      }
+      .you-account .btn {
+        margin-top: 4px;
+      }
+      .you-account-note {
+        margin: 10px 0 0;
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--muted-fg);
+        text-align: center;
+      }
+
+      /* Story / place reading stays serif */
+      .learn-title,
+      .reveal,
+      .home-credit span,
+      .parish-section h2,
+      .idea-copy strong,
+      .you-name,
+      .you-section h2,
+      .handoff-title,
+      .gate-title,
+      .gate-price,
+      .finish-copy h1,
+      .count {
+        font-family: var(--font-display), Georgia, serif;
+      }
+      .learn-text,
+      .prose,
+      .quest-action,
+      .quest-question,
+      .home-line,
+      .teach-note,
+      .parish-section > p,
+      .idea-copy span,
+      .you-account-note,
+      .handoff-walk,
+      .gate-lede,
+      .finish-copy p {
+        font-family: var(--font-body), Georgia, serif;
+      }
+
+
+      .parish-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0 0 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .parish-body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+      .parish-hero {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 2 / 1;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .parish-hero img {
+        width: 100%;
+        height: 140%;
+        margin-top: -20%;
+        display: block;
+        object-fit: cover;
+        object-position: center 35%;
+      }
+      .parish-section {
+        padding: 16px var(--page-x) 0;
+      }
+      .parish-section + .parish-section {
+        margin-top: 28px;
+        padding-top: 0;
+      }
+      .parish-section h2 {
+        margin: 0;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 26px;
+        font-weight: 600;
+        line-height: 1.12;
+      }
+      .parish-section > p {
+        margin: 6px 0 0;
+        font-size: 15px;
+        line-height: 1.4;
+        color: var(--muted-fg);
+      }
+      .parish-prize[hidden],
+      .parish-hero[hidden] { display: none; }
+      .gift-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin: 14px 0 10px;
+      }
+      .gift-amt {
+        appearance: none;
+        min-height: 44px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--foreground);
+        font: 700 14px/1 var(--font-ui), system-ui, sans-serif;
+        cursor: pointer;
+        transition: transform 90ms ease-out, background 180ms var(--ease-out), color 180ms var(--ease-out);
+      }
+      .gift-amt.is-on {
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+      .gift-amt:active { transform: scale(0.97); }
+      .gift-amt:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .gift-field {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 48px;
+        margin: 0 0 10px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+      }
+      .gift-field:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.25);
+      }
+      .gift-field-prefix {
+        font: 700 15px/1 var(--font-ui), system-ui, sans-serif;
+        color: var(--muted-fg);
+      }
+      .gift-field input {
+        appearance: none;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--foreground);
+        font: 700 15px/1 var(--font-ui), system-ui, sans-serif;
+        outline: none;
+      }
+      .gift-hint {
+        margin: -4px 0 10px;
+        font-size: 12px;
+        line-height: 1.3;
+        color: var(--danger);
+      }
+      .gift-hint[hidden] { display: none; }
+      .idea-list {
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .idea-row {
+        appearance: none;
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+      }
+      .idea-row:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .idea-thumb {
+        flex: none;
+        width: 72px;
+        height: 72px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+      .idea-thumb img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+      .idea-copy {
+        min-width: 0;
+        padding-top: 2px;
+      }
+      .idea-copy strong {
+        display: block;
+        font-family: var(--font-display), Georgia, serif;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--foreground);
+      }
+      .idea-copy span {
+        display: block;
+        margin-top: 4px;
+        font-size: 14px;
+        line-height: 1.35;
+        color: var(--muted-fg);
+      }
+
+      .tabbar {
+        position: relative;
+        flex: none;
+        z-index: 6;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        padding: 8px var(--page-x) calc(10px + env(safe-area-inset-bottom, 0px));
+        background: var(--background);
+      }
+      .tabbar[hidden] { display: none; }
+      .tab {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        min-height: 58px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: var(--muted-fg);
+        font: 700 13px/1.1 var(--font-ui), system-ui, sans-serif;
+        letter-spacing: 0.01em;
+        text-transform: none;
+        cursor: pointer;
+        border-radius: 12px;
+      }
+      .tab-icon {
+        width: 40px;
+        height: 40px;
+        display: block;
+        object-fit: contain;
+        opacity: 0.55;
+        transform: scale(0.96);
+        transition: opacity 120ms ease, transform 120ms ease;
+      }
+      .tab.is-on {
+        color: var(--accent);
+      }
+      .tab.is-on .tab-icon {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .tab:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+
+      .place-back {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        padding: 0;
+        color: var(--stone);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        flex: none;
+        border-radius: 12px;
+      }
+      .place-back svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+      }
+      .place-back:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+      .place-back:active { transform: scale(0.96); }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+      }
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes ping {
+        0% { transform: scale(0.85); opacity: 0.8; }
+        100% { transform: scale(1.35); opacity: 0; }
+      }
+      @keyframes correct-celebrate-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes correct-celebrate-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      @keyframes correct-sticker-in {
+        0% { opacity: 0; transform: rotate(-8deg) scale(0.35); }
+        70% { opacity: 1; transform: rotate(-2deg) scale(1.08); }
+        100% { opacity: 1; transform: rotate(-3deg) scale(1); }
+      }
+      @keyframes correct-spark-in {
+        0% { opacity: 0; transform: scale(0) rotate(0deg); }
+        60% { opacity: 1; transform: scale(1.15) rotate(12deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 12px 0 20px;
+          gap: 10px;
+          justify-content: flex-start;
+        }
+        .proto-head {
+          width: 375px;
+          max-width: calc(100% - 24px);
+        }
+        .device {
+          width: auto;
+          max-width: calc(100% - 24px);
+        }
+        .screen {
+          width: 375px;
+          height: 667px;
+          max-width: 100%;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .choice.is-wrong,
+        .reveal,
+        .intro-stage.is-in,
+        .intro-stage.is-out,
+        .intro-stage.is-pulse,
+        .correct-celebrate,
+        .correct-sticker,
+        .correct-sticker-spark { animation: none; }
+        .correct-sticker { transform: rotate(-3deg); opacity: 1; }
+        .quest-backdrop,
+        .quest-root[data-open="true"] .quest-backdrop,
+        .quest-panel,
+        .quest-root[data-open="true"] .quest-panel {
+          transition: none;
+        }
+        .quest-panel { transform: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="proto-head">
+      <p class="proto-kicker" id="step-label">Step 1. <strong>Walk</strong></p>
+      <button class="replay" type="button" id="replay">Start over</button>
+    </header>
+
+    <div class="device">
+      <div class="screen" id="screen">
+        <button class="map-chip" type="button" id="map-chip" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="10" r="2.2" fill="currentColor" />
+          </svg>
+          <span id="chip-count">1 of 16</span>
+        </button>
+
+        <section class="view home" id="view-home" hidden aria-label="Church poster">
+          <div class="home-media">
+            <video
+              autoplay
+              muted
+              loop
+              playsinline
+              poster="../img/entrance.webp"
+              aria-label="The cathedral entrance"
+            >
+              <source src="../video/entrance.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div class="home-credit">
+            <img
+              src="../img/naga-metropolitan-cathedral.png"
+              width="503"
+              height="868"
+              alt=""
+            />
+            <span>
+              <span>The Naga Metropolitan</span>
+              <span>Cathedral</span>
+            </span>
+          </div>
+          <div class="home-body">
+            <img
+              class="home-brand"
+              src="../brand/lakaw-katedral.png"
+              width="940"
+              height="516"
+              alt="Lakaw Katedral"
+            />
+            <p class="home-line">
+              16 places. Learn each one. Finish for a prize.
+            </p>
+            <p class="home-terms">By continuing, I agree to the <a href="#terms" id="terms-link">terms and conditions</a>.</p>
+          </div>
+          <div class="home-dock">
+            <button class="btn" type="button" id="start-walk">Start the walk</button>
+          </div>
+        </section>
+
+        <section class="view intro" id="view-intro" hidden aria-label="Loading the walk" aria-live="polite">
+          <div class="intro-stage" id="intro-load-stage">
+            <div class="intro-partners">
+              <img
+                class="partner-ryne"
+                src="../brand/ryne-media.webp"
+                width="1024"
+                height="453"
+                alt="Ryne Media"
+              />
+              <img
+                class="partner-bald"
+                src="../brand/bald-puppies.webp"
+                width="559"
+                height="563"
+                alt="Bald Puppies Solutions Inc."
+              />
+            </div>
+            <div class="intro-load">
+              <div class="intro-bar" aria-hidden="true"><span id="intro-bar-fill"></span></div>
+              <p class="intro-percent"><span id="intro-percent">0</span>%</p>
+            </div>
+          </div>
+          <div class="intro-stage" id="intro-welcome-stage" hidden>
+            <p class="intro-welcome-label">Welcome to</p>
+            <img
+              class="intro-brand"
+              src="../brand/lakaw-katedral.png"
+              width="940"
+              height="516"
+              alt="Lakaw Katedral"
+            />
+          </div>
+        </section>
+
+        <section class="view" id="view-place" hidden aria-label="Place">
+          <div class="topbar">
+            <button class="place-back" type="button" id="place-back" aria-label="Back to walk">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 6 9 12l6 6" />
+              </svg>
+            </button>
+            <p class="count" id="place-name">Entrance</p>
+          </div>
+
+          <div class="learn-body" id="place-scroll">
+            <div class="teach-block" id="teach-block">
+              <p class="beat-kicker" id="learn-kicker" hidden>Learn</p>
+              <div class="teach-media landscape" id="teach-media">
+                <video id="teach-clip" playsinline preload="auto" muted loop hidden></video>
+                <img id="teach-still" alt="" hidden />
+                <button class="play-badge" type="button" id="teach-play" hidden>
+                  <span>Sound</span>
+                </button>
+              </div>
+              <h1 class="learn-title" id="learn-title" hidden></h1>
+              <div id="learn-copy"></div>
+              <p class="teach-note" id="teach-note" hidden></p>
+            </div>
+
+            <div class="reward-block" id="reward-block" hidden>
+              <p class="reveal" id="reveal"></p>
+            </div>
+
+            <div class="place-story" id="place-story">
+              <h2 class="story-kicker">The story</h2>
+              <div id="story-body"></div>
+            </div>
+          </div>
+
+          <div class="learn-dock" id="learn-dock">
+            <button class="btn" type="button" id="dock-btn">Solve the quest</button>
+          </div>
+
+          <div class="quest-root" id="quest-root" data-open="false" aria-hidden="true">
+            <button class="quest-backdrop" type="button" id="quest-backdrop" aria-label="Close quest"></button>
+            <div
+              class="quest-panel"
+              id="quest-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="quest-panel-title"
+              tabindex="-1"
+            >
+              <div class="quest-panel-head">
+                <h2 class="quest-panel-title" id="quest-panel-title">Your quest</h2>
+                <button class="quest-close" type="button" id="quest-close" aria-label="Close">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </div>
+              <p class="quest-action" id="quest-action"></p>
+              <p class="quest-question" id="quest-question"></p>
+              <p class="quest-feedback" id="quest-feedback" role="status"></p>
+              <div class="quest-answer" id="quest-answer"></div>
+              <button class="btn check-btn" type="button" id="check-btn" disabled>Check</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="view has-tabs" id="view-map" hidden aria-label="Walk map">
+          <div class="map-bar">
+            <button class="map-logo-btn" type="button" id="church-switch-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="church-switcher" title="Switch church">
+              <img
+                class="map-logo"
+                src="../brand/lakaw-katedral.png"
+                width="940"
+                height="516"
+                alt=""
+              />
+              <span class="map-logo-caret" aria-hidden="true"></span>
+              <span class="sr-only">Switch church</span>
+            </button>
+            <div class="map-bar-end">
+              <div class="map-currency" title="Coins placeholder" aria-label="Coins, placeholder">
+                <svg class="map-currency-coins" viewBox="0 0 26 20" aria-hidden="true">
+                  <ellipse cx="9" cy="12" rx="7.2" ry="6.2" fill="#b8922e" />
+                  <ellipse cx="9" cy="11" rx="7.2" ry="6.2" fill="#e0b84a" stroke="#8a6a1e" stroke-width="1" />
+                  <ellipse cx="9" cy="11" rx="4.2" ry="3.6" fill="none" stroke="#c4922e" stroke-width="1" />
+                  <ellipse cx="17" cy="10" rx="7.2" ry="6.2" fill="#b8922e" />
+                  <ellipse cx="17" cy="9" rx="7.2" ry="6.2" fill="#f0d48a" stroke="#8a6a1e" stroke-width="1" />
+                  <ellipse cx="17" cy="9" rx="4.2" ry="3.6" fill="none" stroke="#c4922e" stroke-width="1" />
+                </svg>
+                <span id="map-points">0</span>
+              </div>
+              <button class="map-close" type="button" id="map-close" hidden aria-label="Back">×</button>
+            </div>
+          </div>
+          <div class="map-stage">
+            <div class="plan">
+              <img
+                src="../img/cathedral-compound.webp"
+                alt="Map of the cathedral grounds."
+              />
+              <div id="pins"></div>
+            </div>
+          </div>
+
+          <div class="church-switcher" id="church-switcher" hidden>
+            <button class="church-switcher-backdrop" type="button" id="church-switcher-backdrop" aria-label="Close church list"></button>
+            <div
+              class="church-switcher-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="church-switcher-title"
+            >
+              <h2 id="church-switcher-title">Your walks</h2>
+              <ul class="church-list">
+                <li>
+                  <button class="church-row is-on" type="button" id="church-naga" data-church="naga">
+                    <img src="../img/home-facade.webp" alt="" />
+                    <span>
+                      <strong>Naga Cathedral</strong>
+                      <span>16 places · Naga City</span>
+                    </span>
+                    <span class="church-state" id="naga-cta">On</span>
+                  </button>
+                </li>
+                <li>
+                  <button class="church-row" type="button" disabled aria-disabled="true">
+                    <img src="../img/plaza-dome.webp" alt="" />
+                    <span>
+                      <strong>Peñafrancia Basilica</strong>
+                      <span>Coming soon · Naga City</span>
+                    </span>
+                    <span class="church-state">Soon</span>
+                  </button>
+                </li>
+                <li>
+                  <button class="church-row" type="button" disabled aria-disabled="true">
+                    <img src="../img/porta-mariae.webp" alt="" />
+                    <span>
+                      <strong>San Francisco Church</strong>
+                      <span>Coming soon · Naga City</span>
+                    </span>
+                    <span class="church-state">Soon</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="view onboard" id="view-onboard" hidden aria-label="Onboarding">
+          <div class="onboard-body">
+            <h1 class="onboard-title">Start at the entrance</h1>
+            <p class="onboard-line">
+              Go to the front door of the Cathedral, then scan the QR code next to it.
+            </p>
+            <div class="onboard-map">
+              <img
+                src="../img/cathedral-compound.webp"
+                alt="Map of the cathedral grounds."
+              />
+              <div class="onboard-pin" aria-hidden="true">1</div>
+              <div class="onboard-callout">
+                <div class="onboard-callout-frame">
+                  <figure>
+                    <img
+                      src="../img/entrance.webp"
+                      alt="The Cathedral Entrance"
+                    />
+                  </figure>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="onboard-dock">
+            <button class="btn" type="button" id="onboard-scan">Scan the entrance QR</button>
+          </div>
+        </section>
+
+        <section class="view handoff" id="view-handoff" hidden aria-label="Next place">
+          <div class="topbar">
+            <button class="place-back" type="button" id="handoff-back" aria-label="Back">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 6 9 12l6 6" />
+              </svg>
+            </button>
+            <p class="count" id="handoff-map-label">Inside the Cathedral</p>
+          </div>
+          <div class="handoff-body">
+            <h1 class="handoff-title" id="handoff-title" hidden>Mural</h1>
+            <p class="handoff-walk" id="handoff-walk"></p>
+            <div class="handoff-map" id="handoff-map">
+              <img id="handoff-map-img" src="../img/cathedral-interior.webp" alt="Inside the Cathedral" />
+              <svg class="handoff-svg" viewBox="0 0 280 360" aria-hidden="true">
+                <polyline
+                  id="handoff-route-glow"
+                  fill="none"
+                  stroke="var(--surface)"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  opacity="0.82"
+                ></polyline>
+                <polyline
+                  id="handoff-route"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-dasharray="5 7"
+                  opacity="0.85"
+                ></polyline>
+              </svg>
+              <div class="handoff-pins" id="handoff-pins"></div>
+            </div>
+          </div>
+          <div class="handoff-dock">
+            <button class="btn" type="button" id="handoff-scan">Scan QR</button>
+          </div>
+        </section>
+
+        <section class="view scan" id="view-scan" hidden aria-label="Scan">
+          <div class="finder" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <p class="found" id="scan-status">Scanning</p>
+          <p id="scan-line"></p>
+        </section>
+
+        <section class="view has-tabs" id="view-parish" hidden aria-label="Parish">
+          <div class="shell-top">
+            <p class="shell-brand">Parish</p>
+            <p class="shell-status">Naga Cathedral</p>
+          </div>
+          <div class="parish-body">
+            <div class="parish-hero" id="parish-hero">
+              <img
+                id="parish-hero-img"
+                src="../img/give-people.webp"
+                alt=""
+              />
+            </div>
+
+            <section class="parish-section parish-prize" id="parish-prize" hidden>
+              <h2>Your surprise prize</h2>
+              <p>Ask at the parish office for the small prize the church has for you.</p>
+            </section>
+
+            <section class="parish-section" aria-labelledby="parish-gift-heading">
+              <h2 id="parish-gift-heading">Help the parish</h2>
+              <p>If you liked this walk, a small gift helps keep it going.</p>
+              <div class="gift-row" role="group" aria-label="Gift amount">
+                <button class="gift-amt is-on" type="button" data-amount="20">₱20</button>
+                <button class="gift-amt" type="button" data-amount="50">₱50</button>
+                <button class="gift-amt" type="button" data-amount="100">₱100</button>
+                <button class="gift-amt" type="button" data-amount="500">₱500</button>
+              </div>
+              <label class="gift-field">
+                <span class="gift-field-prefix">₱</span>
+                <input
+                  id="gift-input"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  value="20"
+                  aria-label="Gift amount"
+                />
+              </label>
+              <p class="gift-hint" id="gift-hint" hidden>Minimum gift is ₱20.</p>
+              <button class="btn" type="button" id="gift-btn">Give ₱20</button>
+            </section>
+
+            <section class="parish-section" aria-labelledby="parish-ideas-heading">
+              <h2 id="parish-ideas-heading">While you are here</h2>
+              <ul class="idea-list">
+                <li>
+                  <button class="idea-row" type="button">
+                    <span class="idea-thumb">
+                      <img src="../img/prayer.webp" alt="" style="object-position: center 30%" />
+                    </span>
+                    <span class="idea-copy">
+                      <strong>Offer a Mass</strong>
+                      <span>Ask at the parish office.</span>
+                    </span>
+                  </button>
+                </li>
+                <li>
+                  <button class="idea-row" type="button">
+                    <span class="idea-thumb">
+                      <img src="../img/bell-sagrada-familia.webp" alt="" />
+                    </span>
+                    <span class="idea-copy">
+                      <strong>Holy Family Chapel</strong>
+                      <span>A quieter place to pray.</span>
+                    </span>
+                  </button>
+                </li>
+                <li>
+                  <button class="idea-row" type="button">
+                    <span class="idea-thumb">
+                      <img src="../img/porta-mariae-museum.webp" alt="" />
+                    </span>
+                    <span class="idea-copy">
+                      <strong>Souvenir shop</strong>
+                      <span>Small keepsakes when open.</span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="view has-tabs" id="view-you" hidden aria-label="Profile">
+          <div class="you-body">
+            <div class="you-banner">
+              <img
+                src="../img/bernardo-avatar.png"
+                alt="Bernardo de la Concepción"
+              />
+            </div>
+            <div class="you-identity">
+              <h1 class="you-name">Bernardo de la Concepción</h1>
+            </div>
+
+            <section class="you-section" aria-labelledby="you-progress-heading">
+              <h2 id="you-progress-heading">Your progress</h2>
+              <div class="you-progress-block">
+                <div class="you-progress-thumb">
+                  <img src="../img/entrance.webp" alt="" />
+                </div>
+                <div class="you-progress-copy">
+                  <div class="you-progress-meta">
+                    <strong>Naga Cathedral</strong>
+                    <span id="you-walk-status">0 of 16</span>
+                  </div>
+                  <div class="you-progress" aria-hidden="true">
+                    <span id="you-walk-bar"></span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="you-section you-account">
+              <button class="btn" type="button" id="you-login">Log in to save</button>
+              <p class="you-account-note">Log in to save your progress on your account.</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="view gate" id="view-login" hidden aria-label="Log in">
+          <div class="gate-body">
+            <div class="gate-hero">
+              <img src="../img/statue.webp" alt="The Cathedra" />
+            </div>
+            <div class="gate-copy">
+              <p class="gate-kicker">The free walk</p>
+              <h1 class="gate-title">Continue the walk</h1>
+              <p class="gate-lede">
+                The first two places are free in this prototype. Log in to open the rest. We will remember you on this phone.
+              </p>
+              <form class="gate-form" id="login-form">
+                <label class="gate-field">
+                  <span>Email</span>
+                  <span class="gate-field-box">
+                    <input id="login-email" type="email" autocomplete="email" inputmode="email" required />
+                  </span>
+                </label>
+                <label class="gate-field">
+                  <span>Password</span>
+                  <span class="gate-field-box">
+                    <input id="login-password" type="password" autocomplete="current-password" minlength="8" required />
+                  </span>
+                  <p class="gate-help">Use at least 8 characters.</p>
+                </label>
+                <p class="gate-error" id="login-error" hidden></p>
+              </form>
+            </div>
+          </div>
+          <div class="gate-dock">
+            <button class="btn" type="submit" form="login-form" id="login-submit">Log in</button>
+            <button class="gate-back" type="button" id="login-back">Back to the walk</button>
+          </div>
+        </section>
+
+        <section class="view gate" id="view-pay" hidden aria-label="Paywall">
+          <div class="gate-body">
+            <div class="gate-hero">
+              <img src="../img/cathedral-interior.webp" alt="Inside Naga Metropolitan Cathedral" />
+            </div>
+            <div class="gate-copy">
+              <p class="gate-kicker">The rest of the walk</p>
+              <h1 class="gate-title">Keep walking</h1>
+              <p class="gate-lede">
+                Unlock the next place to finish this short prototype walk.
+              </p>
+              <p class="gate-price">₱50</p>
+              <span class="gate-price-rule" aria-hidden="true"></span>
+              <p class="gate-help" id="pay-account">Saved on this phone.</p>
+            </div>
+          </div>
+          <div class="gate-dock">
+            <button class="btn" type="button" id="pay-submit">Pay ₱50</button>
+            <button class="gate-back" type="button" id="pay-back">Back to the walk</button>
+          </div>
+        </section>
+
+        <section class="view finish" id="view-finish" hidden aria-label="Finish">
+          <div class="finish-body">
+            <div class="finish-hero">
+              <img
+                src="../img/finish-prize-side-pilgrim.jpg"
+                alt="A pilgrim at the parish side office holding a small prize"
+              />
+            </div>
+            <div class="finish-copy">
+              <h1>You finished the walk</h1>
+              <p>
+                Ask at the parish office for the small surprise prize. Then help the parish if you like.
+              </p>
+            </div>
+            <div class="finish-actions">
+              <button class="btn" type="button" id="finish-to-parish">Help the parish</button>
+              <button class="text-btn" type="button" id="finish-replay">Start over</button>
+            </div>
+          </div>
+        </section>
+
+        <nav class="tabbar" id="tabbar" aria-label="App">
+          <button class="tab is-on" type="button" data-tab="walk" id="tab-walk">
+            <img class="tab-icon" src="../icons/tab-walk.png" width="256" height="256" alt="" />
+            Walk
+          </button>
+          <button class="tab" type="button" data-tab="parish" id="tab-parish">
+            <img class="tab-icon" src="../icons/tab-parish.png" width="256" height="256" alt="" />
+            Parish
+          </button>
+          <button class="tab" type="button" data-tab="you" id="tab-you">
+            <img class="tab-icon" src="../icons/tab-you.png" width="256" height="256" alt="" />
+            Profile
+          </button>
+        </nav>
+
+        <div class="correct-celebrate" id="correct-celebrate" hidden role="status" aria-live="polite">
+          <div class="correct-celebrate-backdrop" aria-hidden="true"></div>
+          <canvas class="correct-confetti" id="correct-confetti" aria-hidden="true"></canvas>
+          <p class="correct-sticker">
+            Correct
+            <span class="correct-sticker-spark correct-sticker-spark--a" aria-hidden="true"></span>
+            <span class="correct-sticker-spark correct-sticker-spark--b" aria-hidden="true"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const places = [
+        {
+          order: 1,
+          short: "Entrance",
+          title: "The Cathedral Entrance",
+          // First viewport = level: title, demo clip, look-and-answer. Story waits.
+          teach: {
+            kind: "watch",
+            title: "Meet the door",
+            lines: [],
+            video: "../video/cathedral.mp4",
+            frame: "landscape",
+          },
+          look: "Look above the main door.",
+          action: "Stand at the main door. Ask Saint John and Saint Peter Baptist to walk with you.",
+          question: "Finish the line from what you see and read.",
+          questType: "cloze",
+          cloze: {
+            before: "Above the crown is a",
+            after: ".",
+            answer: "Bird",
+            chips: ["Bird", "Angel", "Lion", "Lamb"],
+          },
+          answer: "Bird",
+          image: "../img/entrance.webp",
+          imageAlt: "The main door of Naga Metropolitan Cathedral, with the coat of arms above it.",
+          imagePosition: "center 42%",
+          video: "../video/cathedral.mp4",
+          frame: "landscape",
+          reveal: "That bird is a dove, a sign of the Holy Spirit. It welcomes you as you enter the house of God.",
+          more: [
+            "This door has welcomed the faithful of Bicol for centuries. Above it is a gold coat of arms, and a crown above that coat of arms.",
+            "The present church was begun in 1808 and finished in 1843. It has strong stone walls, twin towers, and a dome. It was restored and rededicated in 1988.",
+            "The diocese was founded in 1595. This is the mother church of the Archdiocese of Cáceres.",
+            "When you stand at this door, you stand where generations of Bicolano faithful have entered to pray, give thanks, and ask for help.",
+          ],
+          nudges: [
+            "Not quite. Look again.",
+            "Try once more. Check above the crown.",
+            "It is the bird.",
+          ],
+          // Compound overview coords (viewBox 280×360).
+          pin: { x: 200, y: 178 },
+          areaId: "nave",
+          areaPin: { x: 140, y: 336 },
+          nextPin: { x: 198, y: 128 },
+          route: "200,178 200,128",
+          areaRoute: "140,336 104,298",
+          walk: "Walk in through the main doors. Find the angels that hold the holy water. The code is behind those angels.",
+          scanLine: "Point at the code behind the angels.",
+        },
+        {
+          order: 2,
+          short: "Mural",
+          title: "The Alcomendas Mural",
+          // First viewport = level: title, still, look-and-answer. Story waits.
+          teach: {
+            kind: "read",
+            title: "A wall that tells a story",
+            lines: [],
+            image: "../img/murals.webp",
+            imageAlt: "The Alcomendas mural inside the cathedral.",
+          },
+          look: "Look along the mural.",
+          action: "Stand before the mural. Give thanks that you are part of this story.",
+          question: "How many crosses can you count?",
+          questType: "count",
+          count: { min: 1, max: 6, answer: 3 },
+          // Story sequence uses the same sheet: set questType to "order"
+          orderItems: [
+            "Life before the Spanish came",
+            "Years of faith and mission",
+            "Life of the people today",
+          ],
+          answer: 3,
+          image: "../img/murals.webp",
+          imageAlt: "The Alcomendas mural inside the cathedral.",
+          imagePosition: "center",
+          video: "../video/entrance.mp4",
+          frame: "portrait",
+          reveal: "Those crosses mark Christ on this wall, and the faith the missionaries brought to Bicol.",
+          more: [
+            "This mural by Bicolano artist Raul Alcomendas tells the story of Naga and Bicol: life before the Spanish came, the years of faith and mission, and the life of the people today.",
+            "It also tells how the Gospel came to Bicol: the missionaries who came, the communities they served, and the generations who passed the faith on.",
+            "Sacred and everyday stories sit side by side here: community, local life, and faith close to home.",
+          ],
+          nudges: [
+            "Not quite. Look along the wall again.",
+            "Try once more. Count only the crosses.",
+            "There are three.",
+          ],
+          pin: { x: 198, y: 128 },
+          areaId: "nave",
+          areaPin: { x: 104, y: 298 },
+          nextPin: { x: 200, y: 58 },
+          route: "198,128 200,128 200,58",
+          areaRoute: "104,298 140,78",
+          walk: "Keep walking toward the sanctuary, the area around the altar. Find the Archbishop's Chair.",
+          scanLine: "Point at the code by the Archbishop's Chair.",
+        },
+        {
+          order: 3,
+          short: "Cathedra",
+          title: "The Cathedra",
+          teach: {
+            kind: "read",
+            title: "The Archbishop's Chair",
+            lines: [],
+            image: "../img/statue.webp",
+            imageAlt: "The Cathedra inside the cathedral.",
+          },
+          look: "Look at the Cathedra. Find the cloth on the seat.",
+          action: "Find the Archbishop's Chair. Pause. Give thanks for the shepherds who care for God's people.",
+          question: "Red on the Cathedra marks which of these?",
+          questType: "select_all",
+          selectAll: {
+            options: ["The Holy Spirit", "Love", "The martyrs", "The Spanish crown"],
+            answers: ["The Holy Spirit", "Love", "The martyrs"],
+          },
+          answer: ["The Holy Spirit", "Love", "The martyrs"],
+          image: "../img/statue.webp",
+          imageAlt: "The Cathedra inside the cathedral.",
+          imagePosition: "center 30%",
+          video: "../video/entrance.mp4",
+          frame: "portrait",
+          reveal: "Red is the color of the Holy Spirit, of love, and of the martyrs. On the Cathedra it marks courage and care.",
+          more: [
+            "A cathedral takes its name from the cathedra, the Archbishop's Chair. Because this chair is here, this church is a cathedral: the mother church of the Archdiocese of Cáceres.",
+            "The cloth on the seat is red. Here red marks the Holy Spirit, love, and the martyrs: courage and care for God's people.",
+            "From this chair the Archbishop teaches and shepherds the people of Bicol. When you pause here, remember the shepherds who have guided this Church, and the faithful who gather under their care.",
+          ],
+          nudges: [
+            "Not quite. Red marks more than one meaning here.",
+            "Try once more. Think of Spirit, love, and the martyrs.",
+            "Select the Holy Spirit, love, and the martyrs.",
+          ],
+          pin: { x: 200, y: 58 },
+          areaId: "nave",
+          areaPin: { x: 140, y: 78 },
+          nextPin: { x: 162, y: 68 },
+          route: "200,58 200,68 162,68",
+          areaRoute: "",
+          walk: "You finished the prototype walk.",
+          scanLine: "Point at the code by the Archbishop's Chair.",
+        },
+      ];
+
+      const AREA_MAPS = {
+        nave: {
+          id: "nave",
+          title: "Inside the Cathedral",
+          image: "../img/cathedral-interior.webp",
+        },
+      };
+
+      const check =
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.2 6.4 11.5 13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+      // Free-browse board (16 pins). Places 1–3 have full content in this prototype.
+      const mapBoard = [
+        { order: 1, title: "The Cathedral Entrance", pin: { x: 200, y: 178 }, placeIndex: 0 },
+        { order: 2, title: "The Alcomendas Mural", pin: { x: 198, y: 128 }, placeIndex: 1 },
+        { order: 3, title: "The Cathedra", pin: { x: 200, y: 58 }, placeIndex: 2 },
+        { order: 4, title: "North aisle", pin: { x: 155, y: 48 }, placeIndex: null },
+        { order: 5, title: "West chapel", pin: { x: 118, y: 48 }, placeIndex: null },
+        { order: 6, title: "Baptistry", pin: { x: 82, y: 55 }, placeIndex: null },
+        { order: 7, title: "Side door", pin: { x: 55, y: 78 }, placeIndex: null },
+        { order: 8, title: "Cloister walk", pin: { x: 48, y: 120 }, placeIndex: null },
+        { order: 9, title: "Garden gate", pin: { x: 48, y: 162 }, placeIndex: null },
+        { order: 10, title: "Candle garden", pin: { x: 52, y: 205 }, placeIndex: null },
+        { order: 11, title: "Bells", pin: { x: 70, y: 245 }, placeIndex: null },
+        { order: 12, title: "Plaza edge", pin: { x: 110, y: 278 }, placeIndex: null },
+        { order: 13, title: "Dome view", pin: { x: 155, y: 295 }, placeIndex: null },
+        { order: 14, title: "Porta Mariae", pin: { x: 205, y: 288 }, placeIndex: null },
+        { order: 15, title: "Compound path", pin: { x: 235, y: 248 }, placeIndex: null },
+        { order: 16, title: "Front yard", pin: { x: 228, y: 205 }, placeIndex: null },
+      ];
+
+      let viewing = 0;
+      const solved = new Set();
+      let misses = 0;
+      let locked = false;
+      let selectedAnswer = null;
+      let selectedAnswers = [];
+      let orderState = [];
+      let countValue = 1;
+      let activeQuestType = "choice";
+      const CORRECT_CELEBRATE_MS = 1800;
+      let celebrateTimers = [];
+      let confettiRaf = 0;
+      let generation = 0;
+      let walkStarted = false;
+      let introTimers = [];
+      let introRaf = 0;
+      let mapFromPlace = false;
+      let mapFromHandoff = false;
+      let handoffLevel = "area"; // "area" | "compound"
+      let activeTab = "walk";
+      let visitedMap = false;
+      let selectedBoard = 0;
+      let accountEmail = null;
+      let walkPaid = false;
+      const WALK_PRICE = 50;
+      const PROTO_PLACE_COUNT = places.length;
+
+      const views = {
+        home: document.querySelector("#view-home"),
+        intro: document.querySelector("#view-intro"),
+        onboard: document.querySelector("#view-onboard"),
+        place: document.querySelector("#view-place"),
+        handoff: document.querySelector("#view-handoff"),
+        map: document.querySelector("#view-map"),
+        parish: document.querySelector("#view-parish"),
+        you: document.querySelector("#view-you"),
+        scan: document.querySelector("#view-scan"),
+        login: document.querySelector("#view-login"),
+        pay: document.querySelector("#view-pay"),
+        finish: document.querySelector("#view-finish"),
+      };
+      const GIFT_MIN = 20;
+      const GIFT_TEMPLATES = [20, 50, 100, 500];
+      let giftAmount = 20;
+      const churchSwitcher = document.querySelector("#church-switcher");
+      const churchSwitchBtn = document.querySelector("#church-switch-btn");
+      const stepLabel = document.querySelector("#step-label");
+      const chip = document.querySelector("#map-chip");
+      const tabbar = document.querySelector("#tabbar");
+      const teachClip = document.querySelector("#teach-clip");
+      const teachStill = document.querySelector("#teach-still");
+      const teachPlay = document.querySelector("#teach-play");
+      const teachMedia = document.querySelector("#teach-media");
+      const teachBlock = document.querySelector("#teach-block");
+      const rewardBlock = document.querySelector("#reward-block");
+      const placeScroll = document.querySelector("#place-scroll");
+      const placeStory = document.querySelector("#place-story");
+      const questRoot = document.querySelector("#quest-root");
+      const questPanel = document.querySelector("#quest-panel");
+      const learnDock = document.querySelector("#learn-dock");
+      const dockBtn = document.querySelector("#dock-btn");
+      const checkBtn = document.querySelector("#check-btn");
+      const correctCelebrate = document.querySelector("#correct-celebrate");
+      const confettiCanvas = document.querySelector("#correct-confetti");
+      const mapClose = document.querySelector("#map-close");
+
+      checkBtn.addEventListener("click", onCheck);
+      document.querySelector("#quest-backdrop").addEventListener("click", closeQuest);
+      document.querySelector("#quest-close").addEventListener("click", closeQuest);
+
+      function poiAt(index) {
+        return places[index];
+      }
+
+      function show(name) {
+        for (const [key, node] of Object.entries(views)) {
+          node.hidden = key !== name;
+        }
+        chip.hidden = name !== "place" && name !== "handoff";
+        const shell = name === "map" || name === "parish" || name === "you";
+        tabbar.hidden = !shell;
+        if (shell) setTab(name === "map" ? "walk" : name);
+        if (name !== "map") closeChurchSwitcher();
+        if (name !== "place") {
+          stopTeachVideo();
+          if (questRoot && questRoot.getAttribute("data-open") === "true") {
+            questRoot.setAttribute("data-open", "false");
+            questRoot.setAttribute("aria-hidden", "true");
+            views.place.classList.remove("is-quest-open");
+          }
+        }
+        if (name !== "handoff" && name !== "map") mapFromHandoff = false;
+        if (name !== "intro") clearIntroTimers();
+        syncShellChrome();
+      }
+
+      function setTab(tab) {
+        activeTab = tab;
+        for (const button of document.querySelectorAll(".tab")) {
+          button.classList.toggle("is-on", button.dataset.tab === tab);
+        }
+      }
+
+      function setStep(step, name) {
+        stepLabel.innerHTML = "Step " + step + ". <strong>" + name + "</strong>";
+      }
+
+      function syncChip(poi) {
+        document.querySelector("#chip-count").textContent = poi.order + " of 16";
+        chip.setAttribute("aria-label", "Open walk map, place " + poi.order + " of 16");
+      }
+
+      function syncShellChrome() {
+        const done = solved.size;
+        const nagaCta = document.querySelector("#naga-cta");
+        if (nagaCta) {
+          if (solved.has(2)) nagaCta.textContent = "Done";
+          else if (walkStarted || done > 0) nagaCta.textContent = "On";
+          else nagaCta.textContent = "On";
+        }
+        const totalPlaces = 16;
+        const walkDone = solved.has(2);
+        const youWalkStatus = document.querySelector("#you-walk-status");
+        const youWalkBar = document.querySelector("#you-walk-bar");
+        const progressPct = Math.min(100, Math.round((done / totalPlaces) * 100));
+        youWalkBar.style.width = progressPct + "%";
+        youWalkStatus.textContent = walkDone
+          ? done + " of " + totalPlaces + " · Done"
+          : done + " of " + totalPlaces;
+        const parishPrize = document.querySelector("#parish-prize");
+        const parishHeroImg = document.querySelector("#parish-hero-img");
+        parishPrize.hidden = !walkDone;
+        if (walkDone) {
+          parishHeroImg.src = "../img/finish-prize-side-pilgrim.jpg";
+          parishHeroImg.alt =
+            "A pilgrim at the parish side office holding a small prize";
+          parishHeroImg.style.objectPosition = "center 35%";
+        } else {
+          parishHeroImg.src = "../img/give-people.webp";
+          parishHeroImg.alt = "People gathered near the cathedral";
+          parishHeroImg.style.objectPosition = "center 40%";
+        }
+      }
+
+      function openChurchSwitcher() {
+        churchSwitcher.hidden = false;
+        churchSwitchBtn.setAttribute("aria-expanded", "true");
+        setStep(1, "Church switch");
+      }
+
+      function closeChurchSwitcher() {
+        if (!churchSwitcher || churchSwitcher.hidden) return;
+        churchSwitcher.hidden = true;
+        churchSwitchBtn.setAttribute("aria-expanded", "false");
+        if (!views.map.hidden) setStep(1, "Walk");
+      }
+
+      function syncMapPoints() {
+        // Placeholder currency: +10 per solved place in this prototype.
+        document.querySelector("#map-points").textContent = String(solved.size * 10);
+      }
+
+      function stopTeachVideo() {
+        teachClip.pause();
+      }
+
+      function showTeachStill(poi) {
+        stopTeachVideo();
+        teachClip.hidden = true;
+        teachPlay.hidden = true;
+        teachStill.hidden = false;
+        teachStill.src = poi.image;
+        teachStill.alt = poi.imageAlt || "";
+        teachStill.style.objectPosition = poi.imagePosition || "center";
+      }
+
+      function showHome() {
+        setStep(1, "Poster");
+        show("home");
+      }
+
+      function showParish() {
+        setStep(1, "Parish");
+        show("parish");
+      }
+
+      function showYou() {
+        setStep(1, "Profile");
+        show("you");
+      }
+
+      function parseGiftAmount(value) {
+        const trimmed = String(value || "").trim();
+        if (!/^[0-9]+(\.[0-9]{1,2})?$/.test(trimmed)) return null;
+        const amount = Number(trimmed);
+        if (!Number.isFinite(amount) || amount < GIFT_MIN) return null;
+        return amount;
+      }
+
+      function formatGiftAmount(amount) {
+        return Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
+      }
+
+      function syncGiftTemplates(amount) {
+        for (const button of document.querySelectorAll(".gift-amt")) {
+          const value = Number(button.dataset.amount);
+          button.classList.toggle("is-on", amount != null && value === amount);
+        }
+      }
+
+      function syncGiftButton() {
+        const btn = document.querySelector("#gift-btn");
+        const hint = document.querySelector("#gift-hint");
+        const valid = giftAmount != null;
+        hint.hidden = valid;
+        btn.disabled = !valid;
+        btn.textContent = valid
+          ? "Give ₱" + formatGiftAmount(giftAmount)
+          : "Give";
+      }
+
+      function setGiftAmount(amount, { syncInput = true } = {}) {
+        giftAmount = amount;
+        if (syncInput && amount != null) {
+          document.querySelector("#gift-input").value = formatGiftAmount(amount);
+        }
+        syncGiftTemplates(amount);
+        syncGiftButton();
+      }
+
+      function clearIntroTimers() {
+        for (const id of introTimers) window.clearTimeout(id);
+        introTimers = [];
+        if (introRaf) cancelAnimationFrame(introRaf);
+        introRaf = 0;
+      }
+
+      function later(ms, fn) {
+        const id = window.setTimeout(fn, ms);
+        introTimers.push(id);
+        return id;
+      }
+
+      function startWalk() {
+        if (walkStarted) {
+          const next = nextTarget();
+          if (next && next.placeIndex !== null && !solved.has(next.placeIndex)) {
+            startScan();
+            return;
+          }
+          if (solved.has(viewing)) {
+            renderPlace(viewing);
+            return;
+          }
+          renderPlace(viewing);
+          return;
+        }
+        showIntro();
+      }
+
+      function openWalkTab() {
+        openMap({ fromPlace: false });
+      }
+
+      function openBoardStop(stop) {
+        selectedBoard = stop.order - 1;
+        if (stop.placeIndex === null) {
+          renderWalkBoard();
+          return;
+        }
+        if (stop.placeIndex >= 2 && !walkPaid) {
+          if (!accountEmail) showLogin();
+          else showPay();
+          return;
+        }
+        walkStarted = true;
+        renderPlace(stop.placeIndex);
+      }
+
+      function showIntro() {
+        setStep(2, "Loading");
+        show("intro");
+        clearIntroTimers();
+
+        const loadStage = document.querySelector("#intro-load-stage");
+        const welcomeStage = document.querySelector("#intro-welcome-stage");
+        const bar = document.querySelector("#intro-bar-fill");
+        const percent = document.querySelector("#intro-percent");
+
+        loadStage.hidden = false;
+        welcomeStage.hidden = true;
+        loadStage.className = "intro-stage is-in";
+        welcomeStage.className = "intro-stage";
+        bar.style.width = "0%";
+        percent.textContent = "0";
+
+        const countMs = 2400;
+        const power = 2.4;
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min(1, (now - start) / countMs);
+          const eased = Math.pow(t, power);
+          const value = Math.round(eased * 100);
+          bar.style.width = value + "%";
+          percent.textContent = String(value);
+          if (t < 1) {
+            introRaf = requestAnimationFrame(tick);
+            return;
+          }
+          loadStage.classList.add("is-pulse");
+          later(640, () => {
+            loadStage.classList.remove("is-in", "is-pulse");
+            loadStage.classList.add("is-out");
+            later(360, () => {
+              loadStage.hidden = true;
+              welcomeStage.hidden = false;
+              welcomeStage.className = "intro-stage is-in";
+              setStep(2, "Welcome");
+              later(1600, finishIntro);
+            });
+          });
+        };
+        introRaf = requestAnimationFrame(tick);
+      }
+
+      function finishIntro() {
+        clearIntroTimers();
+        walkStarted = true;
+        showOnboard();
+      }
+
+      function showOnboard() {
+        setStep(3, "Onboarding");
+        show("onboard");
+      }
+
+      function renderPlace(index = viewing) {
+        viewing = index;
+        walkStarted = true;
+        const poi = poiAt(viewing);
+        const done = solved.has(viewing);
+        show("place");
+        syncChip(poi);
+        document.querySelector("#place-name").textContent = poi.short;
+        misses = 0;
+        locked = false;
+        if (done) showReward(poi, false);
+        else showTeach(poi);
+      }
+
+      function fillPlaceStory(poi) {
+        const body = document.querySelector("#story-body");
+        body.innerHTML = "";
+        for (const paragraph of poi.more) {
+          const p = document.createElement("p");
+          p.className = "prose";
+          p.textContent = paragraph;
+          body.appendChild(p);
+        }
+        placeStory.hidden = poi.more.length === 0;
+      }
+
+      function closeQuest() {
+        if (questRoot.getAttribute("data-open") !== "true") return;
+        questRoot.setAttribute("data-open", "false");
+        questRoot.setAttribute("aria-hidden", "true");
+        views.place.classList.remove("is-quest-open");
+      }
+
+      function openQuest(poi) {
+        renderQuest(poi);
+        questRoot.setAttribute("data-open", "true");
+        questRoot.setAttribute("aria-hidden", "false");
+        views.place.classList.add("is-quest-open");
+        // Dock stays in layout under the sheet; preventScroll avoids focus jumping the page.
+        window.setTimeout(() => {
+          questPanel.focus({ preventScroll: true });
+        }, 80);
+      }
+
+      function showTeach(poi) {
+        setStep(4, "Place");
+        teachBlock.hidden = false;
+        rewardBlock.hidden = true;
+        closeQuest();
+        learnDock.hidden = false;
+        dockBtn.textContent = "Solve the quest";
+        stopTeachVideo();
+        teachBlock.classList.remove("is-solved");
+        misses = 0;
+        locked = false;
+
+        const teach = poi.teach;
+        document.querySelector("#learn-kicker").hidden = true;
+        document.querySelector("#learn-title").textContent = teach.title || "";
+        document.querySelector("#learn-title").hidden = true;
+        document.querySelector("#teach-note").textContent = "";
+        document.querySelector("#teach-note").hidden = true;
+
+        const copy = document.querySelector("#learn-copy");
+        copy.innerHTML = "";
+        const lines = teach.lines || [];
+        copy.hidden = lines.length === 0;
+        for (const line of lines) {
+          const p = document.createElement("p");
+          p.className = "learn-text";
+          p.textContent = line;
+          copy.appendChild(p);
+        }
+
+        teachMedia.classList.toggle("landscape", teach.frame === "landscape" || teach.kind === "read");
+        teachMedia.classList.toggle("portrait", teach.frame === "portrait");
+
+        if (teach.kind === "watch") {
+          teachStill.hidden = true;
+          teachClip.hidden = false;
+          teachPlay.hidden = true;
+          teachClip.controls = false;
+          teachClip.muted = true;
+          teachClip.loop = true;
+          teachClip.playsInline = true;
+          teachClip.poster = poi.image;
+          teachClip.src = teach.video;
+          teachClip.load();
+          const playPromise = teachClip.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {
+              teachPlay.hidden = false;
+              teachPlay.querySelector("span").textContent = "Play";
+            });
+          }
+          window.setTimeout(() => {
+            if (!teachClip.paused && teachClip.muted) {
+              teachPlay.hidden = false;
+              teachPlay.querySelector("span").textContent = "Sound";
+            }
+          }, 700);
+        } else {
+          teachClip.hidden = true;
+          teachPlay.hidden = true;
+          teachStill.hidden = false;
+          teachStill.src = teach.image;
+          teachStill.alt = teach.imageAlt || "";
+        }
+
+        fillPlaceStory(poi);
+        placeScroll.scrollTop = 0;
+      }
+
+      function clearQuestFeedback() {
+        const feedback = document.querySelector("#quest-feedback");
+        feedback.textContent = "";
+        feedback.className = "quest-feedback";
+      }
+
+      function syncCheckEnabled() {
+        if (locked) {
+          checkBtn.disabled = true;
+          return;
+        }
+        if (activeQuestType === "cloze") {
+          checkBtn.disabled = !selectedAnswer;
+        } else if (activeQuestType === "order") {
+          checkBtn.disabled = orderState.length < 2;
+        } else if (activeQuestType === "count") {
+          checkBtn.disabled = false;
+        } else if (activeQuestType === "select_all") {
+          checkBtn.disabled = selectedAnswers.length === 0;
+        } else {
+          checkBtn.disabled = !selectedAnswer;
+        }
+      }
+
+      function renderQuest(poi) {
+        selectedAnswer = null;
+        selectedAnswers = [];
+        orderState = [];
+        countValue = poi.count?.min ?? 1;
+        activeQuestType = poi.questType || "choice";
+        checkBtn.hidden = false;
+        checkBtn.disabled = true;
+        document.querySelector("#quest-action").textContent = poi.action;
+        document.querySelector("#quest-question").innerHTML =
+          poi.look + " <strong>" + poi.question + "</strong>";
+        clearQuestFeedback();
+        questPanel.classList.remove("is-shake");
+
+        const root = document.querySelector("#quest-answer");
+        root.innerHTML = "";
+
+        if (activeQuestType === "cloze") renderClozeQuest(poi, root);
+        else if (activeQuestType === "order") renderOrderQuest(poi, root);
+        else if (activeQuestType === "count") renderCountQuest(poi, root);
+        else if (activeQuestType === "select_all") renderSelectAllQuest(poi, root);
+        else renderChoiceQuest(poi, root);
+
+        syncCheckEnabled();
+      }
+
+      function renderChoiceQuest(poi, root) {
+        const grid = document.createElement("div");
+        grid.className = "choices";
+        for (const label of poi.choices || []) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            if (locked) return;
+            selectedAnswer = label;
+            clearQuestFeedback();
+            for (const node of grid.querySelectorAll(".choice")) {
+              node.classList.remove("is-selected", "is-wrong");
+            }
+            button.classList.add("is-selected");
+            syncCheckEnabled();
+          });
+          grid.appendChild(button);
+        }
+        root.appendChild(grid);
+      }
+
+      function renderClozeQuest(poi, root) {
+        const cloze = poi.cloze;
+        const line = document.createElement("p");
+        line.className = "cloze-line";
+        const blank = document.createElement("span");
+        blank.className = "cloze-blank is-empty";
+        blank.id = "cloze-blank";
+        blank.textContent = "___";
+        line.append(document.createTextNode(cloze.before + " "));
+        line.append(blank);
+        if (cloze.after) line.append(document.createTextNode(cloze.after));
+        root.appendChild(line);
+
+        const row = document.createElement("div");
+        row.className = "chip-row";
+        for (const label of cloze.chips) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            if (locked) return;
+            selectedAnswer = label;
+            clearQuestFeedback();
+            blank.textContent = label;
+            blank.classList.remove("is-empty");
+            for (const node of row.querySelectorAll(".chip")) {
+              node.classList.remove("is-selected", "is-wrong");
+            }
+            button.classList.add("is-selected");
+            syncCheckEnabled();
+          });
+          row.appendChild(button);
+        }
+        root.appendChild(row);
+      }
+
+      function shuffleCopy(items) {
+        const list = items.slice();
+        for (let i = list.length - 1; i > 0; i -= 1) {
+          const j = (Math.random() * (i + 1)) | 0;
+          const tmp = list[i];
+          list[i] = list[j];
+          list[j] = tmp;
+        }
+        // Avoid starting already solved.
+        if (list.length > 1 && list.every((item, index) => item === items[index])) {
+          const last = list.pop();
+          list.unshift(last);
+        }
+        return list;
+      }
+
+      function renderOrderQuest(poi, root) {
+        orderState = shuffleCopy(poi.orderItems || []);
+        const list = document.createElement("ol");
+        list.className = "order-list";
+        list.id = "order-list";
+
+        function paint() {
+          list.innerHTML = "";
+          orderState.forEach((label, index) => {
+            const item = document.createElement("li");
+            const card = document.createElement("div");
+            card.className = "order-card";
+            card.dataset.index = String(index);
+
+            const badge = document.createElement("span");
+            badge.className = "order-index";
+            badge.textContent = String(index + 1);
+
+            const text = document.createElement("span");
+            text.className = "order-text";
+            text.textContent = label;
+
+            const move = document.createElement("div");
+            move.className = "order-move";
+            const up = document.createElement("button");
+            up.type = "button";
+            up.textContent = "↑";
+            up.setAttribute("aria-label", "Move up");
+            up.disabled = locked || index === 0;
+            up.addEventListener("click", () => {
+              if (locked || index === 0) return;
+              const next = orderState.slice();
+              const tmp = next[index - 1];
+              next[index - 1] = next[index];
+              next[index] = tmp;
+              orderState = next;
+              clearQuestFeedback();
+              paint();
+              syncCheckEnabled();
+            });
+            const down = document.createElement("button");
+            down.type = "button";
+            down.textContent = "↓";
+            down.setAttribute("aria-label", "Move down");
+            down.disabled = locked || index === orderState.length - 1;
+            down.addEventListener("click", () => {
+              if (locked || index === orderState.length - 1) return;
+              const next = orderState.slice();
+              const tmp = next[index + 1];
+              next[index + 1] = next[index];
+              next[index] = tmp;
+              orderState = next;
+              clearQuestFeedback();
+              paint();
+              syncCheckEnabled();
+            });
+            move.append(up, down);
+            card.append(badge, text, move);
+            item.appendChild(card);
+            list.appendChild(item);
+          });
+        }
+
+        paint();
+        root.appendChild(list);
+      }
+
+      function renderCountQuest(poi, root) {
+        const conf = poi.count || { min: 1, max: 6, answer: 1 };
+        countValue = conf.min;
+        const wrap = document.createElement("div");
+        wrap.className = "stepper";
+        wrap.id = "count-stepper";
+
+        const minus = document.createElement("button");
+        minus.type = "button";
+        minus.className = "stepper-btn";
+        minus.textContent = "−";
+        minus.setAttribute("aria-label", "Decrease");
+
+        const value = document.createElement("div");
+        value.className = "stepper-value";
+        value.id = "count-value";
+        value.textContent = String(countValue);
+
+        const plus = document.createElement("button");
+        plus.type = "button";
+        plus.className = "stepper-btn";
+        plus.textContent = "+";
+        plus.setAttribute("aria-label", "Increase");
+
+        function paint() {
+          value.textContent = String(countValue);
+          minus.disabled = locked || countValue <= conf.min;
+          plus.disabled = locked || countValue >= conf.max;
+          syncCheckEnabled();
+        }
+
+        minus.addEventListener("click", () => {
+          if (locked || countValue <= conf.min) return;
+          countValue -= 1;
+          clearQuestFeedback();
+          wrap.classList.remove("is-wrong", "is-hinted");
+          paint();
+        });
+        plus.addEventListener("click", () => {
+          if (locked || countValue >= conf.max) return;
+          countValue += 1;
+          clearQuestFeedback();
+          wrap.classList.remove("is-wrong", "is-hinted");
+          paint();
+        });
+
+        wrap.append(minus, value, plus);
+        root.appendChild(wrap);
+        paint();
+      }
+
+      function renderSelectAllQuest(poi, root) {
+        const conf = poi.selectAll || { options: [], answers: [] };
+        selectedAnswers = [];
+        const row = document.createElement("div");
+        row.className = "chip-row";
+        for (const label of conf.options) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            if (locked) return;
+            clearQuestFeedback();
+            if (selectedAnswers.includes(label)) {
+              selectedAnswers = selectedAnswers.filter((item) => item !== label);
+              button.classList.remove("is-selected");
+            } else {
+              selectedAnswers = selectedAnswers.concat(label);
+              button.classList.add("is-selected");
+            }
+            syncCheckEnabled();
+          });
+          row.appendChild(button);
+        }
+        root.appendChild(row);
+      }
+
+      function sameStringSet(a, b) {
+        if (a.length !== b.length) return false;
+        const left = a.slice().sort();
+        const right = b.slice().sort();
+        return left.every((item, index) => item === right[index]);
+      }
+
+      function questIsCorrect(poi) {
+        if (activeQuestType === "cloze") return selectedAnswer === poi.cloze.answer;
+        if (activeQuestType === "order") {
+          const expected = poi.orderItems || [];
+          return (
+            orderState.length === expected.length &&
+            orderState.every((item, index) => item === expected[index])
+          );
+        }
+        if (activeQuestType === "count") return countValue === poi.count.answer;
+        if (activeQuestType === "select_all") {
+          return sameStringSet(selectedAnswers, poi.selectAll.answers || []);
+        }
+        return selectedAnswer === poi.answer;
+      }
+
+      function markQuestResult(correct) {
+        const root = document.querySelector("#quest-answer");
+        if (activeQuestType === "count") {
+          const stepper = root.querySelector("#count-stepper");
+          if (!stepper) return;
+          stepper.classList.toggle("is-right", correct);
+          stepper.classList.toggle("is-wrong", !correct);
+          if (correct) {
+            for (const btn of stepper.querySelectorAll(".stepper-btn")) btn.disabled = true;
+          }
+          return;
+        }
+
+        if (activeQuestType === "order") {
+          for (const card of root.querySelectorAll(".order-card")) {
+            card.classList.toggle("is-right", correct);
+            card.classList.toggle("is-wrong", !correct);
+            for (const btn of card.querySelectorAll("button")) btn.disabled = true;
+          }
+          return;
+        }
+
+        const nodes = root.querySelectorAll(".choice, .chip");
+        if (correct) {
+          for (const node of nodes) {
+            node.disabled = true;
+            const on =
+              activeQuestType === "select_all"
+                ? selectedAnswers.includes(node.textContent)
+                : node.textContent === selectedAnswer;
+            if (on) node.classList.add("is-right");
+            else node.style.opacity = "0.35";
+            node.classList.remove("is-selected", "is-wrong");
+          }
+          return;
+        }
+
+        for (const node of nodes) {
+          const on =
+            activeQuestType === "select_all"
+              ? selectedAnswers.includes(node.textContent)
+              : node.classList.contains("is-selected");
+          if (on) {
+            node.classList.remove("is-selected");
+            node.classList.add("is-wrong");
+          }
+        }
+      }
+
+      function hintQuest(poi) {
+        const root = document.querySelector("#quest-answer");
+        if (activeQuestType === "count") {
+          const stepper = root.querySelector("#count-stepper");
+          if (stepper) stepper.classList.add("is-hinted");
+          countValue = poi.count.answer;
+          const value = root.querySelector("#count-value");
+          if (value) value.textContent = String(countValue);
+          return;
+        }
+        if (activeQuestType === "order") {
+          orderState = (poi.orderItems || []).slice();
+          root.innerHTML = "";
+          const list = document.createElement("ol");
+          list.className = "order-list";
+          orderState.forEach((label, index) => {
+            const item = document.createElement("li");
+            const card = document.createElement("div");
+            card.className = "order-card is-hinted";
+            const badge = document.createElement("span");
+            badge.className = "order-index";
+            badge.textContent = String(index + 1);
+            const text = document.createElement("span");
+            text.className = "order-text";
+            text.textContent = label;
+            card.append(badge, text);
+            item.appendChild(card);
+            list.appendChild(item);
+          });
+          root.appendChild(list);
+          syncCheckEnabled();
+          return;
+        }
+        if (activeQuestType === "select_all") {
+          const answers = poi.selectAll.answers || [];
+          for (const node of root.querySelectorAll(".chip")) {
+            if (answers.includes(node.textContent)) node.classList.add("is-hinted");
+          }
+          return;
+        }
+        const answer =
+          activeQuestType === "cloze" ? poi.cloze.answer : poi.answer;
+        for (const node of root.querySelectorAll(".choice, .chip")) {
+          if (node.textContent === answer) node.classList.add("is-hinted");
+        }
+      }
+
+      function showReward(poi, animate) {
+        setStep(4, "Reward");
+        teachBlock.hidden = false;
+        teachBlock.classList.add("is-solved");
+        closeQuest();
+        document.querySelector("#learn-copy").hidden = true;
+        document.querySelector("#teach-note").hidden = true;
+        rewardBlock.hidden = false;
+        learnDock.hidden = false;
+        dockBtn.textContent =
+          viewing >= PROTO_PLACE_COUNT - 1 ? "Finish the walk" : "Next place";
+        showTeachStill(poi);
+        fillPlaceStory(poi);
+
+        document.querySelector("#reveal").textContent = poi.reveal;
+        document.querySelector("#reveal").style.animation = animate
+          ? "rise 420ms var(--ease-out) both"
+          : "none";
+        // Stay put after celebrate; reopen scrolls to top.
+        if (!animate) placeScroll.scrollTop = 0;
+      }
+
+      function clearCelebrateTimers() {
+        for (const id of celebrateTimers) window.clearTimeout(id);
+        celebrateTimers = [];
+        if (confettiRaf) {
+          cancelAnimationFrame(confettiRaf);
+          confettiRaf = 0;
+        }
+      }
+
+      function prefersReducedMotion() {
+        return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }
+
+      function fireCorrectConfetti() {
+        if (prefersReducedMotion()) return;
+        const canvas = confettiCanvas;
+        const screen = document.querySelector("#screen");
+        const width = screen.clientWidth;
+        const height = screen.clientHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const colors = ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"];
+        const particles = [];
+        function burst(originX, originY, angleDeg, count, speed) {
+          for (let i = 0; i < count; i += 1) {
+            const spread = (Math.random() - 0.5) * 70;
+            const angle = ((angleDeg + spread) * Math.PI) / 180;
+            const velocity = speed * (0.65 + Math.random() * 0.55);
+            particles.push({
+              x: originX,
+              y: originY,
+              vx: Math.cos(angle) * velocity,
+              vy: Math.sin(angle) * velocity,
+              life: 1,
+              decay: 0.008 + Math.random() * 0.01,
+              size: 4 + Math.random() * 5,
+              color: colors[(Math.random() * colors.length) | 0],
+              spin: (Math.random() - 0.5) * 0.4,
+              rot: Math.random() * Math.PI,
+            });
+          }
+        }
+        burst(0, height * 0.55, -30, 45, 11);
+        burst(width, height * 0.55, 210, 45, 11);
+        burst(width * 0.5, height * 0.4, -90, 28, 9);
+
+        const gravity = 0.22;
+        function tick() {
+          ctx.clearRect(0, 0, width, height);
+          let alive = false;
+          for (const p of particles) {
+            if (p.life <= 0) continue;
+            alive = true;
+            p.vy += gravity;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx *= 0.992;
+            p.life -= p.decay;
+            p.rot += p.spin;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.life);
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size * 0.5, -p.size * 0.25, p.size, p.size * 0.5);
+            ctx.restore();
+          }
+          if (alive) confettiRaf = requestAnimationFrame(tick);
+          else {
+            confettiRaf = 0;
+            ctx.clearRect(0, 0, width, height);
+          }
+        }
+        confettiRaf = requestAnimationFrame(tick);
+      }
+
+      function playCorrectCelebrate(onDone) {
+        clearCelebrateTimers();
+        correctCelebrate.hidden = false;
+        correctCelebrate.classList.remove("is-leaving");
+        // Restart sticker animation.
+        const sticker = correctCelebrate.querySelector(".correct-sticker");
+        sticker.style.animation = "none";
+        void sticker.offsetWidth;
+        sticker.style.animation = "";
+        fireCorrectConfetti();
+
+        celebrateTimers.push(
+          window.setTimeout(() => {
+            correctCelebrate.classList.add("is-leaving");
+          }, CORRECT_CELEBRATE_MS - 280),
+        );
+        celebrateTimers.push(
+          window.setTimeout(() => {
+            correctCelebrate.hidden = true;
+            correctCelebrate.classList.remove("is-leaving");
+            clearCelebrateTimers();
+            onDone?.();
+          }, CORRECT_CELEBRATE_MS),
+        );
+      }
+
+      function onCheck() {
+        if (locked) return;
+        if (activeQuestType === "cloze" || activeQuestType === "choice") {
+          if (!selectedAnswer) return;
+        } else if (activeQuestType === "select_all") {
+          if (!selectedAnswers.length) return;
+        }
+        const poi = poiAt(viewing);
+        const feedback = document.querySelector("#quest-feedback");
+        const correct = questIsCorrect(poi);
+
+        if (correct) {
+          locked = true;
+          checkBtn.disabled = true;
+          markQuestResult(true);
+          feedback.textContent = "";
+          playCorrectCelebrate(() => {
+            solved.add(viewing);
+            showReward(poi, true);
+          });
+          return;
+        }
+
+        misses += 1;
+        markQuestResult(false);
+        questPanel.classList.remove("is-shake");
+        void questPanel.offsetWidth;
+        questPanel.classList.add("is-shake");
+        const nudge = poi.nudges[Math.min(misses, poi.nudges.length) - 1];
+        feedback.textContent = nudge;
+        feedback.className = "quest-feedback" + (misses >= 3 ? " is-hint" : "");
+        if (misses >= 3) hintQuest(poi);
+
+        if (activeQuestType === "cloze" || activeQuestType === "choice") {
+          selectedAnswer = null;
+          checkBtn.disabled = true;
+        } else if (activeQuestType === "select_all") {
+          selectedAnswers = [];
+          checkBtn.disabled = true;
+        } else {
+          syncCheckEnabled();
+        }
+
+        window.setTimeout(() => {
+          if (locked) return;
+          const root = document.querySelector("#quest-answer");
+          for (const node of root.querySelectorAll(".choice, .chip, .order-card")) {
+            node.classList.remove("is-wrong");
+          }
+          const stepper = root.querySelector("#count-stepper");
+          if (stepper) stepper.classList.remove("is-wrong");
+          if (activeQuestType === "select_all") {
+            for (const node of root.querySelectorAll(".chip")) {
+              node.classList.remove("is-selected");
+            }
+          }
+          if (activeQuestType === "cloze") {
+            const blank = document.querySelector("#cloze-blank");
+            if (blank && !selectedAnswer) {
+              blank.textContent = "___";
+              blank.classList.add("is-empty");
+            }
+            for (const node of root.querySelectorAll(".chip")) {
+              node.classList.remove("is-selected");
+            }
+          }
+        }, 420);
+      }
+
+      /** Prototype entry: visitor scanned the Entrance QR. */
+      function enterFromEntranceScan() {
+        walkStarted = true;
+        visitedMap = false;
+        const gen = ++generation;
+        setStep(3, "Scan");
+        show("scan");
+        document.querySelector("#scan-status").textContent = "Scanning";
+        document.querySelector("#scan-line").textContent =
+          "Point at the code at the main door.";
+        window.setTimeout(() => {
+          if (gen !== generation) return;
+          document.querySelector("#scan-status").textContent = "Code found";
+          window.setTimeout(() => {
+            if (gen !== generation) return;
+            renderPlace(0);
+          }, 700);
+        }, 900);
+      }
+
+      function nextTarget() {
+        if (!solved.has(0)) {
+          return {
+            order: 1,
+            title: "The entrance",
+            pin: places[0].pin,
+            route: "",
+            walk: "Go to the front door of the Cathedral. Scan the QR code next to it.",
+            scanLine: "Point at the code at the main door.",
+            placeIndex: 0,
+            first: true,
+          };
+        }
+        if (!solved.has(1)) {
+          return {
+            order: 2,
+            title: "The mural",
+            pin: places[1].pin,
+            route: places[0].route,
+            walk: places[0].walk,
+            scanLine: places[0].scanLine,
+            placeIndex: 1,
+          };
+        }
+        if (!solved.has(2)) {
+          return {
+            order: 3,
+            title: "The Cathedra",
+            pin: places[2].pin,
+            route: places[1].route,
+            walk: places[1].walk,
+            scanLine: places[1].scanLine,
+            placeIndex: 2,
+          };
+        }
+        return null;
+      }
+
+      function showLogin() {
+        setStep(5, "Log in");
+        show("login");
+        document.querySelector("#login-error").hidden = true;
+        document.querySelector("#login-error").textContent = "";
+      }
+
+      function showPay() {
+        setStep(5, "Paywall");
+        show("pay");
+        document.querySelector("#pay-account").textContent = accountEmail
+          ? "Saved on this phone as " + accountEmail + "."
+          : "Saved on this phone.";
+        document.querySelector("#pay-submit").textContent = "Pay ₱" + WALK_PRICE;
+      }
+
+      function showFinish() {
+        setStep(6, "Finish");
+        show("finish");
+        syncShellChrome();
+      }
+
+      function continueWalk() {
+        if (solved.has(2)) {
+          showFinish();
+          return;
+        }
+        if (solved.has(1) && !solved.has(2)) {
+          if (!accountEmail) {
+            showLogin();
+            return;
+          }
+          if (!walkPaid) {
+            showPay();
+            return;
+          }
+        }
+        showHandoff();
+      }
+
+      function showHandoff(level = "area") {
+        const next = nextTarget();
+        if (!next) {
+          showFinish();
+          return;
+        }
+        if (next.placeIndex >= 2 && !walkPaid) {
+          if (!accountEmail) {
+            showLogin();
+            return;
+          }
+          if (!walkPaid) {
+            showPay();
+            return;
+          }
+        }
+
+        handoffLevel = level === "compound" ? "compound" : "area";
+        const nextPoi = poiAt(next.placeIndex);
+        setStep(4, "Handoff");
+        show("handoff");
+        document.querySelector("#handoff-title").textContent = nextPoi.short;
+        document.querySelector("#handoff-title").hidden = true;
+        document.querySelector("#handoff-walk").textContent = next.walk;
+        syncChip(nextPoi);
+        renderHandoffMap();
+      }
+
+      function renderHandoffMap() {
+        const next = nextTarget();
+        if (!next) return;
+        const nextPoi = poiAt(next.placeIndex);
+        const fromPoi = solved.has(viewing) ? poiAt(viewing) : null;
+        const area = AREA_MAPS[nextPoi.areaId] || AREA_MAPS.nave;
+        const mapImg = document.querySelector("#handoff-map-img");
+        const mapLabel = document.querySelector("#handoff-map-label");
+        const routeGlow = document.querySelector("#handoff-route-glow");
+        const routeLine = document.querySelector("#handoff-route");
+        const pins = document.querySelector("#handoff-pins");
+        const onArea = handoffLevel === "area";
+
+        mapImg.src = onArea ? area.image : "../img/cathedral-compound.webp";
+        mapImg.alt = onArea ? area.title : "Map of the cathedral grounds.";
+        mapLabel.textContent = onArea ? area.title : "Cathedral grounds";
+
+        const routePoints = onArea
+          ? fromPoi && fromPoi.areaId === nextPoi.areaId
+            ? fromPoi.areaRoute || ""
+            : ""
+          : next.route || "";
+        if (routePoints) {
+          routeGlow.setAttribute("points", routePoints);
+          routeLine.setAttribute("points", routePoints);
+          routeGlow.style.display = "";
+          routeLine.style.display = "";
+        } else {
+          routeGlow.removeAttribute("points");
+          routeLine.removeAttribute("points");
+          routeGlow.style.display = "none";
+          routeLine.style.display = "none";
+        }
+
+        pins.innerHTML = "";
+        const fromPoint = onArea
+          ? fromPoi && fromPoi.areaId === nextPoi.areaId
+            ? fromPoi.areaPin
+            : null
+          : fromPoi
+            ? fromPoi.pin
+            : null;
+        if (fromPoint) {
+          const fromPin = document.createElement("div");
+          fromPin.className = "handoff-pin is-from";
+          fromPin.style.left = (fromPoint.x / 280) * 100 + "%";
+          fromPin.style.top = (fromPoint.y / 360) * 100 + "%";
+          fromPin.textContent = String(fromPoi.order);
+          fromPin.setAttribute("aria-hidden", "true");
+          pins.appendChild(fromPin);
+        }
+
+        const nextPoint = onArea ? nextPoi.areaPin : next.pin;
+        const nextPin = document.createElement("button");
+        nextPin.type = "button";
+        nextPin.className = "handoff-pin is-next";
+        nextPin.style.left = (nextPoint.x / 280) * 100 + "%";
+        nextPin.style.top = (nextPoint.y / 360) * 100 + "%";
+        nextPin.textContent = String(next.order);
+        nextPin.setAttribute(
+          "aria-label",
+          onArea
+            ? "Scan QR for place " + next.order
+            : "Open area map for place " + next.order,
+        );
+        nextPin.addEventListener("click", () => {
+          if (handoffLevel === "compound") {
+            showHandoff("area");
+            return;
+          }
+          startScan();
+        });
+        pins.appendChild(nextPin);
+      }
+
+      function openMap({ fromPlace = false } = {}) {
+        mapFromPlace = fromPlace;
+        visitedMap = true;
+        if (fromPlace) {
+          const match = mapBoard.findIndex((stop) => stop.placeIndex === viewing);
+          selectedBoard = match >= 0 ? match : selectedBoard;
+        } else if (!walkStarted && solved.size === 0) {
+          selectedBoard = 0;
+        }
+        setStep(1, "Walk");
+        show("map");
+        mapClose.hidden = !fromPlace;
+        renderWalkBoard();
+      }
+
+      function renderWalkBoard() {
+        syncMapPoints();
+        const pins = document.querySelector("#pins");
+        pins.innerHTML = "";
+        mapBoard.forEach((item, index) => {
+          const isDone =
+            item.placeIndex !== null && solved.has(item.placeIndex);
+          const isActive = index === selectedBoard;
+          const classes = ["pin"];
+          if (isDone) classes.push("pin-done");
+          if (isActive) classes.push("pin-active");
+          const node = makePin(
+            item.pin,
+            classes.join(" "),
+            isDone ? check : String(item.order),
+            "Open " + item.title,
+            true,
+          );
+          node.addEventListener("click", () => openBoardStop(item));
+          pins.appendChild(node);
+        });
+        syncShellChrome();
+      }
+
+      function makePin(point, className, html, label, tappable) {
+        const node = document.createElement(tappable ? "button" : "div");
+        if (tappable) node.type = "button";
+        node.className = className;
+        node.style.left = (point.x / 280) * 100 + "%";
+        node.style.top = (point.y / 360) * 100 + "%";
+        node.innerHTML = html;
+        node.setAttribute("aria-label", label);
+        return node;
+      }
+
+      function startScan() {
+        const next = nextTarget();
+        if (!next) {
+          showFinish();
+          return;
+        }
+        if (next.placeIndex >= 2 && !walkPaid) {
+          if (!accountEmail) showLogin();
+          else showPay();
+          return;
+        }
+        const gen = ++generation;
+        setStep(3, "Scan");
+        show("scan");
+        document.querySelector("#scan-status").textContent = "Scanning";
+        document.querySelector("#scan-line").textContent = next.scanLine;
+        window.setTimeout(() => {
+          if (gen !== generation) return;
+          document.querySelector("#scan-status").textContent = "Code found";
+          window.setTimeout(() => {
+            if (gen !== generation) return;
+            renderPlace(next.placeIndex);
+          }, 700);
+        }, 1100);
+      }
+
+      churchSwitchBtn.addEventListener("click", () => {
+        if (churchSwitcher.hidden) openChurchSwitcher();
+        else closeChurchSwitcher();
+      });
+      document.querySelector("#church-switcher-backdrop").addEventListener("click", closeChurchSwitcher);
+      document.querySelector("#church-naga").addEventListener("click", () => {
+        closeChurchSwitcher();
+        // Already on this walk; keep them on the map.
+        openWalkTab();
+      });
+      document.querySelector("#start-walk").addEventListener("click", startWalk);
+      document.querySelector("#onboard-scan").addEventListener("click", () => {
+        enterFromEntranceScan();
+      });
+      document.querySelector("#terms-link").addEventListener("click", (event) => {
+        event.preventDefault();
+      });
+      teachPlay.addEventListener("click", () => {
+        teachClip.muted = false;
+        teachClip.controls = true;
+        teachPlay.hidden = true;
+        teachClip.play().catch(() => {});
+      });
+      dockBtn.addEventListener("click", () => {
+        if (!solved.has(viewing)) {
+          openQuest(poiAt(viewing));
+          return;
+        }
+        continueWalk();
+      });
+      document.querySelector("#login-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const email = document.querySelector("#login-email").value.trim();
+        const password = document.querySelector("#login-password").value;
+        const error = document.querySelector("#login-error");
+        if (!email || !email.includes("@")) {
+          error.hidden = false;
+          error.textContent = "Enter a valid email.";
+          return;
+        }
+        if (password.length < 8) {
+          error.hidden = false;
+          error.textContent = "Use at least 8 characters.";
+          return;
+        }
+        error.hidden = true;
+        accountEmail = email;
+        syncShellChrome();
+        showPay();
+      });
+      document.querySelector("#login-back").addEventListener("click", () => {
+        openWalkTab();
+      });
+      document.querySelector("#pay-submit").addEventListener("click", () => {
+        walkPaid = true;
+        syncShellChrome();
+        showHandoff();
+      });
+      document.querySelector("#handoff-scan").addEventListener("click", () => {
+        startScan();
+      });
+      document.querySelector("#handoff-back").addEventListener("click", () => {
+        if (handoffLevel === "area") {
+          showHandoff("compound");
+          return;
+        }
+        renderPlace(viewing);
+      });
+      document.querySelector("#pay-back").addEventListener("click", () => {
+        openWalkTab();
+      });
+      document.querySelector("#finish-to-parish").addEventListener("click", showParish);
+      document.querySelector("#finish-replay").addEventListener("click", restart);
+      chip.addEventListener("click", () => {
+        openMap({ fromPlace: true });
+      });
+      document.querySelector("#place-back").addEventListener("click", () => {
+        openWalkTab();
+      });
+      mapClose.addEventListener("click", () => {
+        closeChurchSwitcher();
+        if (mapFromHandoff) {
+          mapFromHandoff = false;
+          showHandoff();
+          return;
+        }
+        renderPlace(viewing);
+      });
+      for (const button of document.querySelectorAll(".tab")) {
+        button.addEventListener("click", () => {
+          const tab = button.dataset.tab;
+          if (tab === "walk") openWalkTab();
+          else if (tab === "parish") showParish();
+          else showYou();
+        });
+      }
+      for (const button of document.querySelectorAll(".gift-amt")) {
+        button.addEventListener("click", () => {
+          const amount = Number(button.dataset.amount);
+          if (!GIFT_TEMPLATES.includes(amount)) return;
+          setGiftAmount(amount);
+        });
+      }
+      document.querySelector("#gift-input").addEventListener("input", (event) => {
+        const parsed = parseGiftAmount(event.target.value);
+        giftAmount = parsed;
+        syncGiftTemplates(parsed);
+        syncGiftButton();
+      });
+      document.querySelector("#gift-btn").addEventListener("click", () => {
+        if (giftAmount == null) {
+          document.querySelector("#gift-hint").hidden = false;
+          return;
+        }
+        document.querySelector("#gift-btn").textContent = "Thank you";
+        document.querySelector("#gift-btn").disabled = true;
+        window.setTimeout(() => setGiftAmount(giftAmount), 1200);
+      });
+      document.querySelector("#you-login").addEventListener("click", () => {
+        if (accountEmail) {
+          const btn = document.querySelector("#you-login");
+          btn.textContent = "Signed in";
+          btn.disabled = true;
+          window.setTimeout(() => {
+            btn.textContent = "Log in to save";
+            btn.disabled = false;
+          }, 1200);
+          return;
+        }
+        showLogin();
+      });
+      document.querySelector("#replay").addEventListener("click", restart);
+
+      function restart() {
+        generation += 1;
+        viewing = 0;
+        misses = 0;
+        locked = false;
+        selectedAnswer = null;
+        selectedAnswers = [];
+        orderState = [];
+        countValue = 1;
+        activeQuestType = "choice";
+        accountEmail = null;
+        walkPaid = false;
+        walkStarted = false;
+        mapFromPlace = false;
+        mapFromHandoff = false;
+        handoffLevel = "area";
+        visitedMap = false;
+        solved.clear();
+        clearIntroTimers();
+        clearCelebrateTimers();
+        correctCelebrate.hidden = true;
+        correctCelebrate.classList.remove("is-leaving");
+        document.querySelector("#login-email").value = "";
+        document.querySelector("#login-password").value = "";
+        stopTeachVideo();
+        showHome();
+      }
+
+      // First screen matches production: home poster.
+      showHome();
+    </script>
+  </body>
+</html>

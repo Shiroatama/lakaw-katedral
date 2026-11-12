@@ -11,6 +11,7 @@ export type PaymentProvider = {
 /** MVP stub. Swap for a real gateway later (SPEC §9). */
 export const stubPaymentProvider: PaymentProvider = {
   async createPayment() {
-    return { redirectUrl: "/finish" };
+    // Gifts are given from the Parish tab, so that is where we stay.
+    return { redirectUrl: "/parish" };
   },
 };

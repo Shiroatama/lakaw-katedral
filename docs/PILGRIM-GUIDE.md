@@ -1,7 +1,7 @@
 # A Pilgrim’s Guide through the Naga Metropolitan Cathedral
 
 **Status:** Parish source of truth (provided by the Cathedral)  
-**App scope:** Guide items **1–3**, **9** (places 4–5), outdoor bell pavilion (place 6), **14** (place 7), and **13** (place 8). Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`SPEC.md`](./SPEC.md) §3.1). Other stops stay here until they are added to the app.
+**App scope:** All 16 walk places. Guide items **1–14** are in the app. Item **9** is two places (bells and candle garden). Place 6 is the outdoor bell pavilion, which is not a numbered guide item. Guide items **15** and **16** stay in this document only. Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`SPEC.md`](./SPEC.md) §3.1).
 
 ---
 
@@ -203,7 +203,15 @@ PAUSE. PRAY. GIVE THANKS.
 | — | (outdoor pavilion near the heritage bells) | 6 | The Bell Pavilion | `/s/pavilion` |
 | 14 | Rise to the Quadricentennial Dome | 7 | The Quadricentennial Dome | `/s/dome` |
 | 13 | Meet Ina at the Porta Mariae | 8 | The Porta Mariae | `/s/porta` |
+| 4 | Remember the First Archbishop | 9 | The Archbishop's Tomb | `/s/santos` |
+| 5 | Meet Ina | 10 | The Novenary Image | `/s/ina` |
+| 6 | Look Up and Remember the Missionaries | 11 | The Missionary Dome | `/s/missionaries` |
+| 7 | Be Still Before Christ | 12 | The Tabernacle | `/s/tabernacle` |
+| 8 | Climb the Belfries | 13 | The Belfries | `/s/belfries` |
+| 10 | Enter Gethsemane | 14 | The Adoration Chapel | `/s/gethsemane` |
+| 11 | Touch the Stones of History | 15 | The Brick Arches | `/s/arches` |
+| 12 | Enter the Holy Family Chapel | 16 | The Holy Family Chapel | `/s/holy-family` |
 
-App headlines name the place or object. Guide activity titles stay as written above for the parish document. The guide does not give a separate formal title for the mural; the app uses the artist name until the parish confirms another. Guide item 9 is split into app places 4–5; the plaza rotunda with the golden crown is guide item 14 (app place 7); Porta Mariae is app place 8. Place 6 is the nearby outdoor bell pavilion (working name until the parish confirms). These outdoor stops are ahead of guide items 4–8 while those indoor stops are still pending.
+App headlines name the place or object. Guide activity titles stay as written above for the parish document. The guide does not give a separate formal title for the mural; the app uses the artist name until the parish confirms another. Guide item 9 is split into app places 4–5; the plaza rotunda with the golden crown is guide item 14 (app place 7); Porta Mariae is app place 8. Place 6 is the nearby outdoor bell pavilion (working name until the parish confirms). After that outdoor loop, places 9–12 go back inside (tomb, Novenary Image, missionary dome, Tabernacle). Places 13–16 are the belfries, the Adoration Chapel, the brick arches, and the Holy Family Chapel. These eight are guide items 4–8 and 10–12, not guide order.
 
-Items 4–8, 10–12, and 15–16 are recorded here for a later release. Do not invent stop copy from public web sources when this guide already covers the place.
+Items 15 and 16 (offer a Mass, souvenir shop) are not walk places. Do not invent stop copy from public web sources when this guide already covers the place.

@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { PageTransition } from "@/components/page-transition";
-import { ScanScreen } from "@/components/scan-screen";
+import { PlaceView } from "@/components/place-view";
 import { getPoiBySlug, nagaTour } from "@/lib/tour";
 
 type PageProps = {
@@ -23,11 +22,5 @@ export default async function StopPage({ params }: PageProps) {
   const poi = getPoiBySlug(slug);
   if (!poi) notFound();
 
-  return (
-    <PageTransition>
-      <main className="flex flex-1 flex-col">
-        <ScanScreen key={poi.slug} poi={poi} />
-      </main>
-    </PageTransition>
-  );
+  return <PlaceView key={poi.slug} poi={poi} />;
 }

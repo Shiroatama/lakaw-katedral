@@ -1,20 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Ruwudu, Source_Sans_3 } from "next/font/google";
+import { EB_Garamond, Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import { JourneyHydrator } from "@/components/journey-hydrator";
 import { PwaProvider } from "@/components/pwa-provider";
 import { WalkIntroHost } from "@/components/walk-intro";
 import "./globals.css";
+import "./walk.css";
 
-const display = Ruwudu({
+/** Story voice: titles and reveals. */
+const display = EB_Garamond({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "600"],
   display: "swap",
 });
 
-const body = Source_Sans_3({
+/** Story body: prose under the media. */
+const body = Source_Serif_4({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
+
+/** Shell and UI chrome: tabs, buttons, chips, forms. */
+const ui = Source_Sans_3({
+  variable: "--font-ui",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 
@@ -50,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} ${ui.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-[var(--background)] text-[var(--foreground)]">
         <WalkIntroHost>

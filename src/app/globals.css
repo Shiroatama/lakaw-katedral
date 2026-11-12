@@ -9,23 +9,19 @@
   --muted-fg: #6b5e54;
   --accent: #b85c38;
   --accent-fg: #fffaf5;
+  /* Solid lip under chunky CTAs (Duolingo-style, no blur). */
+  --accent-depth: #7a3f28;
   --stone: #6b4a35;
   --stone-light: #e8d8c8;
   --ceremonial: #ecbe41;
   --success: #4f6b4a;
-  /* Lighter success for text on dark quest cards. */
+  --success-depth: #314832;
+  /* Lighter success for text on dark surfaces. */
   --success-on-dark: #b8d4b0;
   --danger: #b33b2e;
-  /* Space for the bottom dock CTA */
-  --action-bar-space: 5.5rem;
-  /* Floating fullscreen + map head: top inset + h-11 + gap below */
-  --top-chrome-space: calc(
-    max(0.75rem, env(safe-area-inset-top)) + 2.75rem + 0.5rem
-  );
 
   /* Motion tokens */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* fast start, soft landing */
-  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1); /* iOS-style sheet */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* small overshoot */
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }
@@ -33,13 +29,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body);
+  /* Shell / UI chrome. Story voice uses --font-display and --font-body. */
+  --font-sans: var(--font-ui);
   --font-display: var(--font-display);
 }
 
 @utility font-display {
   font-family: var(--font-display), ui-serif, Georgia, serif;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 html {
@@ -49,7 +46,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-ui), system-ui, sans-serif;
 }
 
 /* ==========================================================================
@@ -77,43 +74,6 @@ body {
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes hero-settle {
-  from {
-    transform: scale(1.07);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes bar-fill {
-  from {
-    width: 0;
   }
 }
 
@@ -294,57 +254,6 @@ body {
   animation: walk-intro-loading-shimmer 1.5s linear infinite;
 }
 
-@keyframes observation-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
-  }
-}
-
-.observation-shake {
-  animation: observation-shake 350ms var(--ease-out);
-}
-
-@keyframes count-pop {
-  0% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes marker-ping {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.75;
-  }
-  80%,
-  100% {
-    transform: scale(2.1);
-    opacity: 0;
-  }
-}
-
-/* Start over lands on Home already settled, so the start screen is not
-   invisible for the entrance fade (about half a second). */
-.instant-arrival .fade-up,
-.instant-arrival .fade-in,
-.instant-arrival .rise-in,
-.instant-arrival .hero-settle,
-.instant-arrival .story-drift,
-.instant-arrival .pop-in {
-  animation: none;
-}
-
 /*
   Content arriving: rises and fades. Set --delay inline to stagger.
 
@@ -364,281 +273,6 @@ body {
   opacity: 1;
   animation: fade-in 500ms var(--ease-out) backwards;
   animation-delay: var(--delay, 0ms);
-}
-
-/* Optional rise-in for non-dock surfaces. Dock itself stays put. */
-.rise-in {
-  opacity: 1;
-  transform: translateY(0);
-  animation: rise-in 560ms var(--ease-out) backwards;
-  animation-delay: var(--delay, 0ms);
-}
-
-.pop-in {
-  opacity: 1;
-  transform: scale(1);
-  animation: pop-in 420ms var(--ease-spring) backwards;
-  animation-delay: var(--delay, 0ms);
-}
-
-/* Photo eases from slightly zoomed to rest (clipped by its frame). */
-.hero-settle {
-  animation: hero-settle 1100ms var(--ease-out) both;
-}
-
-/* Soft editorial drift on story photos (clipped by the frame). */
-@keyframes story-drift {
-  from {
-    transform: scale(1.08) translate3d(-1.5%, 0, 0);
-  }
-  to {
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-@keyframes story-drift-alt {
-  from {
-    transform: scale(1.08) translate3d(1.5%, 0, 0);
-  }
-  to {
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-.story-drift {
-  animation: story-drift 1400ms var(--ease-out) both;
-}
-
-.story-drift--alt {
-  animation-name: story-drift-alt;
-}
-
-.bar-fill {
-  animation: bar-fill 1000ms var(--ease-out) both;
-}
-
-/* Percent / map icon swap in the floating map head (sequenced in JS, not parallel). */
-.map-progress-pct {
-  font-size: 0.7rem;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  animation: pop-in 360ms var(--ease-spring) both;
-}
-
-.map-progress-icon {
-  animation: pop-in 360ms var(--ease-spring) both;
-}
-
-/*
- * Solve the quest + quest backdrop share the same fade timing.
- * In: 480ms. Out: 220ms.
- */
-@keyframes solve-quest-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes solve-quest-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-.solve-quest-cta {
-  opacity: 0;
-  transition: filter 200ms var(--ease-out);
-  will-change: opacity;
-}
-
-.solve-quest-cta.is-shown {
-  animation: solve-quest-in 480ms var(--ease-out) both;
-}
-
-.solve-quest-cta.is-leaving {
-  animation: solve-quest-out 220ms var(--ease-in) forwards;
-}
-
-/*
- * Quest modal: backdrop + card fade with Solve the quest.
- * In: 480ms. Out: 220ms.
- */
-.quest-sheet-root {
-  visibility: hidden;
-  transition: visibility 0s linear 220ms;
-}
-
-.quest-sheet-root[data-open="true"] {
-  visibility: visible;
-  transition-delay: 0s;
-}
-
-.quest-sheet-backdrop {
-  opacity: 0;
-  transition: opacity 220ms var(--ease-in);
-}
-
-.quest-sheet-root[data-open="true"] .quest-sheet-backdrop {
-  opacity: 1;
-  transition: opacity 480ms var(--ease-out);
-}
-
-.quest-sheet-panel {
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  opacity: 0;
-  transition: opacity 220ms var(--ease-in);
-  will-change: opacity;
-}
-
-.quest-sheet-root[data-open="true"] .quest-sheet-panel {
-  opacity: 1;
-  transition: opacity 480ms var(--ease-out);
-}
-
-/* Dock CTA after a correct answer: fade in Next / Continue / Finish. */
-.dock-cta-fade-in {
-  animation: solve-quest-in 480ms var(--ease-out) both;
-}
-
-.count-pop {
-  display: inline-block;
-  animation: count-pop 420ms var(--ease-spring) 500ms both;
-}
-
-/* Map: "next" marker sends out a soft ring. */
-.marker-ping {
-  transform-box: fill-box;
-  transform-origin: center;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Only runs while the sheet is open (restarts each time it opens). */
-.sheet-root[data-open="true"] .marker-ping,
-.map-live .marker-ping {
-  animation: marker-ping 2s var(--ease-out) 700ms infinite;
-}
-
-.map-marker {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-/* Kill the default blue focus / tap highlight on map pins (SVG + WebKit). */
-.map-marker-hit {
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.map-marker-hit:focus,
-.map-marker-hit:focus-visible {
-  outline: none;
-}
-
-/* Onboarding: entrance photo inset on the compound map. */
-.entrance-callout {
-  animation: fade-up 560ms var(--ease-out) 280ms backwards;
-}
-
-/* --------------------------------------------------------------------------
-   Map sheet. Always mounted (portaled to <body>) so it can animate both ways;
-   data-open drives everything. Bottom-anchored: height follows content, capped
-   at the top safe area (body scrolls when content exceeds that).
-   -------------------------------------------------------------------------- */
-
-.sheet-root {
-  visibility: hidden;
-  /* Hold visibility until the close animation has finished. */
-  transition: visibility 0s linear 320ms;
-}
-
-.sheet-root[data-open="true"] {
-  visibility: visible;
-  transition-delay: 0s;
-}
-
-.sheet-backdrop {
-  opacity: 0;
-  transition: opacity 280ms var(--ease-in);
-}
-
-.sheet-root[data-open="true"] .sheet-backdrop {
-  opacity: 1;
-  transition: opacity 380ms var(--ease-out);
-}
-
-.sheet-panel {
-  transform-origin: bottom left;
-  transform: translateY(12px) scale(0.92);
-  opacity: 0;
-  transition:
-    transform 300ms var(--ease-in),
-    opacity 220ms var(--ease-in);
-  will-change: transform, opacity;
-}
-
-/* Soft speech-bubble tail: centered on the map chat-head (dock px-5 + half of 56px). */
-.sheet-tail {
-  position: absolute;
-  /* Panel inset-x-3 (0.75rem); head center = 1.25rem + 1.75rem → 2.25rem from panel left */
-  left: 2.25rem;
-  top: 100%;
-  margin-top: -1px;
-  width: 1.75rem;
-  height: 1.15rem;
-  overflow: visible;
-  pointer-events: none;
-  transform: translateX(-50%);
-  filter: drop-shadow(0 6px 10px rgba(42, 33, 28, 0.14));
-}
-
-.sheet-panel--no-head {
-  transform-origin: bottom center;
-}
-
-.sheet-panel--no-head .sheet-tail {
-  display: none;
-}
-
-.sheet-root[data-open="true"] .sheet-panel {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-  transition:
-    transform 480ms var(--ease-sheet),
-    opacity 320ms var(--ease-out);
-}
-
-/* Sheet contents reveal on open. Prefer fade (no vertical travel). */
-.sheet-root[data-open="true"] .sheet-item {
-  opacity: 1;
-  transform: none;
-  animation: fade-in 420ms var(--ease-out) backwards;
-  animation-delay: calc(160ms + var(--i, 0) * 90ms);
-}
-
-.sheet-root[data-open="true"] .map-marker {
-  opacity: 1;
-  transform: none;
-}
-
-/* Staggered intro only the first time the visitor opens the map. */
-.sheet-root[data-open="true"][data-markers-animate="true"] .map-marker {
-  animation: pop-in 480ms var(--ease-spring) backwards;
-  animation-delay: calc(420ms + var(--i, 0) * 110ms);
-}
-
-.sheet-root[data-open="true"] .map-label {
-  opacity: 1;
-  animation: fade-in 400ms var(--ease-out) backwards;
-  animation-delay: calc(560ms + var(--i, 0) * 110ms);
 }
 
 /* --------------------------------------------------------------------------
@@ -686,86 +320,6 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Page transitions (React <ViewTransition> + Link/router transitionTypes).
-   Forward = new page rises from below; back = new page drops in from above.
-   -------------------------------------------------------------------------- */
-
-::view-transition {
-  /* Let taps through while a transition runs. */
-  pointer-events: none;
-}
-
-/*
- * Dock stays put while the page slides between stops.
- * Chrome's default group animation morphs width/height between snapshots;
- * that is what made the next-place CTA look full-span then shrink. Keep geometry
- * frozen (animation: none) and only attach view-transition-name when the
- * map column is present on both sides (see StickyActionBar).
- */
-::view-transition-group(stop-dock) {
-  z-index: 30;
-  animation: none;
-}
-
-::view-transition-old(stop-dock),
-::view-transition-new(stop-dock) {
-  animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
-  width: 100%;
-  overflow: clip;
-  object-fit: none;
-}
-
-::view-transition-old(.nav-forward) {
-  --slide-offset: -40px;
-  animation:
-    160ms var(--ease-in) both vt-fade reverse,
-    420ms var(--ease-sheet) both vt-slide-y reverse;
-}
-
-::view-transition-new(.nav-forward) {
-  --slide-offset: 40px;
-  animation:
-    260ms var(--ease-out) 120ms both vt-fade,
-    480ms var(--ease-sheet) both vt-slide-y;
-}
-
-::view-transition-old(.nav-back) {
-  --slide-offset: 40px;
-  animation:
-    160ms var(--ease-in) both vt-fade reverse,
-    420ms var(--ease-sheet) both vt-slide-y reverse;
-}
-
-::view-transition-new(.nav-back) {
-  --slide-offset: -40px;
-  animation:
-    260ms var(--ease-out) 120ms both vt-fade,
-    480ms var(--ease-sheet) both vt-slide-y;
-}
-
-@keyframes vt-fade {
-  from {
-    opacity: 0;
-    filter: blur(2px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes vt-slide-y {
-  from {
-    translate: 0 var(--slide-offset);
-  }
-  to {
-    translate: 0 0;
-  }
-}
-
-/* --------------------------------------------------------------------------
    Print QR sheet (/qr)
    -------------------------------------------------------------------------- */
 
@@ -790,70 +344,6 @@ body {
     background: white !important;
     box-shadow: none !important;
   }
-}
-
-/* --------------------------------------------------------------------------
-   Reduced motion: no movement, no waiting. Content simply appears.
-   -------------------------------------------------------------------------- */
-
-/* ==========================================================================
-   Scan viewfinder: ceremonial corner brackets (QR camera chrome)
-   ========================================================================== */
-
-@keyframes scan-corner-breathe {
-  0%,
-  100% {
-    opacity: 0.78;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.scan-viewfinder {
-  filter: drop-shadow(0 0 12px rgba(236, 190, 65, 0.28));
-}
-
-.scan-corner {
-  position: absolute;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-color: var(--ceremonial);
-  border-style: solid;
-  border-width: 0;
-  animation: scan-corner-breathe 2.4s var(--ease-out) infinite;
-}
-
-.scan-corner--tl {
-  top: 0;
-  left: 0;
-  border-top-width: 3px;
-  border-left-width: 3px;
-  border-top-left-radius: 0.35rem;
-}
-
-.scan-corner--tr {
-  top: 0;
-  right: 0;
-  border-top-width: 3px;
-  border-right-width: 3px;
-  border-top-right-radius: 0.35rem;
-}
-
-.scan-corner--bl {
-  bottom: 0;
-  left: 0;
-  border-bottom-width: 3px;
-  border-left-width: 3px;
-  border-bottom-left-radius: 0.35rem;
-}
-
-.scan-corner--br {
-  bottom: 0;
-  right: 0;
-  border-bottom-width: 3px;
-  border-right-width: 3px;
-  border-bottom-right-radius: 0.35rem;
 }
 
 /* ==========================================================================
@@ -926,9 +416,9 @@ body {
 .correct-sticker {
   margin: 0;
   padding: 0.28em 0.5em 0.34em;
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-ui), system-ui, sans-serif;
   font-weight: 900;
-  font-size: clamp(2.17rem, 10.5vw, 4.375rem);
+  font-size: clamp(2.1rem, 11vw, 2.75rem);
   line-height: 0.92;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -976,6 +466,9 @@ body {
   height: 0.28em;
   animation-delay: 360ms;
 }
+/* --------------------------------------------------------------------------
+   Reduced motion: no movement, no waiting. Content simply appears.
+   -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -992,21 +485,10 @@ body {
   /* Never leave reveal content at the keyframe "from" state. */
   .fade-up,
   .fade-in,
-  .rise-in,
-  .pop-in,
-  .hero-settle,
-  .story-drift,
-  .story-drift--alt,
-  .sheet-root[data-open="true"] .sheet-panel,
-  .sheet-root[data-open="true"] .sheet-item,
-  .sheet-root[data-open="true"] .map-marker,
-  .sheet-root[data-open="true"][data-markers-animate="true"] .map-marker,
-  .sheet-root[data-open="true"] .map-label,
   .confirm-root[data-open="true"] .confirm-panel,
   .correct-celebrate,
   .correct-sticker,
-  .correct-sticker-spark,
-  .scan-corner {
+  .correct-sticker-spark {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -1014,35 +496,6 @@ body {
 
   .correct-sticker {
     transform: rotate(-3deg) !important;
-  }
-
-  .solve-quest-cta.is-shown {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-
-  .solve-quest-cta.is-leaving {
-    animation: none !important;
-    opacity: 0 !important;
-  }
-
-  .quest-sheet-root,
-  .quest-sheet-root[data-open="true"],
-  .quest-sheet-backdrop,
-  .quest-sheet-panel,
-  .quest-sheet-root[data-open="true"] .quest-sheet-backdrop,
-  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
-    transition: none !important;
-  }
-
-  .quest-sheet-backdrop,
-  .quest-sheet-panel {
-    opacity: 0 !important;
-  }
-
-  .quest-sheet-root[data-open="true"] .quest-sheet-backdrop,
-  .quest-sheet-root[data-open="true"] .quest-sheet-panel {
-    opacity: 1 !important;
   }
 
   .walk-intro,
@@ -1074,27 +527,5 @@ body {
     background: none !important;
     color: var(--accent-fg) !important;
     -webkit-text-fill-color: var(--accent-fg) !important;
-  }
-
-  .marker-ping {
-    animation: none !important;
-    opacity: 0;
-  }
-
-  .map-progress-pct,
-  .map-progress-icon {
-    animation: none !important;
-  }
-
-  .dock-cta-fade-in {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
   }
 }

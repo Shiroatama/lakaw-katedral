@@ -1,7 +1,7 @@
 /**
- * Area detail maps (compound → area with 3–4 pins → QR).
+ * Area detail maps (compound → area map → QR).
  * Marker coords are in the shared SVG viewBox 280×360.
- * Orders 9–16 are provisional until those stops ship (no poiId).
+ * All 16 walk places have a poiId. Area art for 9–16 is still a sketch.
  */
 
 export type AreaMapMarker = {
@@ -19,9 +19,6 @@ export type AreaMapDef = {
   image: string;
   markers: AreaMapMarker[];
 };
-
-/** @deprecated Use AreaMapDef */
-export type PlaceMapDef = AreaMapDef;
 
 export const AREA_MAPS: AreaMapDef[] = [
   {
@@ -49,6 +46,34 @@ export const AREA_MAPS: AreaMapDef[] = [
         y: 78,
         title: "The Cathedra",
         poiId: "cathedra",
+      },
+      {
+        order: 9,
+        x: 78,
+        y: 118,
+        title: "The Archbishop's Tomb",
+        poiId: "santos",
+      },
+      {
+        order: 10,
+        x: 202,
+        y: 188,
+        title: "The Novenary Image",
+        poiId: "ina",
+      },
+      {
+        order: 11,
+        x: 202,
+        y: 72,
+        title: "The Missionary Dome",
+        poiId: "missionaries",
+      },
+      {
+        order: 12,
+        x: 140,
+        y: 40,
+        title: "The Tabernacle",
+        poiId: "tabernacle",
       },
     ],
   },
@@ -99,24 +124,6 @@ export const AREA_MAPS: AreaMapDef[] = [
         title: "The Porta Mariae",
         poiId: "porta",
       },
-      {
-        order: 9,
-        x: 72,
-        y: 188,
-        title: "The First Archbishop",
-      },
-      {
-        order: 10,
-        x: 140,
-        y: 210,
-        title: "Meet Ina",
-      },
-      {
-        order: 11,
-        x: 208,
-        y: 230,
-        title: "The Missionary Dome",
-      },
     ],
   },
   {
@@ -125,41 +132,36 @@ export const AREA_MAPS: AreaMapDef[] = [
     image: "/img/map/area-south.webp",
     markers: [
       {
-        order: 12,
-        x: 200,
-        y: 200,
-        title: "The Tabernacle",
-      },
-      {
         order: 13,
         x: 140,
         y: 78,
         title: "The Belfries",
+        poiId: "belfries",
       },
       {
         order: 14,
         x: 72,
         y: 198,
-        title: "Gethsemane",
+        title: "The Adoration Chapel",
+        poiId: "gethsemane",
       },
       {
         order: 15,
         x: 210,
         y: 160,
-        title: "The Parish Office",
+        title: "The Brick Arches",
+        poiId: "arches",
       },
       {
         order: 16,
         x: 140,
         y: 286,
         title: "The Holy Family Chapel",
+        poiId: "holy-family",
       },
     ],
   },
 ];
-
-/** Alias kept for older imports. */
-export const PLACE_MAPS = AREA_MAPS;
 
 export function getAreaMap(id: string): AreaMapDef | undefined {
   return AREA_MAPS.find((area) => area.id === id);
@@ -186,12 +188,49 @@ export function getAreaMarkerTitle(order: number): string | undefined {
   return undefined;
 }
 
-/** @deprecated Use getAreaMapForOrder */
-export function getPlaceMap(order: number): AreaMapDef | undefined {
-  return getAreaMapForOrder(order);
+/** Area map pin for a place, when the place sits on an area map. */
+export function getAreaPin(
+  poiId: string,
+): { area: AreaMapDef; x: number; y: number } | undefined {
+  for (const area of AREA_MAPS) {
+    const marker = area.markers.find((m) => m.poiId === poiId);
+    if (marker) return { area, x: marker.x, y: marker.y };
+  }
+  return undefined;
 }
 
-/** @deprecated Use getAreaMapByPoiId */
-export function getPlaceMapByPoiId(poiId: string): AreaMapDef | undefined {
-  return getAreaMapByPoiId(poiId);
+/** Nave spine on the compound overview (places 1–3 sit along it). */
+export const COMPOUND_AISLE_X = 200;
+
+/** Center aisle on the nave interior floor plan. */
+export const NAVE_AISLE_X = 140;
+
+/** Aisle that keeps a route off the walls, per map. */
+export function aisleXFor(areaId: string | null): number {
+  return areaId === "nave" ? NAVE_AISLE_X : COMPOUND_AISLE_X;
+}
+
+/**
+ * Axis-aligned walk path (90° bends only) as an SVG `points` string. Prefers
+ * the aisle so the line does not cut diagonally through walls: up/down the
+ * aisle, then across.
+ */
+export function navRoutePoints(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  aisleX: number,
+): string {
+  if (from.x === to.x || from.y === to.y) {
+    return `${from.x},${from.y} ${to.x},${to.y}`;
+  }
+
+  const viaAisleThenAcross = { x: from.x, y: to.y };
+  const viaAcrossThenAisle = { x: to.x, y: from.y };
+  const aisleScore = (p: { x: number }) => Math.abs(p.x - aisleX);
+  const bend =
+    aisleScore(viaAisleThenAcross) <= aisleScore(viaAcrossThenAisle)
+      ? viaAisleThenAcross
+      : viaAcrossThenAisle;
+
+  return `${from.x},${from.y} ${bend.x},${bend.y} ${to.x},${to.y}`;
 }

@@ -12,10 +12,6 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BRAND_MARK, BrandMark } from "@/components/brand-mark";
-import {
-  FullscreenButton,
-  MapHeadSlotContext,
-} from "@/components/fullscreen-button";
 import { requestAppFullscreen } from "@/lib/fullscreen";
 import {
   playWalkIntroBrandSound,
@@ -90,7 +86,6 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<Phase>("count");
   const [leaving, setLeaving] = useState(false);
-  const [mapHeadSlot, setMapHeadSlot] = useState<HTMLDivElement | null>(null);
   const playing = useRef(false);
 
   useEffect(() => {
@@ -204,20 +199,17 @@ export function WalkIntroHost({ children }: { children: React.ReactNode }) {
 
   return (
     <WalkIntroContext.Provider value={play}>
-      <MapHeadSlotContext.Provider value={mapHeadSlot}>
-        {children}
-        <FullscreenButton mapSlotRef={setMapHeadSlot} />
-        {target
-          ? createPortal(
-              <WalkIntroOverlay
-                visible={visible}
-                progress={progress}
-                phase={phase}
-              />,
-              document.body,
-            )
-          : null}
-      </MapHeadSlotContext.Provider>
+      {children}
+      {target
+        ? createPortal(
+            <WalkIntroOverlay
+              visible={visible}
+              progress={progress}
+              phase={phase}
+            />,
+            document.body,
+          )
+        : null}
     </WalkIntroContext.Provider>
   );
 }

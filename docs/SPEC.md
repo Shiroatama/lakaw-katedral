@@ -72,7 +72,15 @@ Fixed route, in order (from the parish pilgrim guide; see [`PILGRIM-GUIDE.md`](.
 | 6 | The Bell Pavilion | Outdoor pavilion with hanging bells (working name) | `/s/pavilion` |
 | 7 | The Quadricentennial Dome | Plaza rotunda with golden crown / stained glass | `/s/dome` |
 | 8 | The Porta Mariae | Triumphal arch / Marian Gate at the grounds | `/s/porta` |
-| End | Finish (success modal + give/next) | After POI 8 | `/finish` |
+| 9 | The Archbishop's Tomb | Tomb of +Most Rev. Pedro S. Santos (guide item 4) | `/s/santos` |
+| 10 | The Novenary Image | Novenary Image of Our Lady of Peñafrancia (guide item 5) | `/s/ina` |
+| 11 | The Missionary Dome | Dome above the sanctuary (guide item 6) | `/s/missionaries` |
+| 12 | The Tabernacle | Silver Tabernacle below the main retablo (guide item 7) | `/s/tabernacle` |
+| 13 | The Belfries | Twin bell towers, with staff (guide item 8) | `/s/belfries` |
+| 14 | The Adoration Chapel | Chapel recalling the Garden of Gethsemane (guide item 10) | `/s/gethsemane` |
+| 15 | The Brick Arches | Cathedral Parish Office and Rectory (guide item 11) | `/s/arches` |
+| 16 | The Holy Family Chapel | Chapel of Baptism, Matrimony, and Reconciliation (guide item 12) | `/s/holy-family` |
+| End | Finish (success modal + give/next) | After POI 16 | `/finish` |
 
 **URL design (consideration).** Stop URLs are short readable words, not random tokens, so a visitor can type one by hand if a code won't scan (glare, dim light, damaged sticker). Trade-offs, accepted for MVP:
 
@@ -140,7 +148,7 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 
 - Two-level illustrated maps (SVG markers over raster art, viewBox 280×360):
   1. **Compound overview** (`/img/cathedral-compound.webp`): pins 1–16. Tapping a pin opens the **area** map that contains that stop (never opens scan from the compound).
-  2. **Area maps** (3–5 pins each): nave (`cathedral-interior.webp`, places 1–3), heritage garden (`/img/map/area-garden.webp`, 4–7), Porta lane (`area-porta.webp`, 8–11), south compound (`area-south.webp`, 12–16). On an area map, only finished places, the current place, and the next stop are drawn; later pins in the cluster stay hidden. Tapping a pin opens `/scan` only when that pin is the next live stop; completed live stops reopen `/s/[slug]`; future pins without a `poiId` stay hidden until those stops ship.
+  2. **Area maps**: nave (`cathedral-interior.webp`, places 1–3 and the later indoor stops 9–12), heritage garden (`/img/map/area-garden.webp`, 4–7), Porta lane (`area-porta.webp`, place 8), south compound (`area-south.webp`, 13–16). On an area map, only finished places, the current place, and the next stop are drawn; later pins in the cluster stay hidden. Tapping a pin opens `/scan` only when that pin is the next live stop; completed live stops reopen `/s/[slug]`. All 16 stops have a `poiId`. Indoor pins 9–12 sit on the nave plan. Exact spots for the tomb, the Novenary Image, and the chapels still need the parish to confirm. Area art for the south compound is still a sketch.
 - Catalog: `src/lib/tour/place-maps.ts` (`AREA_MAPS`: image, marker coords, titles, optional `poiId`).
 - Wayfinding (“Continue the walk” / focus next) and chat-head “here” open the matching area map, with Back to the compound.
 - Marker states: completed, current ("You are here"), next (highlighted/pulsing), locked / future.
@@ -149,7 +157,7 @@ Element-level inventory, chrome rules, and color tokens live in [`DESIGN.md`](./
 
 ## 7. Content (hardcoded)
 
-**Source of truth:** [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md), the parish pilgrim guide. The walk ships guide items **1–3**, **9** (places 4–5), the outdoor bell pavilion (place 6), **14** (place 7), and **13** (place 8). Guide items 4–8, 10–12, and 15–16 stay in that document until a later release.
+**Source of truth:** [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md), the parish pilgrim guide. The walk ships all 16 map places: guide items **1–3**, **9** (places 4–5), the outdoor bell pavilion (place 6), **14** (place 7), **13** (place 8), then **4–8** and **10–12** (places 9–16). Guide items **15** (offer a Mass) and **16** (souvenir shop) are not walk places.
 
 The text visitors read is the Grade 3 rewrite in `src/lib/tour/content.ts` (see 7.3). When the rewrite and the guide differ in tone, the guide wins on facts and names; the rewrite only simplifies the words around them.
 
@@ -176,6 +184,30 @@ The Quadricentennial Dome (guide item 14): the plaza rotunda between the Cathedr
 
 ### POI 8: The Porta Mariae
 The Porta Mariae (guide item 13), Latin for Marian Gate. Triumphal arch commemorating 300 years of devotion to Our Lady of Peñafrancia (1710–2010), blessed 9 September 2010. Museum and upper view of Ina.
+
+### POI 9: The Archbishop's Tomb
+Tomb of +Most Rev. Pedro S. Santos, the first Archbishop of Cáceres (guide item 4). Give thanks for his life and ministry, and for the bishops, priests, religious, and lay faithful who have built the Church of Bicol.
+
+### POI 10: The Novenary Image
+The Novenary Image of Our Lady of Peñafrancia (guide item 5). Bicolanos call her Ina. Stand in prayer, kiss the image where that is reverent, and entrust family and intentions to her.
+
+### POI 11: The Missionary Dome
+The dome above the sanctuary (guide item 6). It shows the religious orders that evangelized Bicol and the founders who inspired their missionary work. The guide does not name the orders, so the app does not either.
+
+### POI 12: The Tabernacle
+The silver-clad Tabernacle below the main retablo (guide item 7). Jesus Christ is truly present in the Blessed Sacrament. The place is for silence, not for a long story.
+
+### POI 13: The Belfries
+The twin bell towers (guide item 8). Climb only with Cathedral staff. From above: Holy Rosary Minor Seminary on the right; Elias Angeles Street, the Archbishop's Residence, and the Universidad de Santa Isabel on the left. The observation can be answered from the ground (two towers) so a closed climb does not block the walk.
+
+### POI 14: The Adoration Chapel
+The Adoration Chapel inspired by the Garden of Gethsemane (guide item 10). Remain with Jesus in silence.
+
+### POI 15: The Brick Arches
+Historic brick arches at the Cathedral Parish Office and Rectory (guide item 11). Touch them only where that is appropriate.
+
+### POI 16: The Holy Family Chapel
+The Holy Family Chapel (guide item 12). Baptism, Holy Matrimony, and, during the Peñafrancia Novenary, the Sacrament of Reconciliation. Stained glass shows the Flight of the Holy Family into Egypt and the Holy Family of Nazareth, with Saint Joseph as a carpenter.
 
 ### 7.2 Landmarks (wayfinding copy)
 Each stop has a one- or two-sentence `landmark` in plain words, shown in the wayfinding sheet under "Next: the …". It tells the visitor where to look for the sign and QR code, since a map marker alone is not enough in a busy nave. Current lines are **placeholders** until the parish confirms where each QR sign will be mounted.
@@ -204,7 +236,7 @@ Stored as typed JSON/MDX in the repo. Keep route rules and content in plain Type
 
 ### 7.3 Visitor-facing wording
 
-Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**, **The Heritage Bells**, **The Candle Garden**, **The Bell Pavilion**, **The Quadricentennial Dome**, **The Porta Mariae**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (short; what is here, no instructions), optional **Read more** (`aboutMore` history), then **action** and the observation quest (what to do: pray, look, pause). The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
+Titles name the place or object, not a verb invite: **The Cathedral Entrance**, **The Alcomendas Mural**, **The Cathedra**, **The Heritage Bells**, **The Candle Garden**, **The Bell Pavilion**, **The Quadricentennial Dome**, **The Porta Mariae**, **The Archbishop's Tomb**, **The Novenary Image**, **The Missionary Dome**, **The Tabernacle**, **The Belfries**, **The Adoration Chapel**, **The Brick Arches**, **The Holy Family Chapel**. (The pilgrim guide activity titles stay as written in [`PILGRIM-GUIDE.md`](./PILGRIM-GUIDE.md); the app uses place names for headlines.) Each stop reads in this order: **about** (short; what is here, no instructions), optional **Read more** (`aboutMore` history), then **action** and the observation quest (what to do: pray, look, pause). The copy in `src/lib/tour/content.ts` keeps every name and key term from the guide and uses short sentences with a plain-words explanation of each hard term (section 3.1). Because the wording is simplified for readers, the parish should verify the rewritten text against the guide. Landmark lines and every UI string follow the same rules.
 
 ## 8. Progress and state
 

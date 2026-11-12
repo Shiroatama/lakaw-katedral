@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Gift acknowledgment lives as a modal on /finish. */
+/** Gift thanks shows on the Parish tab. */
 export default function ThankYouPage() {
-  redirect("/finish");
+  redirect("/parish");
 }

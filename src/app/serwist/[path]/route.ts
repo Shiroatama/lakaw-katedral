@@ -15,12 +15,20 @@ const revision =
 /**
  * Pages saved on the visitor's phone the first time the service worker
  * installs, so every later scan works with no signal (SPEC §10).
- * Donation pages are intentionally left out: giving needs a network.
+ * Giving needs a network, but the Parish page itself is cached.
  */
 const OFFLINE_PAGES = [
   "/",
-  "/map",
+  "/walk",
+  "/parish",
+  "/you",
+  "/onboarding",
+  "/handoff",
+  "/scan",
+  "/login",
+  "/pay",
   "/finish",
+  "/terms",
   "/~offline",
   ...nagaTour.pois.map((poi) => `/s/${poi.slug}`),
 ];

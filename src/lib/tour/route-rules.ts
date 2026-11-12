@@ -44,35 +44,13 @@ export function getEntrancePoi(tour: Tour): Poi {
 }
 
 /**
- * Normalize a typed observation answer for comparison.
- * Lower case, trim, strip light punctuation, collapse spaces.
- */
-export function normalizeObservationAnswer(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** True when the typed answer matches any accepted answer for this place. */
-export function isObservationCorrect(poi: Poi, raw: string): boolean {
-  const guess = normalizeObservationAnswer(raw);
-  if (!guess) return false;
-  return poi.observation.answers.some(
-    (answer) => normalizeObservationAnswer(answer) === guess,
-  );
-}
-
-/**
  * Evaluate a stop visit (SPEC §4.2).
  *
- * Places open in order. Only the next unsolved place shows its full quest.
- * Opening any other unsolved place shows a teaser and a gate toward the
- * expected stop. Arrival at the expected place starts the walk (if needed)
- * and sets "you are here"; the place counts as complete only after the
- * observation key is solved.
+ * Places open in order. Only the next unsolved place can be completed.
+ * Opening any other unsolved place points the visitor toward the expected
+ * stop. Arrival at the expected place starts the walk (if needed) and sets
+ * "you are here"; the place counts as complete only after the quest is
+ * solved. Solved places reopen as story and reveal.
  *
  * Pure function: no framework imports, reusable by a future Expo app.
  */
@@ -107,13 +85,12 @@ export function evaluateScan(
 
 /**
  * Record arrival at a place. Does not mark the place complete; that waits
- * for a correct observation answer (`applyObservationSuccess`).
- * `start_here` leaves progress unchanged (teaser only; not a real visit).
+ * for a solved quest (`applyQuestSuccess`).
+ * `start_here` leaves progress unchanged (not a real visit).
  */
 export function applyScanOutcome(
   progress: JourneyProgress,
   outcome: ScanOutcome,
-  _tour: Tour,
 ): JourneyProgress {
   if (outcome.kind === "start_here") {
     return progress;
@@ -135,11 +112,11 @@ export function applyScanOutcome(
 }
 
 /**
- * Mark a place complete after a correct observation answer.
+ * Mark a place complete after a solved quest.
  * Only the next unsolved place in order can be completed. Idempotent if the
  * place is already in `completed`.
  */
-export function applyObservationSuccess(
+export function applyQuestSuccess(
   progress: JourneyProgress,
   poi: Poi,
   tour: Tour,
@@ -170,4 +147,43 @@ export function applyObservationSuccess(
     completed,
     finishedAt: finished,
   };
+}
+
+/** How a pin or place reads on the Walk board. */
+export type PlaceState = "done" | "next" | "locked";
+
+export function getPlaceState(
+  poi: Poi,
+  progress: JourneyProgress,
+  tour: Tour,
+): PlaceState {
+  if (progress.completed.includes(poi.id)) return "done";
+  const next = getNextExpectedPoi(progress, tour);
+  return next?.id === poi.id ? "next" : "locked";
+}
+
+/** The place solved just before `poi` (or null for place 1). */
+export function getPreviousPoi(poi: Poi, tour: Tour): Poi | null {
+  return tour.pois.find((p) => p.order === poi.order - 1) ?? null;
+}
+
+/**
+ * True when `poi` is the furthest solved place. Reopening it offers
+ * "Next place"; older places offer "Continue the walk".
+ */
+export function isLatestSolved(
+  poi: Poi,
+  progress: JourneyProgress,
+): boolean {
+  return (
+    progress.completed.includes(poi.id) &&
+    poi.order === progress.completed.length
+  );
+}
+
+/** Points stub until a real currency exists: 10 per solved place. */
+export const POINTS_PER_PLACE = 10;
+
+export function getPoints(progress: JourneyProgress): number {
+  return progress.completed.length * POINTS_PER_PLACE;
 }

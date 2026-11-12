@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ScanPage() {
-  return (
-    <main className="flex flex-1 flex-col">
-      <QrScanner />
-    </main>
-  );
+  return <QrScanner />;
 }

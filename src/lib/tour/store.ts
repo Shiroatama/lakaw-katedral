@@ -4,30 +4,31 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nagaTour } from "./content";
 import {
-  applyObservationSuccess,
+  applyQuestSuccess,
   applyScanOutcome,
   createInitialProgress,
   evaluateScan,
   getNextExpectedPoi,
-  isObservationCorrect,
 } from "./route-rules";
 import type { JourneyProgress, Poi, ScanOutcome } from "./types";
-import { clearFinishSuccessSeen } from "./finish-success";
 
 type JourneyStore = JourneyProgress & {
   /** Outcome of the most recent stop visit. In memory only, never persisted. */
   lastOutcome: ScanOutcome | null;
   /**
-   * After scanning a place too early mid-walk. In memory only.
-   * Map sheet shows warm copy for this expected place id.
+   * After opening a place too early mid-walk. In memory only.
+   * Walk shows warm copy for this expected place id.
    */
   earlyScanExpectedId: string | null;
   hydrateTourVersion: () => void;
   scanPoi: (poi: Poi) => ScanOutcome;
-  /** Mark a place complete when the observation key is correct. */
-  completePoi: (poi: Poi, answer: string) => boolean;
+  /**
+   * Mark a place complete once its quest is solved. Only the next unsolved
+   * place can be completed. The sheet checks the answer with `isQuestCorrect`.
+   */
+  completePoi: (poi: Poi) => boolean;
   markDonated: () => void;
-  /** Remember a too-early scan so the map can explain where to go. */
+  /** Remember a too-early visit so Walk can explain where to go. */
   setEarlyScanGate: (expectedId: string | null) => void;
   reset: () => void;
 };
@@ -64,18 +65,17 @@ export const useJourneyStore = create<JourneyStore>()(
         const state = get();
         const outcome = evaluateScan(poi, state, nagaTour);
         set({
-          ...applyScanOutcome(state, outcome, nagaTour),
+          ...applyScanOutcome(state, outcome),
           lastOutcome: outcome,
         });
         return outcome;
       },
 
-      completePoi: (poi, answer) => {
-        if (!isObservationCorrect(poi, answer)) return false;
+      completePoi: (poi) => {
         const state = get();
         const expected = getNextExpectedPoi(state, nagaTour);
         if (!expected || expected.id !== poi.id) return false;
-        set(applyObservationSuccess(state, poi, nagaTour));
+        set(applyQuestSuccess(state, poi, nagaTour));
         return true;
       },
 
@@ -87,7 +87,6 @@ export const useJourneyStore = create<JourneyStore>()(
 
       reset: () => {
         showHomeAtOnce = true;
-        clearFinishSuccessSeen();
         set({
           ...createInitialProgress(nagaTour),
           lastOutcome: null,

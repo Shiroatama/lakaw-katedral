@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Place shapes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ruwudu&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --background: #f4eee4;
+        --foreground: #2a211c;
+        --surface: #faf6ef;
+        --muted-fg: #6b5e54;
+        --accent: #b85c38;
+        --accent-fg: #fffaf5;
+        --stone-light: #e8d8c8;
+        --pad: 1.25rem;
+        --page: min(100%, 32rem);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      html,
+      body {
+        margin: 0;
+        overflow-x: clip;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: "Source Sans 3", system-ui, sans-serif;
+      }
+
+      body {
+        min-height: 100dvh;
+      }
+
+      .page {
+        width: var(--page);
+        margin: 0 auto;
+        padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+      }
+
+      .option {
+        margin: 1.75rem 0 0;
+      }
+
+      .hero-block {
+        margin: 0;
+      }
+
+      .option-name {
+        margin: 0 var(--pad) 0.55rem;
+        color: var(--muted-fg);
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        line-height: 1.3;
+        text-transform: uppercase;
+      }
+
+      .hero,
+      .frame {
+        position: relative;
+        overflow: hidden;
+        background: var(--stone-light);
+      }
+
+      .hero {
+        aspect-ratio: 16 / 9;
+      }
+
+      .hero video,
+      .frame img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .copy {
+        padding: 1.1rem var(--pad) 0;
+      }
+
+      .kicker {
+        margin: 0 0 0.4rem;
+        color: var(--muted-fg);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: Ruwudu, Georgia, serif;
+        font-size: clamp(1.65rem, 8vw, 1.875rem);
+        font-weight: 400;
+        line-height: 1.15;
+      }
+
+      .about,
+      .caption,
+      .beside p {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .about {
+        margin-top: 0.8rem;
+      }
+
+      .inset {
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .wide {
+        aspect-ratio: 16 / 9;
+      }
+
+      .crop-high {
+        object-position: center 30%;
+      }
+
+      .crop-dome {
+        object-position: center 35%;
+      }
+
+      .crop-face {
+        object-position: center 18%;
+      }
+
+      .caption {
+        padding: 0.75rem var(--pad) 0;
+      }
+
+      .beside {
+        display: grid;
+        grid-template-columns: 6.25rem minmax(0, 1fr);
+        gap: 0.75rem;
+        align-items: start;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .beside .frame {
+        aspect-ratio: 1;
+      }
+
+      .plate {
+        display: flex;
+        align-items: flex-end;
+        aspect-ratio: 4 / 3;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .plate p {
+        position: relative;
+        z-index: 1;
+        width: calc(100% - 1.1rem);
+        margin: 0 0.55rem 0.55rem;
+        padding: 0.7rem 0.75rem;
+        background: var(--surface);
+        font-size: 1rem;
+        line-height: 1.45;
+      }
+
+      .pair {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.65rem;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .pair figure {
+        min-width: 0;
+        margin: 0;
+      }
+
+      .pair .frame {
+        aspect-ratio: 1;
+      }
+
+      .pair figcaption,
+      .portraits figcaption,
+      .strip figcaption {
+        margin: 0;
+        padding: 0.45rem 0 0;
+        font-size: 0.875rem;
+        line-height: 1.35;
+      }
+
+      .strip {
+        display: flex;
+        gap: 0.65rem;
+        margin: 0;
+        padding: 0 var(--pad) 0.15rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: var(--pad);
+        scrollbar-width: none;
+      }
+
+      .strip::-webkit-scrollbar {
+        display: none;
+      }
+
+      .strip figure {
+        flex: 0 0 78%;
+        min-width: 0;
+        margin: 0;
+        scroll-snap-align: start;
+      }
+
+      .strip .frame {
+        aspect-ratio: 4 / 3;
+      }
+
+      .portraits {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.65rem;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .portraits figure {
+        min-width: 0;
+        margin: 0;
+      }
+
+      .portraits .frame {
+        aspect-ratio: 3 / 4;
+        max-height: min(34svh, 13rem);
+      }
+
+      .medallion {
+        display: grid;
+        grid-template-columns: 7.25rem minmax(0, 1fr);
+        gap: 0.85rem;
+        align-items: center;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .medallion .frame {
+        aspect-ratio: 1;
+        border-radius: 50%;
+      }
+
+      .medallion p {
+        margin: 0;
+      }
+
+      .medallion p {
+        font-size: 1rem;
+        line-height: 1.45;
+      }
+
+      .lines p {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .even {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.5rem;
+        margin-right: var(--pad);
+        margin-left: var(--pad);
+      }
+
+      .even .frame {
+        aspect-ratio: 3 / 2;
+      }
+
+      .lines {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.75rem var(--pad) 0;
+      }
+
+      .dock {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: var(--page);
+        margin-inline: auto;
+        padding: 0.5rem var(--pad) max(0.75rem, env(safe-area-inset-bottom));
+        background: var(--background);
+      }
+
+      .dock span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3.5rem;
+        border-radius: 0.375rem;
+        background: var(--accent);
+        color: var(--accent-fg);
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      @media (max-width: 340px) {
+        :root {
+          --pad: 1rem;
+        }
+
+        .beside {
+          grid-template-columns: 5.25rem minmax(0, 1fr);
+          gap: 0.6rem;
+        }
+
+        .pair {
+          gap: 0.5rem;
+        }
+
+        .pair figcaption,
+        .portraits figcaption,
+        .strip figcaption {
+          font-size: 0.8125rem;
+        }
+
+        .strip figure {
+          flex-basis: 84%;
+        }
+
+        .medallion {
+          grid-template-columns: 6.25rem minmax(0, 1fr);
+          gap: 0.65rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="option hero-block" aria-label="Full bleed">
+        <div class="hero">
+          <video
+            src="video/cathedral.mp4"
+            poster="img/entrance.webp"
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+        </div>
+      </section>
+
+      <header class="copy">
+        <p class="kicker">Place 1</p>
+        <h1>The Cathedral Entrance</h1>
+        <p class="about">
+          This Cathedral has stood at the heart of Bicol for more than four centuries. At this door are two patrons: Saint John the Evangelist and Saint Peter Baptist.
+        </p>
+      </header>
+
+      <section class="option" aria-labelledby="in-the-column">
+        <h2 class="option-name" id="in-the-column">In the column</h2>
+        <div class="frame inset wide">
+          <img src="img/murals.webp" alt="The Alcomendas mural inside the cathedral" width="1200" height="675" />
+        </div>
+        <p class="caption">The present church was begun in 1808 and finished in 1843.</p>
+      </section>
+
+      <section class="option" aria-labelledby="beside">
+        <h2 class="option-name" id="beside">Beside</h2>
+        <div class="beside">
+          <div class="frame">
+            <img src="img/statue.webp" alt="A sacred image in the cathedral" width="900" height="900" />
+          </div>
+          <p>The diocese was founded in 1595. This is the mother church of the Archdiocese of Cáceres.</p>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="on-the-plate">
+        <h2 class="option-name" id="on-the-plate">On the plate</h2>
+        <div class="frame plate">
+          <img src="img/dome.webp" alt="The cathedral dome" width="1200" height="900" />
+          <p>It was restored and rededicated in 1988.</p>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="pair">
+        <h2 class="option-name" id="pair">Pair</h2>
+        <div class="pair">
+          <figure>
+            <div class="frame">
+              <img src="img/bell-san-juan.webp" alt="A heritage bell" width="800" height="800" />
+            </div>
+            <figcaption>Generations have entered here to pray.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame">
+              <img src="img/bell-sagrada-familia.webp" alt="A second heritage bell" width="800" height="800" />
+            </div>
+            <figcaption>They give thanks and ask for help.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="strip">
+        <h2 class="option-name" id="strip">Strip</h2>
+        <div class="strip">
+          <figure>
+            <div class="frame">
+              <img src="img/home-facade.webp" alt="The cathedral facade" width="1000" height="750" />
+            </div>
+            <figcaption>Begun in 1808.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame">
+              <img src="img/dome.webp" alt="The cathedral dome" width="1000" height="750" />
+            </div>
+            <figcaption>Finished in 1843.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame">
+              <img src="img/plaza-dome.webp" alt="The dome seen from the plaza" width="1000" height="750" />
+            </div>
+            <figcaption>Restored in 1988.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="two-portraits">
+        <h2 class="option-name" id="two-portraits">Two portraits</h2>
+        <div class="portraits">
+          <figure>
+            <div class="frame">
+              <img class="crop-high" src="img/plaza-dome-cathedral.webp" alt="The cathedral across the plaza" width="800" height="1066" />
+            </div>
+            <figcaption>The mother church of Cáceres.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame">
+              <img class="crop-dome" src="img/quadricentennial-dome.webp" alt="The quadricentennial dome" width="800" height="1066" />
+            </div>
+            <figcaption>A dome above the city.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="medallion">
+        <h2 class="option-name" id="medallion">Medallion</h2>
+        <div class="medallion">
+          <div class="frame">
+            <img class="crop-face" src="img/finish-prize-side-pilgrim.jpg" alt="A pilgrim standing by the cathedral" width="800" height="800" />
+          </div>
+          <p>Saint John the Evangelist and Saint Peter Baptist meet you at this door.</p>
+        </div>
+      </section>
+
+      <section class="option" aria-labelledby="even-pair">
+        <h2 class="option-name" id="even-pair">Even pair, full lines</h2>
+        <div class="even">
+          <div class="frame">
+            <img src="img/porta-mariae.webp" alt="The Porta Mariae monument" width="900" height="600" />
+          </div>
+          <div class="frame">
+            <img src="img/finish-welcome.webp" alt="The cathedral facade from the street" width="900" height="600" />
+          </div>
+        </div>
+        <div class="lines">
+          <p>Porta Mariae is a monument of love for Ina.</p>
+          <p>The present church was begun in 1808 and finished in 1843.</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="dock" aria-hidden="true">
+      <span>Solve the quest</span>
+    </div>
+  </body>
+</html>

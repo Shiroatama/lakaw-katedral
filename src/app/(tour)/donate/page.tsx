@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Gift and next ideas live on /finish behind the success modal. */
+/** Gifts are given from the Parish tab. */
 export default function DonatePage() {
-  redirect("/finish");
+  redirect("/parish");
 }

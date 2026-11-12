@@ -2,16 +2,14 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { usePathname, useRouter } from "next/navigation";
-import { RepeatIcon } from "@/components/icons";
-import { PrimaryButton } from "@/components/ui";
+import { useRouter } from "next/navigation";
+import { Btn, TextBtn } from "@/components/ui";
 import { useJourneyStore } from "@/lib/tour";
 import { useHydrated } from "@/lib/use-hydrated";
 
 /** Quiet destructive action: clears progress after a confirm, then returns home. */
 export function StartOver({ className = "" }: { className?: string }) {
   const router = useRouter();
-  const pathname = usePathname();
   const reset = useJourneyStore((s) => s.reset);
   const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
@@ -36,19 +34,15 @@ export function StartOver({ className = "" }: { className?: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Lock page scroll and manage focus while the dialog is open.
-  // Land on Go back so Enter does not wipe progress by accident.
+  // Manage focus while the dialog is open. Land on Go back so Enter does not
+  // wipe progress by accident.
   useEffect(() => {
     if (open) {
       wasOpen.current = true;
       panelRef.current
-        ?.querySelector<HTMLElement>('button:not([aria-label="Close"])')
+        ?.querySelector<HTMLElement>("button.btn")
         ?.focus({ preventScroll: true });
-      const previous = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = previous;
-      };
+      return;
     }
     if (wasOpen.current) {
       wasOpen.current = false;
@@ -59,17 +53,12 @@ export function StartOver({ className = "" }: { className?: string }) {
   function confirmStartOver() {
     setOpen(false);
     reset();
-    // Already home: the store update is the whole change.
-    // Elsewhere: swap at once. A back transition holds the new
-    // screen for about half a second while progress is still clearing.
-    if (pathname !== "/") {
-      router.push("/");
-    }
+    router.push("/");
   }
 
   const dialog = (
     <div
-      className="confirm-root fixed inset-0 z-50 flex items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[var(--top-chrome-space)]"
+      className="confirm-root fixed inset-0 z-50 flex items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]"
       data-open={open ? "true" : "false"}
       inert={!open ? true : undefined}
       aria-hidden={!open}
@@ -88,40 +77,28 @@ export function StartOver({ className = "" }: { className?: string }) {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="confirm-panel relative max-h-full w-full max-w-sm overflow-y-auto rounded-xl bg-[var(--surface)] px-5 pb-5 pt-10 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] ring-1 ring-[var(--border)] outline-none"
+        className="confirm-panel relative max-h-full w-full max-w-sm overflow-y-auto rounded-[22px] bg-[var(--background)] px-4 pb-4 pt-8 text-center shadow-[0_16px_48px_rgba(42,33,28,0.22)] outline-none"
       >
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-3xl leading-none text-[var(--foreground)] transition-transform duration-200 ease-[var(--ease-out)] active:scale-90"
-          aria-label="Close"
-        >
-          ×
-        </button>
         <h2
           id={titleId}
-          className="font-display text-2xl leading-tight text-[var(--foreground)]"
+          className="font-display text-[28px] leading-tight text-[var(--foreground)]"
         >
           Start again?
         </h2>
         <p
           id={descriptionId}
-          className="mt-2 text-base leading-relaxed text-[var(--muted-fg)]"
+          className="mt-2 font-[family-name:var(--font-body)] text-base leading-snug text-[var(--muted-fg)]"
         >
           Your steps so far will be erased.
         </p>
-        <div className="mt-5 flex flex-col gap-3">
-          <PrimaryButton onClick={() => setOpen(false)} icon="none">
-            Go back
-          </PrimaryButton>
-          <button
-            type="button"
+        <div className="mt-6 flex flex-col gap-2">
+          <Btn onClick={() => setOpen(false)}>Go back</Btn>
+          <TextBtn
             onClick={confirmStartOver}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md px-5 text-base font-medium text-[var(--danger)] transition-[transform,background-color,color] duration-200 ease-[var(--ease-out)] hover:bg-[var(--background)] active:scale-[0.97]"
+            className="!text-[var(--danger)]"
           >
-            <RepeatIcon className="h-[1.1em] w-[1.1em]" />
             Start over
-          </button>
+          </TextBtn>
         </div>
       </div>
     </div>
@@ -135,10 +112,7 @@ export function StartOver({ className = "" }: { className?: string }) {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`mx-auto inline-flex min-h-12 items-center justify-center px-4 text-sm transition-colors duration-200 active:opacity-70 ${
-          className ||
-          "text-[var(--muted-fg)] hover:text-[var(--foreground)]"
-        }`.trim()}
+        className={`text-btn ${className}`.trim()}
       >
         Start over
       </button>
