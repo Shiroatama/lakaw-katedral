@@ -2,7 +2,7 @@
 
 Mobile web app for a QR-guided walk through Naga Metropolitan Cathedral.
 
-See [docs/SPEC.md](docs/SPEC.md) for the MVP product and technical spec, [docs/DESIGN.md](docs/DESIGN.md) for color, UX flow, and screen inventory, and [docs/PILGRIM-GUIDE.md](docs/PILGRIM-GUIDE.md) for the parish source of truth for stop content.
+See [docs/PRODUCT.md](docs/PRODUCT.md) for product rules, and [docs/PILGRIM-GUIDE.md](docs/PILGRIM-GUIDE.md) for parish stop content.
 
 ## Stack
 
@@ -50,7 +50,7 @@ Stop URLs (readable on purpose, so they can be typed by hand):
 - In-app scanner: `/scan` (also from the map sheet: **Scan with this phone**). Needs camera permission. On a phone, prefer HTTPS or `localhost`; plain `http://192.168…` may block the camera.
 - Phone camera app still works: each printed code is a normal `/s/<slug>` link.
 
-Visitor-facing copy uses plain words around real names (say "place", not "stop", but keep names like Naga Metropolitan Cathedral; see SPEC section 3.1). Until QR codes are printed, the map sheet has a "Skip the scan" button. Turn it off with `NEXT_PUBLIC_ALLOW_SKIP=false`.
+Visitor-facing copy uses plain words around real names (say "place", not "stop", but keep names like Naga Metropolitan Cathedral; see docs/PRODUCT.md). Until QR codes are printed, the map sheet has a "Skip the scan" button. Turn it off with `NEXT_PUBLIC_ALLOW_SKIP=false`.
 
 Offline mode only works in a production build: `npm run build && npm run start`, then test in airplane mode. `next dev` does not register the service worker.
 

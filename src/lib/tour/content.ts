@@ -10,7 +10,7 @@ import type { Tour } from "./types";
  * Source of truth: docs/PILGRIM-GUIDE.md (parish pilgrim guide).
  * Real names and key terms stay exact; words around them are plain (about
  * Grade 3). Each hard term is explained the first time it appears.
- * See docs/SPEC.md sections 3.1 and 7.
+ * Product rules: docs/PRODUCT.md.
  *
  * Each stop, in order: about (short lead), aboutMore (story beats, shown as
  * prose with `about` before the quest), action (what to do), quest (tap-only:
@@ -18,7 +18,7 @@ import type { Tour } from "./types";
  * carries instructions. Everything a quest asks is knowable from the story
  * or by looking at the place. Nobody types an answer.
  * `landmark` lines are placeholders until the parish confirms where each QR
- * sign will be mounted (SPEC §17). Hero images reuse existing assets until
+ * sign will be mounted. Hero images reuse existing assets until
  * dedicated photos are provided. `storyImages` pair with `aboutMore` for a
  * future photo story. Optional `heroVideo` fills the teach media slot.
  * `heroVideoFrame` is landscape (16:9) or portrait (3:4 on the page). Place 1

@@ -1,7 +1,7 @@
 # A Pilgrim’s Guide through the Naga Metropolitan Cathedral
 
 **Status:** Parish source of truth (provided by the Cathedral)  
-**App scope:** All 16 walk places. Guide items **1–14** are in the app. Item **9** is two places (bells and candle garden). Place 6 is the outdoor bell pavilion, which is not a numbered guide item. Guide items **15** and **16** stay in this document only. Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`SPEC.md`](./SPEC.md) §3.1).
+**App scope:** All 16 walk places. Guide items **1–14** are in the app. Item **9** is two places (bells and candle garden). Place 6 is the outdoor bell pavilion, which is not a numbered guide item. Guide items **15** and **16** stay in this document only. Visitor-facing copy lives in `src/lib/tour/content.ts` as a Grade 3 rewrite (see [`PRODUCT.md`](./PRODUCT.md)).
 
 ---
 
